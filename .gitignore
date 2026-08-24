@@ -1,0 +1,29 @@
+# 민감정보·개인설정·빌드산출물이 저장소에 올라가지 않도록 제외
+
+# 민감정보 (중요)
+.env
+.env.local
+
+# IDE 설정 (IntelliJ)
+.idea/
+*.iml
+out/
+
+# Java / Maven 빌드 산출물
+target/
+*.class
+
+# 프론트엔드
+node_modules/
+dist/
+
+# DB / 볼륨 관련
+db/data/
+
+# OS별 잡파일
+.DS_Store          # Mac
+Thumbs.db          # Windows
+desktop.ini        # Windows
+
+# 로그 파일
+*.log
