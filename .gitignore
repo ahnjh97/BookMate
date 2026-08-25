@@ -1,5 +1,3 @@
-# 민감정보·개인설정·빌드산출물이 저장소에 올라가지 않도록 제외
-
 # 민감정보 (중요)
 .env
 .env.local
@@ -7,7 +5,12 @@
 # IDE 설정 (IntelliJ)
 .idea/
 *.iml
+*.iws
+*.ipr
 out/
+
+# IDE 설정 (VS Code, 팀원 사용 가능성 대비)
+.vscode/
 
 # Java / Maven 빌드 산출물
 target/
@@ -18,13 +21,12 @@ node_modules/
 dist/
 
 # DB / 볼륨 관련
-backend/db/data/
+db/data/
 
 # OS별 잡파일
-.DS_Store          # Mac
-Thumbs.db          # Windows
-desktop.ini        # Windows
+.DS_Store
+Thumbs.db
+desktop.ini
 
 # 로그 파일
 *.log
-/.idea

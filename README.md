@@ -1,6 +1,6 @@
 ```Shell
 bookmate/
-├── .env                           # DB 등 민감정보 통합 관리 (gitignore 대상)
+├── .env                           # 환경변수: DB 등 민감정보 통합 관리 (gitignore 대상)
 ├── .env.example                   # 팀 공유용 템플릿
 ├── .gitattributes                 # Windows/Mac 줄바꿈 통일: * text=auto eol=lf
 ├── .gitignore
@@ -10,13 +10,13 @@ bookmate/
 ├── backend/                       # Java + JDBC, 4계층 구조(controller-service-dao-dto)
 │   ├── pom.xml                    # 라이브러리 버전 고정(Gson/HikariCP/jBCrypt 등)
 │   └── src/main/
-│       ├── java/bookmate/
+│       ├── java
 │       │   ├── controller/        # HTTP 요청/응답만 담당, 로직은 service에 위임
 │       │   ├── service/           # 비즈니스 로직 전담(권한검증, 베이지안 계산, 취향매칭 등)
 │       │   ├── dao/               # JDBC 쿼리 전담, DB와 직접 대화
 │       │   ├── dto/               # 계층 간 데이터 전달 객체(DB 행 표현)
 │       │   ├── filter/            # 세션 검증, 요청 속도 제한(로그인 무차별대입 방지)
-│       │   └── util/              # DBUtil(HikariCP), JsonUtil, ValidationUtil
+│       │   └── util/              # DBUtil(HikariCP), JsonUtil, ValidationUtil, DB_init(DB 스키마 초기화)
 │       └── resources/
 │           └── config.properties  # 루트 .env 값을 읽어오는 설정
 │
@@ -34,8 +34,8 @@ bookmate/
 ├── db/                           # Oracle DB 컨테이너 정의
 │   ├── schema.sql                # 테이블 생성(DDL) — 순서대로 한 파일에 다 넣어도 무방
 │   └── seed.sql                  # 관리자 계정 등 초기 데이터
-│   
-├── scripts/ # 개발 및 로컬 테스트용 docker 자동화 스크립트
+│
+├── scripts/                       # 개발 및 로컬 테스트용 docker 자동화 스크립트
 │   ├── start.sh / start.bat       # 컨테이너 실행 + schema.sql, seed.sql 적용까지 먼저 자동화
 │   └── dev_reset.sh               # 초기화하고 싶을 때(볼륨 삭제 후 재생성)
 │

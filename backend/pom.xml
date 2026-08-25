@@ -20,5 +20,11 @@
             <artifactId>ojdbc17</artifactId>
             <version>23.26.3.0.0</version>
         </dependency>
+        <!-- .env 파일 로더: Spring Profile + application.properties/application.yml 대용 -->
+        <dependency>
+            <groupId>io.github.cdimascio</groupId>
+            <artifactId>dotenv-java</artifactId>
+            <version>3.0.0</version>
+        </dependency>
     </dependencies>
 </project>
