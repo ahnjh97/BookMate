@@ -1,0 +1,43 @@
+# 여러 컨테이너를 한 번에 묶어서 매번 실행하는 orchestration 파일 → 루트에 위치.
+# 각 서비스가 "어떻게 빌드되는지"는 해당 폴더 Dockerfile이 담당
+# 지금은 db 서비스 하나뿐. frontend/backend에 Dockerfile 생기면 아래 주석 풀고 서비스만 추가.
+
+services:
+  oracle-db:
+    image: gvenzl/oracle-free:23-slim-faststart  # arm64 네이티브 지원 (Mac 칩 무관)
+    env_file:
+    - .env # 같은위치로 자동인식. 안정성을 위해 경로명시
+    container_name: ${PROJECT_NAME:-team}-oracle-db
+    environment:
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD}
+      APP_USER: ${APP_USER}
+      APP_USER_PASSWORD: ${APP_USER_PASSWORD}
+    ports:
+      - "${ORACLE_HOST_PORT:-1521}:1521"
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+      - ./db/schema.sql:/container-entrypoint-initdb.d/schema.sql  # 최초생성 시 테이블 초기화
+      # - ./db/seed.sql:/container-entrypoint-initdb.d/seed.sql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    restart: unless-stopped
+
+  # backend:
+  #   build: ./backend          # backend/Dockerfile 필요
+  #   depends_on:
+  #     oracle-db:
+  #       condition: service_healthy
+  #   ports:
+  #     - "8080:8080"
+
+  # frontend:
+  #   build: ./frontend         # frontend/Dockerfile 필요 (또는 정적 서빙이면 nginx 등)
+  #   ports:
+  #     - "3000:3000"
+
+volumes:
+  oracle-data:

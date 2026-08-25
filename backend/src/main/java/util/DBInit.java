@@ -9,7 +9,7 @@ import java.sql.Statement;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
-public class DB_Init  {
+public class DBInit {
     // 원본:
     // private static final String URL = "jdbc:oracle:thin:@localhost:1521:xe";
     // private static final String USER = "bookmate";
@@ -38,7 +38,7 @@ public class DB_Init  {
                 // 원본: runSql(conn, "backend/db/schema.sql");
                 // 수정: db 폴더가 루트로 이동됨. 실행 위치가 backend/ 기준이면 ../db/schema.sql,
                 //       루트 기준이면 db/schema.sql — 본인 Working directory 설정에 맞게 확인 필요
-                runSql(conn, "../db/schema.sql");
+                runSql(conn, "db/schema.sql");
             }
 
             System.out.println("DB 초기화 완료");

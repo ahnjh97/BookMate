@@ -24,7 +24,13 @@
         <dependency>
             <groupId>io.github.cdimascio</groupId>
             <artifactId>dotenv-java</artifactId>
-            <version>3.0.0</version>
+            <version>3.2.0</version>
+        </dependency>
+        <!-- HikariCP: DB 연결을 매번 새로 맺지 않고 재사용해서 성능 저하·연결 누수 방지 -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>5.1.0</version>
         </dependency>
     </dependencies>
 </project>
