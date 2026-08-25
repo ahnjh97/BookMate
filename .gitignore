@@ -18,7 +18,7 @@ node_modules/
 dist/
 
 # DB / 볼륨 관련
-db/data/
+backend/db/data/
 
 # OS별 잡파일
 .DS_Store          # Mac

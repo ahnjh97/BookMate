@@ -1,3 +1,5 @@
+package db;
+
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,11 +13,12 @@ public class DB_Init {
     private static final String PASSWORD = "book";
 
     public static void main(String[] args) {
+        System.out.println(System.getProperty("user.dir"));
         try {
             Class.forName("oracle.jdbc.OracleDriver");
 
             try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
-                runSql(conn, "db/init.sql");
+                runSql(conn, "backend/db/init.sql");
             }
 
             System.out.println("DB 초기화 완료");
