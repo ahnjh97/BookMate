@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>책 상세 | BookMate</title>
     <link rel="stylesheet" href="/bookmate/assets/css/style.css">
-    <link rel="stylesheet" href="/bookmate/assets/css/book-detail.css">
+    <link rel="stylesheet" href="/bookmate/assets/css/book-detail.css?v=20260826-1">
   </head>
   <body>
     <header class="site-header" data-navbar></header>
@@ -17,7 +17,18 @@
           책 정보를 불러오는 중입니다.
         </p>
         <article id="book-detail" class="book-detail" hidden>
-          <figure id="book-cover" class="book-detail-cover"></figure>
+          <div class="book-detail-visual">
+            <figure id="book-cover" class="book-detail-cover"></figure>
+            <div id="rating-book-context" class="rating-book-context" hidden>
+              <h1 id="rating-book-title"></h1>
+              <p id="rating-book-author" class="book-detail-author"></p>
+              <section aria-labelledby="rating-book-description-heading">
+                <h2 id="rating-book-description-heading">책 소개</h2>
+                <p id="rating-book-description"></p>
+              </section>
+            </div>
+          </div>
+
           <div class="book-detail-content">
             <p id="book-genre" class="book-detail-genre"></p>
             <h1 id="book-title"></h1>
@@ -34,18 +45,61 @@
             </dl>
             <section class="book-detail-rating" aria-labelledby="book-rating-heading">
               <h2 id="book-rating-heading">독자 평점</h2>
-              <strong id="book-average-rating"></strong>
-              <span id="book-rating-count"></span>
+              <div class="book-rating-summary">
+                <strong id="book-average-rating"></strong>
+                <span id="book-rating-count"></span>
+              </div>
+              <button id="open-rating-form" class="button button-primary" type="button">
+                내 평점 기록하기
+              </button>
             </section>
             <section class="book-detail-description" aria-labelledby="book-description-heading">
               <h2 id="book-description-heading">책 소개</h2>
               <p id="book-description"></p>
             </section>
           </div>
+
+          <section id="rating-editor" class="rating-editor" aria-labelledby="rating-form-heading" hidden>
+            <div class="rating-editor-heading">
+              <div>
+                <p>나의 독서 기록</p>
+                <h2 id="rating-form-heading" tabindex="-1">이 책은 어떠셨나요?</h2>
+              </div>
+              <button id="close-rating-form" class="button" type="button">책 정보로 돌아가기</button>
+            </div>
+
+            <form id="rating-form" class="rating-form">
+              <fieldset>
+                <legend>별점을 선택해 주세요</legend>
+                <div class="rating-score-options">
+                  <label><input type="radio" name="score" value="1" required> ★ 1점</label>
+                  <label><input type="radio" name="score" value="2"> ★ 2점</label>
+                  <label><input type="radio" name="score" value="3"> ★ 3점</label>
+                  <label><input type="radio" name="score" value="4"> ★ 4점</label>
+                  <label><input type="radio" name="score" value="5"> ★ 5점</label>
+                </div>
+              </fieldset>
+
+              <label for="rating-comment">한줄평 <span>(선택)</span></label>
+              <textarea
+                id="rating-comment"
+                name="commentText"
+                rows="7"
+                maxlength="500"
+                placeholder="기억하고 싶은 감상이나 다른 독자에게 전하고 싶은 이야기를 남겨주세요."
+              ></textarea>
+
+              <div class="rating-form-actions">
+                <span id="rating-comment-count">0 / 500</span>
+                <button id="rating-submit" class="button button-primary" type="submit">평점 기록 완료</button>
+              </div>
+              <p id="rating-message" class="rating-message" role="status" aria-live="polite"></p>
+            </form>
+          </section>
         </article>
       </section>
     </main>
     <script src="/bookmate/js/components/navbar.js" defer></script>
-    <script src="/bookmate/js/pages/book-detail.js" defer></script>
+    <script src="/bookmate/js/pages/book-detail.js?v=20260826-1" defer></script>
   </body>
 </html>

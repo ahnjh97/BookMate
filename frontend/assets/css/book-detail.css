@@ -52,6 +52,10 @@
   display: none;
 }
 
+.book-detail-visual {
+  min-width: 0;
+}
+
 .book-detail-cover {
   display: flex;
   width: 100%;
@@ -75,6 +79,41 @@
 
 .book-detail-content {
   min-width: 0;
+}
+
+.book-detail-content[hidden],
+.rating-book-context[hidden],
+.rating-editor[hidden] {
+  display: none;
+}
+
+.rating-book-context {
+  margin-top: 20px;
+}
+
+.rating-book-context h1 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+}
+
+.rating-book-context .book-detail-author {
+  margin-bottom: 20px;
+}
+
+.rating-book-context section {
+  padding-top: 18px;
+  border-top: 1px solid var(--color-border);
+}
+
+.rating-book-context h2 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.rating-book-context section p {
+  margin: 0;
+  color: #475467;
+  font-size: 0.92rem;
+  white-space: pre-line;
 }
 
 .book-detail-genre {
@@ -127,16 +166,24 @@
 
 .book-detail-rating {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  align-items: center;
+  gap: 16px;
   padding: 16px 0;
   border-top: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
 }
 
 .book-detail-rating h2 {
-  margin: 0 auto 0 0;
+  margin: 0;
   font-size: 1rem;
+}
+
+.book-rating-summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 8px;
+  text-align: left;
 }
 
 .book-detail-rating strong {
@@ -147,6 +194,148 @@
 .book-detail-rating span {
   color: var(--color-muted);
   font-size: 0.88rem;
+}
+
+.book-detail-rating > .button {
+  margin-left: auto;
+}
+
+.rating-editor {
+  min-width: 0;
+  padding: 28px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+}
+
+.rating-editor-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.rating-editor-heading p {
+  margin: 0 0 4px;
+  color: var(--color-primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.rating-editor-heading h2 {
+  margin: 0;
+  font-size: clamp(1.6rem, 4vw, 2.35rem);
+  letter-spacing: -0.035em;
+}
+
+.rating-editor-heading h2:focus {
+  outline: none;
+}
+
+.rating-form {
+  display: grid;
+  gap: 18px;
+}
+
+.rating-form fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.rating-form legend,
+.rating-form > label {
+  margin-bottom: 9px;
+  font-weight: 700;
+}
+
+.rating-form > label span {
+  color: var(--color-muted);
+  font-size: 0.82rem;
+  font-weight: 400;
+}
+
+.rating-score-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.rating-score-options label {
+  display: inline-flex;
+  min-height: 44px;
+  padding: 0 13px;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  background: var(--color-background);
+  cursor: pointer;
+}
+
+.rating-score-options label:has(input:checked) {
+  color: #7a5200;
+  border-color: #d4a72c;
+  background: #fff8c5;
+}
+
+.rating-score-options input {
+  accent-color: var(--color-primary);
+}
+
+.rating-form textarea {
+  width: 100%;
+  padding: 11px 12px;
+  resize: vertical;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  color: var(--color-text);
+  background: var(--color-background);
+  font: inherit;
+}
+
+.rating-form textarea:focus-visible {
+  border-color: var(--color-primary);
+  outline: 2px solid rgb(53 104 89 / 18%);
+}
+
+.rating-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rating-form-actions span {
+  color: var(--color-muted);
+  font-size: 0.82rem;
+}
+
+.rating-form-actions button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.rating-message {
+  min-height: 24px;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.rating-message[data-state="loading"] {
+  color: var(--color-muted);
+}
+
+.rating-message[data-state="success"] {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.rating-message[data-state="error"] {
+  color: #b42318;
+  font-weight: 700;
 }
 
 .book-detail-description {
@@ -174,6 +363,25 @@
   .book-detail-cover {
     width: min(240px, 75%);
     margin: 0 auto;
+  }
+
+  .book-detail-rating {
+    align-items: stretch;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .book-detail-rating > .button {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .rating-editor {
+    padding: 20px;
+  }
+
+  .rating-editor-heading {
+    flex-direction: column;
   }
 }
 
