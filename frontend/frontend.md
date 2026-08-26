@@ -10,6 +10,7 @@ frontend/
 │
 ├── components/   # "2회 이상 화면에서 재사용되는 HTML 조각". 1회용은 pages에 직접.
 │   ├── header.html
+│   ├── navbar.html
 │   ├── footer.html
 │   └── loader.html
 │

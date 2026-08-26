@@ -7,25 +7,7 @@
     <link rel="stylesheet" href="/bookmate/assets/css/style.css">
   </head>
   <body>
-    <header class="site-header">
-      <nav class="navbar" aria-label="주요 메뉴">
-        <a class="logo" href="/bookmate/">BookMate</a>
-
-        <div class="main-menu">
-          <div class="dropdown">
-            <button class="dropdown-trigger" type="button">도서</button>
-            <div class="dropdown-menu">
-              <a href="/bookmate/pages/book/list.html">책 목록</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="auth-menu">
-          <a class="button" href="/bookmate/pages/auth/login.html">로그인</a>
-          <a class="button button-primary" href="/bookmate/pages/auth/signup.html" aria-current="page">회원가입</a>
-        </div>
-      </nav>
-    </header>
+    <header class="site-header" data-navbar></header>
 
     <main class="page-main">
       <section class="page-content">
@@ -33,5 +15,6 @@
         <p>회원가입 화면은 추후 구현할 예정입니다.</p>
       </section>
     </main>
+    <script src="/bookmate/js/components/navbar.js" defer></script>
   </body>
 </html>

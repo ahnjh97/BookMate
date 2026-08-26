@@ -8,25 +8,7 @@
     <link rel="stylesheet" href="/bookmate/assets/css/book-list.css">
   </head>
   <body>
-    <header class="site-header">
-      <nav class="navbar" aria-label="주요 메뉴">
-        <a class="logo" href="/bookmate/">BookMate</a>
-
-        <div class="main-menu">
-          <div class="dropdown">
-            <button class="dropdown-trigger" type="button">도서</button>
-            <div class="dropdown-menu">
-              <a href="/bookmate/pages/book/list.html" aria-current="page">책 목록</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="auth-menu">
-          <a class="button" href="/bookmate/pages/auth/login.html">로그인</a>
-          <a class="button button-primary" href="/bookmate/pages/auth/signup.html">회원가입</a>
-        </div>
-      </nav>
-    </header>
+    <header class="site-header" data-navbar></header>
 
     <main data-page="books">
       <section>
@@ -57,6 +39,7 @@
         <div id="book-list" class="book-grid"></div>
       </section>
     </main>
+    <script src="/bookmate/js/components/navbar.js" defer></script>
     <script src="/bookmate/js/pages/book-list.js" defer></script>
   </body>
 </html>
