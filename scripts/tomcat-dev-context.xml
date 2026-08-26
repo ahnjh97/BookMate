@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+    <Resources allowLinking="true">
+        <PreResources
+            className="org.apache.catalina.webresources.DirResourceSet"
+            base="__FRONTEND_ROOT__"
+            webAppMount="/"
+            internalPath="/"
+        />
+    </Resources>
+</Context>

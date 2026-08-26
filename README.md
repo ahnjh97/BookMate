@@ -98,6 +98,20 @@ IntelliJ의 Tomcat 통합 기능 없이도 실행할 수 있습니다. Java 21�
 
 스크립트는 실행할 때마다 Maven으로 `bookmate.war`를 빌드하고 Tomcat의 `webapps` 폴더에 배포합니다. 프로젝트 루트의 `.env` 위치도 Tomcat에 자동으로 전달합니다.
 
+### 프론트엔드 실시간 반영 개발 모드 — Windows
+
+먼저 `scripts\tomcat-run.bat`을 한 번 실행해 Maven과 Tomcat을 준비합니다. 이후 평소 프론트엔드 개발에는 다음 파일을 실행합니다.
+
+```bat
+scripts\tomcat-dev.bat
+```
+
+`tomcat-dev.bat`이 실행되지 않거나 Maven 또는 Tomcat을 찾을 수 없다는 메시지가 나오면, `tomcat-run.bat`을 먼저 한 번 실행한 뒤 다시 시도합니다. `tomcat-run.bat`이 필요한 개발 도구를 프로젝트의 `.tools` 폴더에 준비합니다.
+
+개발 모드는 `frontend` 폴더 전체를 Tomcat의 웹 루트에 직접 연결합니다. 기존 폴더뿐 아니라 나중에 새 폴더를 추가해도 별도 설정 없이 실시간 반영 대상에 포함됩니다. HTML, CSS, JavaScript 파일은 저장한 뒤 브라우저를 새로고침하면 재빌드 없이 반영됩니다. Java 파일을 변경한 경우에는 실행 중인 서버를 종료하고 `tomcat-dev.bat`을 다시 실행해야 합니다.
+
+커밋 또는 병합 전에는 `scripts\tomcat-run.bat`으로 clean WAR 빌드와 실제 배포 구성을 최종 확인합니다.
+
 ### IntelliJ IDEA Ultimate 또는 평가판
 
 1. `backend/pom.xml`을 Maven 프로젝트로 불러옵니다.
