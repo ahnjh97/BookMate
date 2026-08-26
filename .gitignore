@@ -15,6 +15,7 @@ out/
 # Java / Maven 빌드 산출물
 target/
 *.class
+.tools/
 
 # 프론트엔드
 node_modules/

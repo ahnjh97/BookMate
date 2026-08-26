@@ -1,2 +1,7 @@
 # Auto detect text files and perform LF normalization
 * text=auto eol=lf
+
+# 플랫폼별 실행 스크립트 줄바꿈
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.sh text eol=lf

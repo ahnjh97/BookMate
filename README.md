@@ -34,9 +34,10 @@ bookmate/
 │   ├── schema.sql                # 테이블 생성(DDL) — 순서대로 한 파일에 다 넣어도 무방
 │   └── seed.sql                  # 관리자 계정 등 초기 데이터
 │
-├── scripts/                       # 개발 및 로컬 테스트용 docker 자동화 스크립트
-│   ├── start.sh / start.bat       # 컨테이너 실행 + schema.sql, seed.sql 적용까지 먼저 자동화
-│   └── dev_reset.sh               # 초기화하고 싶을 때(볼륨 삭제 후 재생성)
+├── scripts/                       # 개발 및 로컬 실행 자동화 스크립트
+│   ├── start.sh / start.bat       # DB 컨테이너 실행
+│   ├── reset.sh / reset.bat       # DB 컨테이너와 볼륨 초기화
+│   └── tomcat-run.sh / .bat       # WAR 빌드·배포 후 Tomcat 터미널 실행
 │
 └── docs/
     ├── README.md                   # 산출물 인덱스(노션/Figma 링크 모음)
@@ -54,7 +55,50 @@ Spring 없이 Tomcat 10.1이 HTML/CSS/JavaScript와 Jakarta Servlet을 실행합
 
 필수 환경: Java 21, Maven, Apache Tomcat 10.1
 
-### IntelliJ IDEA
+### 터미널에서 실행 — 모든 IntelliJ 에디션
+
+IntelliJ의 Tomcat 통합 기능 없이도 실행할 수 있습니다. Java 21과 Docker Desktop만 먼저 설치하면 됩니다. Windows 실행 스크립트는 Maven과 Apache Tomcat을 찾지 못할 경우 프로젝트의 `.tools` 폴더에 정식 안정판 Maven 3.9.16과 Tomcat 10.1.59를 최초 1회 자동 설치합니다.
+
+> **Windows에서 Tomcat을 실행하려면 `scripts\tomcat-run.bat` 파일을 더블클릭하세요.** `scripts\start.bat`은 데이터베이스만 실행하며, 웹 애플리케이션과 Tomcat은 `tomcat-run.bat`이 실행합니다.
+
+1. `.env.example`을 복사해 프로젝트 루트에 `.env`를 만듭니다.
+2. Docker Desktop을 실행한 뒤 DB 컨테이너를 시작합니다.
+
+   Windows:
+
+   ```bat
+   scripts\start.bat
+   ```
+
+   macOS/Linux:
+
+   ```bash
+   bash scripts/start.sh
+   ```
+
+3. 애플리케이션을 실행합니다.
+
+   Windows:
+
+   ```bat
+   scripts\tomcat-run.bat
+   ```
+
+   Windows에서는 `scripts\tomcat-run.bat`을 더블클릭해도 됩니다. 경로 입력은 필요하지 않으며, 오류가 발생해도 원인을 확인할 수 있도록 창이 유지됩니다.
+
+   macOS/Linux:
+
+   ```bash
+   bash scripts/tomcat-run.sh /opt/apache-tomcat-10.1.x
+   ```
+
+   macOS/Linux 스크립트는 Tomcat 경로를 인자로 받습니다. `CATALINA_HOME` 또는 `TOMCAT_HOME` 환경변수를 등록하면 경로 인자 없이 실행할 수 있습니다.
+
+4. `http://localhost:8080/bookmate/`에 접속합니다. 서버를 종료할 때는 Tomcat이 실행 중인 터미널에서 `Ctrl+C`를 누릅니다.
+
+스크립트는 실행할 때마다 Maven으로 `bookmate.war`를 빌드하고 Tomcat의 `webapps` 폴더에 배포합니다. 프로젝트 루트의 `.env` 위치도 Tomcat에 자동으로 전달합니다.
+
+### IntelliJ IDEA Ultimate 또는 평가판
 
 1. `backend/pom.xml`을 Maven 프로젝트로 불러옵니다.
 2. `Run > Edit Configurations`에서 `Tomcat Server > Local`을 추가합니다.
@@ -73,5 +117,6 @@ Spring 없이 Tomcat 10.1이 HTML/CSS/JavaScript와 Jakarta Servlet을 실행합
 4. Tomcat 10.1 실행 설정의 Deployment에 `backend:war exploded`, context path에 `/bookmate`를 지정합니다.
 5. Tomcat이 프로젝트 루트의 `.env`를 읽지 못하면 실행 설정의 Environment variables에 `DB_URL`, `DB_USER`, `DB_PASSWORD`를 등록합니다.
 6. `http://localhost:8080/bookmate/pages/book/list.html`에서 전체 목록, 제목/작가 검색, 장르 필터를 확인합니다.
+7. 목록의 책 표지나 제목을 선택해 상세 화면에서 책·작가·출판·평점 정보를 확인합니다.
 
 책 API는 `GET /bookmate/api/books`를 사용하며 `keyword`, `genre` 쿼리 파라미터를 지원합니다. 책 한 권은 `GET /bookmate/api/books/{bookId}`로 조회할 수 있습니다.
