@@ -1,7 +1,7 @@
 ```Shell
 frontend/
 ├── pages/    # 화면별 HTML 프레임 "URL하나 = 파일하나". 사용자가 실제로 접속하는 화면 단위로만 분할.
-│             # 로직/스타일은 js/pages, tailwind에서 대신 처리
+│             # 로직은 js/pages, 스타일은 assets/css에서 처리
 │   ├── auth/
 │   ├── book/
 │   ├── board/
@@ -35,8 +35,7 @@ frontend/
 │       ├── login.js
 │       └── bookList.js
 │
-├── assets/         # "코드가 아니라 파일 자체가 결과물인 것"(이미지/아이콘)
+├── assets/         # 공통 CSS와 이미지/아이콘
 │
 ├── frontend.md # 폴더 배치 기준·fetch래퍼·디자인토큰 상세?
-└── tailwind.config.js  # "tailwind설정 프로젝트가 공유하는 css라이브러리 설정"(색상/폰트)
 ```

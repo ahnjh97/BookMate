@@ -20,7 +20,7 @@ bookmate/
 │       └── resources/
 │           └── config.properties  # 루트 .env 값을 읽어오는 설정
 │
-├── frontend/                      # 바닐라 JS + Tailwind (상세: frontend/frontend.md)
+├── frontend/                      # HTML + CSS + 바닐라 JavaScript
 │   ├── pages/                     # 화면별 html
 │   ├── components/                # 2곳 이상에서 재사용되는 HTML 조각(헤더 등)
 │   ├── js/
@@ -28,8 +28,7 @@ bookmate/
 │   │   ├── components/            # 재사용 UI의 JS 로직
 │   │   ├── utils/                 # 화면·통신과 무관한 순수 함수
 │   │   └── pages/                 # 화면 1개 전용 스크립트
-│   ├── assets/                    # 이미지/아이콘
-│   └── tailwind.config.js
+│   └── assets/                    # CSS/이미지/아이콘
 │
 ├── db/                           # Oracle DB 컨테이너 정의
 │   ├── schema.sql                # 테이블 생성(DDL) — 순서대로 한 파일에 다 넣어도 무방
@@ -48,3 +47,19 @@ bookmate/
     ├── interface_spec.md           # 인터페이스정의서
     └── coding_convention.md        # 코딩컨벤션
 ```
+
+## 웹 화면 실행
+
+Spring 없이 Tomcat 10.1이 HTML/CSS/JavaScript와 Jakarta Servlet을 실행합니다.
+
+필수 환경: Java 21, Maven, Apache Tomcat 10.1
+
+### IntelliJ IDEA
+
+1. `backend/pom.xml`을 Maven 프로젝트로 불러옵니다.
+2. `Run > Edit Configurations`에서 `Tomcat Server > Local`을 추가합니다.
+3. Application server에 설치한 Tomcat 10.1을 지정합니다.
+4. Deployment에 `backend:war exploded`를 추가하고 context path를 `/bookmate`로 설정합니다.
+5. Tomcat을 실행하고 `http://localhost:8080/bookmate/`로 접속합니다.
+
+서버를 다시 시작할 때는 IntelliJ의 동일한 Tomcat 실행 설정에서 `Rerun`을 사용합니다.
