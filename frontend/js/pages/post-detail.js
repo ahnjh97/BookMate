@@ -42,7 +42,7 @@ async function loadPostDetail() {
 
     try {
         const response = await fetch(
-            `/bookmate/api/posts/detail?postId=${encodeURIComponent(postId)}`
+            `/api/posts/detail?postId=${encodeURIComponent(postId)}`
         );
 
         const result = await response.json();

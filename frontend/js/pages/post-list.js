@@ -20,7 +20,7 @@ async function loadPosts() {
     postListElement.replaceChildren();
 
     try {
-        const response = await fetch("/bookmate/api/posts");
+        const response = await fetch("/api/posts");
 
         const result = await response.json();
 
@@ -70,7 +70,7 @@ function renderPosts(posts) {
         const titleLink = document.createElement("a");
 
         titleLink.href =
-            `/bookmate/pages/post/detail.html?postId=${post.postId}`;
+            `/pages/post/detail.html?postId=${post.postId}`;
 
         // 사용자 입력을 HTML로 삽입하지 않고 안전하게 출력합니다.
         titleLink.textContent = post.title;
