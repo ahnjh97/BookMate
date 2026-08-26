@@ -63,3 +63,15 @@ Spring 없이 Tomcat 10.1이 HTML/CSS/JavaScript와 Jakarta Servlet을 실행합
 5. Tomcat을 실행하고 `http://localhost:8080/bookmate/`로 접속합니다.
 
 서버를 다시 시작할 때는 IntelliJ의 동일한 Tomcat 실행 설정에서 `Rerun`을 사용합니다.
+
+## IntelliJ Maven으로 책 목록 연결 확인
+
+1. IntelliJ에서 `backend/pom.xml`을 Maven 프로젝트로 불러오고 Maven 창에서 `Reload All Maven Projects`를 실행합니다.
+2. `util.DBInit` 실행 설정을 만들고 Working directory를 프로젝트 루트(`book-inven`)로 지정한 뒤 실행합니다.
+   이 작업은 기존 테이블을 삭제하고 `db/schema.sql`, `db/seed.sql` 순서로 다시 생성하므로 필요한 데이터가 있으면 먼저 백업합니다.
+3. Maven 창의 `backend > Lifecycle > package`를 실행합니다.
+4. Tomcat 10.1 실행 설정의 Deployment에 `backend:war exploded`, context path에 `/bookmate`를 지정합니다.
+5. Tomcat이 프로젝트 루트의 `.env`를 읽지 못하면 실행 설정의 Environment variables에 `DB_URL`, `DB_USER`, `DB_PASSWORD`를 등록합니다.
+6. `http://localhost:8080/bookmate/pages/book/list.html`에서 전체 목록, 제목/작가 검색, 장르 필터를 확인합니다.
+
+책 API는 `GET /bookmate/api/books`를 사용하며 `keyword`, `genre` 쿼리 파라미터를 지원합니다. 책 한 권은 `GET /bookmate/api/books/{bookId}`로 조회할 수 있습니다.

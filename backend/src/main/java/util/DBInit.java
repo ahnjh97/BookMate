@@ -15,7 +15,10 @@ public class DBInit {
     // private static final String USER = "bookmate";
     // private static final String PASSWORD = "book";
     // 수정: dotenv-java로 .env 값을 읽어옴. 값 없으면 즉시 에러(하드코딩 fallback 없음)
-    private static final Dotenv dotenv = Dotenv.configure().directory("./").load();
+    private static final Dotenv dotenv = Dotenv.configure()
+            .directory("./")
+            .ignoreIfMissing()
+            .load();
 
     private static final String URL = requireEnv("DB_URL");
     private static final String USER = requireEnv("DB_USER");
@@ -39,6 +42,7 @@ public class DBInit {
                 // 수정: db 폴더가 루트로 이동됨. 실행 위치가 backend/ 기준이면 ../db/schema.sql,
                 //       루트 기준이면 db/schema.sql — 본인 Working directory 설정에 맞게 확인 필요
                 runSql(conn, "db/schema.sql");
+                runSql(conn, "db/seed.sql");
             }
 
             System.out.println("DB 초기화 완료");

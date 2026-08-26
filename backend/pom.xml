@@ -33,6 +33,13 @@
             <artifactId>HikariCP</artifactId>
             <version>5.1.0</version>
         </dependency>
+        <!-- HikariCP 로그 출력 구현체: StaticLoggerBinder 경고 방지 -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.36</version>
+            <scope>runtime</scope>
+        </dependency>
         <!-- Gson: Java 객체와 JSON 데이터 간 변환 -->
         <dependency>
             <groupId>com.google.code.gson</groupId>

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>책 목록 | BookMate</title>
     <link rel="stylesheet" href="/bookmate/assets/css/style.css">
+    <link rel="stylesheet" href="/bookmate/assets/css/book-list.css">
   </head>
   <body>
     <header class="site-header">
@@ -27,11 +28,35 @@
       </nav>
     </header>
 
-    <main class="page-main">
-      <section class="page-content">
+    <main data-page="books">
+      <section>
         <h1>책 목록</h1>
-        <p>등록된 책 목록을 확인할 수 있습니다.</p>
+        <p>제목과 작가명으로 승인된 책을 찾아보세요.</p>
+
+        <form id="book-search-form" class="book-tools" role="search">
+          <div>
+            <input id="book-keyword" name="keyword" type="search" aria-label="책 검색어" aria-autocomplete="list" aria-controls="search-suggestions" placeholder="책 제목 또는 작가명" autocomplete="off">
+            <div id="search-suggestions" role="listbox" hidden></div>
+          </div>
+          <select id="book-genre" name="genre" aria-label="장르">
+            <option value="">전체 장르</option>
+            <option value="판타지">판타지</option>
+            <option value="SF">SF</option>
+            <option value="디스토피아">디스토피아</option>
+            <option value="추리">추리</option>
+            <option value="스릴러">스릴러</option>
+            <option value="인문">인문</option>
+            <option value="과학">과학</option>
+            <option value="자기계발">자기계발</option>
+            <option value="IT">IT</option>
+          </select>
+          <button class="button button-primary" type="submit">검색</button>
+        </form>
+
+        <p id="book-status" aria-live="polite">책 목록을 불러오는 중입니다.</p>
+        <div id="book-list" class="book-grid"></div>
       </section>
     </main>
+    <script src="/bookmate/js/pages/book-list.js" defer></script>
   </body>
 </html>

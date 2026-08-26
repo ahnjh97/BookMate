@@ -1,0 +1,185 @@
+[data-page="books"] {
+  min-height: calc(100vh - var(--navbar-height));
+  padding: 28px 18px 50px;
+  background: var(--color-surface);
+}
+
+[data-page="books"] > section {
+  width: min(1320px, 100%);
+  margin: 0 auto;
+}
+
+[data-page="books"] h1 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+[data-page="books"] section > p {
+  margin: 4px 0 14px;
+  color: var(--color-muted);
+  font-size: 0.88rem;
+}
+
+.book-tools {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) 150px auto;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.book-tools input,
+.book-tools select {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: white;
+  font: inherit;
+}
+
+.book-tools > div {
+  position: relative;
+}
+
+.book-tools input {
+  width: 100%;
+}
+
+#search-suggestions {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  right: 0;
+  left: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  background: white;
+  box-shadow: 0 8px 20px rgb(16 24 40 / 12%);
+}
+
+#search-suggestions button {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  background: white;
+  text-align: left;
+  cursor: pointer;
+}
+
+#search-suggestions button:last-child {
+  border-bottom: 0;
+}
+
+#search-suggestions button:hover,
+#search-suggestions button:focus-visible {
+  background: var(--color-surface);
+  outline: none;
+}
+
+#search-suggestions span {
+  color: var(--color-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+#search-suggestions strong,
+#search-suggestions small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#search-suggestions small {
+  color: var(--color-muted);
+}
+
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(230px, 100%), 1fr));
+  gap: 9px;
+}
+
+.book-card {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr);
+  gap: 10px;
+  min-height: 112px;
+  padding: 9px;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  background: white;
+  box-shadow: none;
+}
+
+.book-card figure {
+  display: flex;
+  width: 62px;
+  height: 93px;
+  margin: 0;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  color: var(--color-muted);
+  background: #e9ecef;
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.book-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.book-card h2 {
+  display: -webkit-box;
+  margin: 0 0 2px;
+  overflow: hidden;
+  font-size: 0.98rem;
+  line-height: 1.25;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.book-card p {
+  margin: 0;
+  overflow: hidden;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.book-card p:first-of-type {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.book-card p:nth-of-type(3) {
+  display: -webkit-box;
+  margin-top: 4px;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.book-card strong {
+  display: block;
+  margin-top: 5px;
+  color: #9a6700;
+  font-size: 0.76rem;
+}
+
+@media (max-width: 560px) {
+  .book-tools {
+    grid-template-columns: 1fr;
+  }
+}
