@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>책 상세 | BookMate</title>
+    <link rel="stylesheet" href="/bookmate/assets/css/style.css">
+    <link rel="stylesheet" href="/bookmate/assets/css/book-detail.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="navbar" aria-label="주요 메뉴">
+        <a class="logo" href="/bookmate/">BookMate</a>
+        <div class="main-menu">
+          <div class="dropdown">
+            <button class="dropdown-trigger" type="button">도서</button>
+            <div class="dropdown-menu">
+              <a href="/bookmate/pages/book/list.html">책 목록</a>
+            </div>
+          </div>
+        </div>
+        <div class="auth-menu">
+          <a class="button" href="/bookmate/pages/auth/login.html">로그인</a>
+          <a class="button button-primary" href="/bookmate/pages/auth/signup.html">회원가입</a>
+        </div>
+      </nav>
+    </header>
+
+    <main data-page="book-detail">
+      <section class="book-detail-shell" aria-labelledby="book-title">
+        <a class="back-link" href="/bookmate/pages/book/list.html">← 책 목록으로</a>
+        <p id="book-detail-status" class="book-detail-status" role="status" aria-live="polite">
+          책 정보를 불러오는 중입니다.
+        </p>
+        <article id="book-detail" class="book-detail" hidden>
+          <figure id="book-cover" class="book-detail-cover"></figure>
+          <div class="book-detail-content">
+            <p id="book-genre" class="book-detail-genre"></p>
+            <h1 id="book-title"></h1>
+            <p id="book-author" class="book-detail-author"></p>
+            <dl class="book-detail-meta">
+              <div>
+                <dt>출판사</dt>
+                <dd id="book-publisher"></dd>
+              </div>
+              <div>
+                <dt>출간일</dt>
+                <dd id="book-published-date"></dd>
+              </div>
+            </dl>
+            <section class="book-detail-rating" aria-labelledby="book-rating-heading">
+              <h2 id="book-rating-heading">독자 평점</h2>
+              <strong id="book-average-rating"></strong>
+              <span id="book-rating-count"></span>
+            </section>
+            <section class="book-detail-description" aria-labelledby="book-description-heading">
+              <h2 id="book-description-heading">책 소개</h2>
+              <p id="book-description"></p>
+            </section>
+          </div>
+        </article>
+      </section>
+    </main>
+    <script src="/bookmate/js/pages/book-detail.js" defer></script>
+  </body>
+</html>

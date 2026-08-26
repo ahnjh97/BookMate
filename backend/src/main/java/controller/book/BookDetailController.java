@@ -1,6 +1,7 @@
 package controller.book;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import dto.BookDTO;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -14,7 +15,7 @@ import java.util.Map;
 @WebServlet("/api/books/*")
 public class BookDetailController extends HttpServlet {
     private final BookService bookService = new BookService();
-    private final Gson gson = new Gson();
+    private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -24,11 +25,13 @@ public class BookDetailController extends HttpServlet {
         try {
             long bookId = parseBookId(request.getPathInfo());
             BookDTO book = bookService.findBook(bookId);
+
             if (book == null) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 gson.toJson(Map.of("success", false, "message", "책을 찾을 수 없습니다."), response.getWriter());
                 return;
             }
+
             gson.toJson(Map.of("success", true, "data", book), response.getWriter());
         } catch (IllegalArgumentException exception) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

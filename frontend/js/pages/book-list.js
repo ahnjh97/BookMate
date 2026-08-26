@@ -117,8 +117,11 @@ function renderBooks(books) {
   }
 
   books.forEach((book) => {
-    const card = document.createElement("article");
+    const detailUrl = `/bookmate/pages/book/detail.html?id=${encodeURIComponent(book.bookId)}`;
+    const card = document.createElement("a");
     card.className = "book-card";
+    card.href = detailUrl;
+    card.setAttribute("aria-label", `${book.title} 상세 보기`);
 
     const cover = document.createElement("figure");
 
