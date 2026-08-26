@@ -8,23 +8,15 @@ import java.sql.Connection;
 import java.util.List;
 
 public class PostDAOCheck {
-
     public static void main(String[] args) {
-
         PostDAO postDAO = new PostDAO();
-
         // 실제로 존재하지 않을 가능성이 높은 게시글 번호
         long testPostId = 999999L;
-
         System.out.println("===== PostDAO DB 연동 검증 시작 =====");
-
         try (Connection conn = DBUtil.getConnection()) {
-
             // 혹시라도 DB 변경이 발생하면 마지막에 되돌리기
             conn.setAutoCommit(false);
-
             try {
-
                 // ============================================
                 // 1. 게시글 전체 목록 조회
                 // ============================================
@@ -32,26 +24,12 @@ public class PostDAOCheck {
                     List<PostDTO> posts =
                             postDAO.selectPostList(conn);
 
-                    System.out.println(
-                            "1. 게시글 목록 조회 : PASS"
-                    );
-
-                    System.out.println(
-                            "   현재 ACTIVE 게시글 수 : "
-                                    + posts.size()
-                    );
-
+                    System.out.println("1. 게시글 목록 조회 : PASS");
+                    System.out.println("   현재 ACTIVE 게시글 수 : "+ posts.size());
                 } catch (Exception e) {
-
-                    System.out.println(
-                            "1. 게시글 목록 조회 : FAIL"
-                    );
-
-                    System.out.println(
-                            "   └ " + e.getMessage()
-                    );
+                    System.out.println("1. 게시글 목록 조회 : FAIL");
+                    System.out.println("   └ " + e.getMessage());
                 }
-
 
                 // ============================================
                 // 2. 존재하지 않는 게시글 상세 조회
@@ -65,24 +43,16 @@ public class PostDAOCheck {
                             );
 
                     if (post == null) {
-                        System.out.println(
-                                "2. 없는 게시글 상세 조회 : PASS"
-                        );
+                        System.out.println("2. 없는 게시글 상세 조회 : PASS");
                     } else {
-                        System.out.println(
-                                "2. 없는 게시글 상세 조회 : FAIL"
-                        );
+                        System.out.println("2. 없는 게시글 상세 조회 : FAIL");
                     }
 
                 } catch (Exception e) {
 
-                    System.out.println(
-                            "2. 없는 게시글 상세 조회 : FAIL"
-                    );
+                    System.out.println("2. 없는 게시글 상세 조회 : FAIL");
 
-                    System.out.println(
-                            "   └ " + e.getMessage()
-                    );
+                    System.out.println("   └ " + e.getMessage());
                 }
 
 
@@ -98,24 +68,16 @@ public class PostDAOCheck {
                             );
 
                     if (!exists) {
-                        System.out.println(
-                                "3. 게시글 존재 여부 확인 : PASS"
-                        );
+                        System.out.println("3. 게시글 존재 여부 확인 : PASS");
                     } else {
-                        System.out.println(
-                                "3. 게시글 존재 여부 확인 : FAIL"
-                        );
+                        System.out.println("3. 게시글 존재 여부 확인 : FAIL");
                     }
 
                 } catch (Exception e) {
 
-                    System.out.println(
-                            "3. 게시글 존재 여부 확인 : FAIL"
-                    );
+                    System.out.println("3. 게시글 존재 여부 확인 : FAIL");
 
-                    System.out.println(
-                            "   └ " + e.getMessage()
-                    );
+                    System.out.println("   └ " + e.getMessage());
                 }
 
 
@@ -131,26 +93,15 @@ public class PostDAOCheck {
                             );
 
                     if (writerId == null) {
-                        System.out.println(
-                                "4. 작성자 번호 조회 : PASS"
-                        );
+                        System.out.println("4. 작성자 번호 조회 : PASS");
                     } else {
-                        System.out.println(
-                                "4. 작성자 번호 조회 : FAIL"
-                        );
+                        System.out.println("4. 작성자 번호 조회 : FAIL");
                     }
 
                 } catch (Exception e) {
-
-                    System.out.println(
-                            "4. 작성자 번호 조회 : FAIL"
-                    );
-
-                    System.out.println(
-                            "   └ " + e.getMessage()
-                    );
+                    System.out.println("4. 작성자 번호 조회 : FAIL");
+                    System.out.println("   └ " + e.getMessage());
                 }
-
 
                 // ============================================
                 // 5. 존재하지 않는 게시글 수정
@@ -171,24 +122,16 @@ public class PostDAOCheck {
                             );
 
                     if (result == 0) {
-                        System.out.println(
-                                "5. 없는 게시글 수정 : PASS"
-                        );
+                        System.out.println("5. 없는 게시글 수정 : PASS");
                     } else {
-                        System.out.println(
-                                "5. 없는 게시글 수정 : FAIL"
-                        );
+                        System.out.println("5. 없는 게시글 수정 : FAIL");
                     }
 
                 } catch (Exception e) {
 
-                    System.out.println(
-                            "5. 없는 게시글 수정 : FAIL"
-                    );
+                    System.out.println("5. 없는 게시글 수정 : FAIL");
 
-                    System.out.println(
-                            "   └ " + e.getMessage()
-                    );
+                    System.out.println("   └ " + e.getMessage());
                 }
 
 
@@ -204,24 +147,16 @@ public class PostDAOCheck {
                             );
 
                     if (result == 0) {
-                        System.out.println(
-                                "6. 작성자 게시글 삭제 : PASS"
-                        );
+                        System.out.println("6. 작성자 게시글 삭제 : PASS");
                     } else {
-                        System.out.println(
-                                "6. 작성자 게시글 삭제 : FAIL"
-                        );
+                        System.out.println("6. 작성자 게시글 삭제 : FAIL");
                     }
 
                 } catch (Exception e) {
 
-                    System.out.println(
-                            "6. 작성자 게시글 삭제 : FAIL"
-                    );
+                    System.out.println("6. 작성자 게시글 삭제 : FAIL");
 
-                    System.out.println(
-                            "   └ " + e.getMessage()
-                    );
+                    System.out.println("   └ " + e.getMessage());
                 }
 
 

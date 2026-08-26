@@ -61,6 +61,18 @@
             <version>1.18.42</version>
             <scope>provided</scope>
         </dependency>
+        <!-- tomcat-embed-core: Tomcat 서버 자체를 라이브러리로 사용, 코드 안에서 직접 구동 -->
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <version>10.1.57</version>
+        </dependency>
+        <!-- tomcat-embed-jasper: JSP 지원용, 미사용이지만 초기화 안정성 위해 포함 -->
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-jasper</artifactId>
+            <version>10.1.57</version>
+        </dependency>
     </dependencies>
 
     <build>
