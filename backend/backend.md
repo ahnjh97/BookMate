@@ -3,11 +3,13 @@ backend/
 ├── pom.xml                        # groupId: bookmate, 라이브러리 버전 고정
 ├── backend.md                     # 계층 구조·호출규칙·라이브러리·API포맷 상세
 └── src/main/
-    ├── java/bookmate/
+    ├── java
+    │   ├── check/                  # JUnit 대용 순수 로직 검정 자체 프레임워크(AllChecks: 진입점)
     │   ├── controller/             # HTTP 요청/응답만 담당, 로직은 service에 위임
     │   ├── service/                # 비즈니스 로직 전담(try-catch: 권한검증, 베이지안 계산, 취향매칭 등)
     │   ├── dao/                    # JDBC 쿼리 전담, DB핸들링
     │   ├── dto/                    # 계층 간 데이터 전달 객체(DB 행 표현)
+    │   ├── exception/              # 커스텀 예외 클래스(GlobalExceptionFilter: 타입별 HTTP 상태코드 매핑)
     │   │
     │   ├── filter/                 # 세션 검증, 요청 속도 제한
     │   │   ├── SessionFilter.java           # 로그인 여부 확인
@@ -19,8 +21,12 @@ backend/
     │       ├── ResponseWrapper.java         # 응답 형식 통일
     │       └── ValidationUtil.java          # 입력값 검증
     │
-    └── resources/
-        └── config.properties       # .env 값 로드
+    ├── resources/
+    │   └── config.properties       # .env 값 로드
+    │
+    └── webapp/
+        └── WEB-INF/
+            └── web.xml              # Servlet 스펙이 강제하는 고정 위치, Main.java가 이 폴더를 웹 루트로 등록
 ```
 
 | 파일                  | 동작 방식                                                      | 배치 이유                                                            | 없을 때 문제                                    |
