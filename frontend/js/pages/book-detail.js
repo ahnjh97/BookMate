@@ -16,12 +16,17 @@ const ratingBookAuthorElement = document.querySelector("#rating-book-author");
 const ratingBookDescriptionElement = document.querySelector("#rating-book-description");
 const ratingEditorElement = document.querySelector("#rating-editor");
 const openRatingFormElement = document.querySelector("#open-rating-form");
+const ratingToastElement = document.querySelector("#rating-toast");
 const closeRatingFormElement = document.querySelector("#close-rating-form");
 const ratingForm = document.querySelector("#rating-form");
 const ratingCommentElement = document.querySelector("#rating-comment");
 const ratingCommentCountElement = document.querySelector("#rating-comment-count");
 const ratingSubmitElement = document.querySelector("#rating-submit");
 const ratingMessageElement = document.querySelector("#rating-message");
+let currentRating = null;
+let isLoggedIn = false;
+let ratingToastTimer = null;
+let ratingToastClearTimer = null;
 
 function getBookId() {
   const value = new URLSearchParams(window.location.search).get("id");
@@ -104,6 +109,7 @@ async function loadBook() {
       throw new Error(result.message || "책 정보를 불러오지 못했습니다.");
     }
     renderBook(result.data);
+    await loadMyRating(bookId);
   } catch (error) {
     const fallbackMessage = "책 정보를 불러오지 못했습니다. DB와 Tomcat 실행 상태를 확인해 주세요.";
     const message = error instanceof TypeError || error instanceof SyntaxError
@@ -111,6 +117,66 @@ async function loadBook() {
       : error.message || fallbackMessage;
     showError(message);
   }
+}
+
+async function loadMyRating(bookId) {
+  try {
+    const response = await fetch(`/bookmate/api/ratings?bookId=${bookId}`);
+    if (response.status === 401) {
+      isLoggedIn = false;
+      currentRating = null;
+      renderRatingState();
+      return;
+    }
+
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "내 평점을 불러오지 못했습니다.");
+    }
+
+    isLoggedIn = true;
+    currentRating = result.data;
+    renderRatingState();
+  } catch (error) {
+    currentRating = null;
+    renderRatingState();
+    console.error(error);
+  }
+}
+
+function showRatingToast(message, state = "error") {
+  window.clearTimeout(ratingToastTimer);
+  window.clearTimeout(ratingToastClearTimer);
+  ratingToastElement.textContent = message;
+  ratingToastElement.dataset.state = state;
+  ratingToastElement.dataset.visible = "true";
+
+  ratingToastTimer = window.setTimeout(() => {
+    delete ratingToastElement.dataset.visible;
+    ratingToastClearTimer = window.setTimeout(() => {
+      ratingToastElement.textContent = "";
+      delete ratingToastElement.dataset.state;
+    }, 300);
+  }, 2200);
+}
+
+function renderRatingState() {
+  const isUpdate = Boolean(currentRating);
+  openRatingFormElement.textContent = isUpdate ? "평점 수정하기" : "평점 등록하기";
+  ratingSubmitElement.textContent = isUpdate ? "평점 수정 완료" : "평점 기록 완료";
+}
+
+function prepareRatingForm() {
+  ratingForm.reset();
+  showRatingMessage("", "");
+
+  if (currentRating) {
+    const scoreInput = ratingForm.querySelector(`input[name="score"][value="${currentRating.score}"]`);
+    if (scoreInput) scoreInput.checked = true;
+    ratingCommentElement.value = currentRating.commentText || "";
+  }
+
+  ratingCommentCountElement.textContent = `${ratingCommentElement.value.length} / 500`;
 }
 
 function showRatingMessage(message, state) {
@@ -125,6 +191,7 @@ function setRatingMode(isRatingMode) {
   ratingEditorElement.hidden = !isRatingMode;
 
   if (isRatingMode) {
+    prepareRatingForm();
     ratingEditorElement.querySelector("h2").focus({ preventScroll: true });
     ratingEditorElement.scrollIntoView({ behavior: "smooth", block: "start" });
   } else {
@@ -146,13 +213,15 @@ async function submitRating(event) {
   }
 
   ratingSubmitElement.disabled = true;
-  showRatingMessage("평점을 등록하는 중입니다.", "loading");
+  const isUpdate = Boolean(currentRating);
+  showRatingMessage(isUpdate ? "평점을 수정하는 중입니다." : "평점을 등록하는 중입니다.", "loading");
 
   try {
     const response = await fetch("/bookmate/api/ratings", {
-      method: "POST",
+      method: isUpdate ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        ratingId: currentRating?.ratingId,
         bookId: Number(bookId),
         score,
         commentText
@@ -161,15 +230,14 @@ async function submitRating(event) {
     const result = await response.json();
 
     if (!response.ok || !result.success) {
-      throw new Error(result.message || "평점을 등록하지 못했습니다.");
+      throw new Error(result.message || `평점을 ${isUpdate ? "수정" : "등록"}하지 못했습니다.`);
     }
 
-    ratingForm.reset();
-    ratingCommentCountElement.textContent = "0 / 500";
-    showRatingMessage(result.message || "평점이 등록되었습니다.", "success");
     await loadBook();
+    setRatingMode(false);
+    showRatingToast(`평점 ${isUpdate ? "수정" : "등록"}이 완료되었습니다.`, "success");
   } catch (error) {
-    const fallbackMessage = "평점을 등록하지 못했습니다. 잠시 후 다시 시도해 주세요.";
+    const fallbackMessage = `평점을 ${isUpdate ? "수정" : "등록"}하지 못했습니다. 잠시 후 다시 시도해 주세요.`;
     const message = error instanceof TypeError || error instanceof SyntaxError
       ? fallbackMessage
       : error.message || fallbackMessage;
@@ -182,7 +250,23 @@ async function submitRating(event) {
 ratingCommentElement.addEventListener("input", () => {
   ratingCommentCountElement.textContent = `${ratingCommentElement.value.length} / 500`;
 });
-openRatingFormElement.addEventListener("click", () => setRatingMode(true));
+openRatingFormElement.addEventListener("click", () => {
+  if (!isLoggedIn) {
+    showRatingToast("로그인이 필요한 기능입니다.");
+    return;
+  }
+  setRatingMode(true);
+});
 closeRatingFormElement.addEventListener("click", () => setRatingMode(false));
 ratingForm.addEventListener("submit", submitRating);
+document.addEventListener("bookmate:auth-changed", () => {
+  isLoggedIn = true;
+  window.clearTimeout(ratingToastTimer);
+  window.clearTimeout(ratingToastClearTimer);
+  ratingToastElement.textContent = "";
+  delete ratingToastElement.dataset.state;
+  delete ratingToastElement.dataset.visible;
+  const bookId = getBookId();
+  if (bookId) loadMyRating(bookId);
+});
 loadBook();

@@ -12,6 +12,16 @@ import java.util.NoSuchElementException;
 public class RatingService {
     private final RatingDAO ratingDAO = new RatingDAO();
 
+    public RatingDTO findMyRating(long bookId, long loginMemberId) {
+        validateBookAndMember(bookId, loginMemberId);
+
+        try (Connection connection = DBUtil.getConnection()) {
+            return ratingDAO.selectRatingByBookAndMember(connection, bookId, loginMemberId);
+        } catch (SQLException exception) {
+            throw new RuntimeException("내 평점을 조회하는 중 오류가 발생했습니다.", exception);
+        }
+    }
+
     public long createRating(RatingDTO rating, long loginMemberId) {
         validateRating(rating, loginMemberId);
         rating.setMemberId(loginMemberId);
@@ -46,6 +56,24 @@ public class RatingService {
         }
     }
 
+    public void updateRating(RatingDTO rating, long loginMemberId) {
+        validateRating(rating, loginMemberId);
+        if (rating.getRatingId() <= 0) {
+            throw new IllegalArgumentException("올바른 평점 번호가 필요합니다.");
+        }
+
+        rating.setMemberId(loginMemberId);
+        rating.setCommentText(normalizeComment(rating.getCommentText()));
+
+        try (Connection connection = DBUtil.getConnection()) {
+            if (ratingDAO.updateRating(connection, rating) == 0) {
+                throw new NoSuchElementException("수정할 평점을 찾을 수 없습니다.");
+            }
+        } catch (SQLException exception) {
+            throw new RuntimeException("평점 수정 중 오류가 발생했습니다.", exception);
+        }
+    }
+
     private void validateRating(RatingDTO rating, long loginMemberId) {
         if (loginMemberId <= 0) {
             throw new IllegalArgumentException("로그인 회원 정보가 올바르지 않습니다.");
@@ -61,6 +89,15 @@ public class RatingService {
         }
         if (rating.getCommentText() != null && rating.getCommentText().trim().length() > 500) {
             throw new IllegalArgumentException("한줄평은 500자 이하로 입력해 주세요.");
+        }
+    }
+
+    private void validateBookAndMember(long bookId, long loginMemberId) {
+        if (bookId <= 0) {
+            throw new IllegalArgumentException("올바른 책 번호가 필요합니다.");
+        }
+        if (loginMemberId <= 0) {
+            throw new IllegalArgumentException("로그인 회원 정보가 올바르지 않습니다.");
         }
     }
 

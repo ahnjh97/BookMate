@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>책 상세 | BookMate</title>
     <link rel="stylesheet" href="/bookmate/assets/css/style.css">
-    <link rel="stylesheet" href="/bookmate/assets/css/book-detail.css?v=20260826-1">
+    <link rel="stylesheet" href="/bookmate/assets/css/book-detail.css?v=20260826-4">
   </head>
   <body>
     <header class="site-header" data-navbar></header>
@@ -50,8 +50,9 @@
                 <span id="book-rating-count"></span>
               </div>
               <button id="open-rating-form" class="button button-primary" type="button">
-                내 평점 기록하기
+                평점 등록하기
               </button>
+              <p id="rating-toast" class="rating-toast" role="status" aria-live="polite"></p>
             </section>
             <section class="book-detail-description" aria-labelledby="book-description-heading">
               <h2 id="book-description-heading">책 소개</h2>
@@ -100,6 +101,6 @@
       </section>
     </main>
     <script src="/bookmate/js/components/navbar.js" defer></script>
-    <script src="/bookmate/js/pages/book-detail.js?v=20260826-1" defer></script>
+    <script src="/bookmate/js/pages/book-detail.js?v=20260826-5" defer></script>
   </body>
 </html>
