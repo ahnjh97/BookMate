@@ -1,0 +1,86 @@
+package controller.post;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import dto.PostDTO;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import service.PostService;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+@WebServlet("/api/posts")
+public class PostListController extends HttpServlet {
+
+    private PostService postService;
+    private Gson gson;
+
+    @Override
+    public void init() throws ServletException {
+        postService = new PostService();
+
+        gson = new GsonBuilder()
+                .setDateFormat("yyyy-MM-dd HH:mm:ss")
+                .create();
+    }
+
+    /*
+     * GET /api/posts
+     *
+     * 게시글 목록 조회
+     */
+    @Override
+    protected void doGet(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws IOException {
+
+        setJsonResponse(response);
+
+        try {
+            List<PostDTO> postList =
+                    postService.getPostList();
+
+            response.setStatus(
+                    HttpServletResponse.SC_OK
+            );
+
+            gson.toJson(
+                    Map.of(
+                            "success", true,
+                            "posts", postList
+                    ),
+                    response.getWriter()
+            );
+
+        } catch (RuntimeException e) {
+            response.setStatus(
+                    HttpServletResponse
+                            .SC_INTERNAL_SERVER_ERROR
+            );
+
+            gson.toJson(
+                    Map.of(
+                            "success", false,
+                            "message",
+                            "게시글 목록을 불러오지 못했습니다."
+                    ),
+                    response.getWriter()
+            );
+        }
+    }
+
+    private void setJsonResponse(
+            HttpServletResponse response
+    ) {
+        response.setContentType(
+                "application/json"
+        );
+        response.setCharacterEncoding("UTF-8");
+    }
+}
