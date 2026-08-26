@@ -164,6 +164,12 @@ button {
   margin-left: auto;
 }
 
+.dev-member-label {
+  color: var(--color-primary);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
 .button {
   display: inline-flex;
   align-items: center;

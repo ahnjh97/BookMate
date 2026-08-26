@@ -139,6 +139,7 @@ try {
     )
 
     $env:BOOKMATE_ENV_DIR = $ProjectRoot
+    $env:BOOKMATE_DEV_MODE = 'true'
     $env:CATALINA_HOME = $TomcatRoot
 
     Write-Host '[3/3] Starting Tomcat in development mode...'

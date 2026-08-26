@@ -110,6 +110,10 @@ scripts\tomcat-dev.bat
 
 개발 모드는 `frontend` 폴더 전체를 Tomcat의 웹 루트에 직접 연결합니다. 기존 폴더뿐 아니라 나중에 새 폴더를 추가해도 별도 설정 없이 실시간 반영 대상에 포함됩니다. HTML, CSS, JavaScript 파일은 저장한 뒤 브라우저를 새로고침하면 재빌드 없이 반영됩니다. Java 파일을 변경한 경우에는 실행 중인 서버를 종료하고 `tomcat-dev.bat`을 다시 실행해야 합니다.
 
+실제 로그인 기능이 완성되기 전까지 개발 모드의 navbar 로그인 버튼은 임시 개발 회원을 생성하거나 조회해 서버 세션에 로그인 상태를 저장합니다. 이 기능은 `tomcat-dev.bat`으로 실행했을 때만 활성화되며 일반 `tomcat-run.bat` 실행에서는 사용할 수 없습니다.
+
+> **임시 인증 제거 필요:** 실제 회원가입·로그인·로그아웃 기능이 병합되면 개발용 인증 API(`controller/dev`, `DevAuthService`, `DevAuthDAO`)와 navbar의 개발용 인증 코드를 삭제해야 합니다. `tomcat-dev.ps1`의 `BOOKMATE_DEV_MODE` 설정도 함께 제거하고, 평점 기능은 실제 로그인에서 생성한 `loginMemberId` 세션을 사용하도록 확인합니다.
+
 커밋 또는 병합 전에는 `scripts\tomcat-run.bat`으로 clean WAR 빌드와 실제 배포 구성을 최종 확인합니다.
 
 ### IntelliJ IDEA Ultimate 또는 평가판
