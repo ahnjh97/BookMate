@@ -56,6 +56,29 @@ button {
 .main-menu {
   display: flex;
   align-items: center;
+  gap: 6px;
+}
+
+.main-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--navbar-height);
+  padding: 0 12px;
+  border: 0;
+  border-radius: 6px;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.main-nav-link:hover,
+.main-nav-link:focus-visible,
+.main-nav-link[aria-current="page"] {
+  color: var(--color-primary);
+  background: var(--color-surface);
+  outline: none;
 }
 
 .dropdown {

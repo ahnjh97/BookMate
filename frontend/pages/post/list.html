@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>커뮤니티 | BookMate</title>
+
+    <link
+            rel="stylesheet"
+            href="/bookmate/assets/css/style.css"
+    >
+    <link
+            rel="stylesheet"
+            href="/bookmate/assets/css/post.css"
+    >
+</head>
+
+<body>
+<header class="site-header">
+    <nav class="navbar" aria-label="주요 메뉴">
+        <a class="logo" href="/bookmate/">
+            BookMate
+        </a>
+
+        <div class="main-menu">
+            <div class="dropdown">
+                <button
+                        class="dropdown-trigger"
+                        type="button"
+                >
+                    도서
+                </button>
+
+                <div class="dropdown-menu">
+                    <a href="/bookmate/pages/book/list.html">
+                        책 목록
+                    </a>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <button
+                        class="dropdown-trigger"
+                        type="button"
+                >
+                    커뮤니티
+                </button>
+
+                <div class="dropdown-menu">
+                    <a
+                            href="/bookmate/pages/post/list.html"
+                            aria-current="page"
+                    >
+                        게시글 목록
+                    </a>
+
+                    <a href="/bookmate/pages/post/create.html">
+                        게시글 작성
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-menu">
+            <a
+                    class="button"
+                    href="/bookmate/pages/auth/login.html"
+            >
+                로그인
+            </a>
+
+            <a
+                    class="button button-primary"
+                    href="/bookmate/pages/auth/signup.html"
+            >
+                회원가입
+            </a>
+        </div>
+    </nav>
+</header>
+
+<<main class="post-page-main">
+    <section class="post-page-content">
+        <!-- 좌측 상단 글쓰기 버튼 -->
+        <div class="post-create-area">
+            <a
+                    class="button button-primary"
+                    href="/bookmate/pages/post/create.html"
+            >
+                게시글 작성
+            </a>
+        </div>
+
+        <div class="post-page-title">
+            <h1>커뮤니티</h1>
+            <p>
+                BookMate 회원들의 게시글을 확인해 보세요.
+            </p>
+        </div>
+
+        <p
+                id="post-status"
+                class="post-status"
+                aria-live="polite"
+        >
+            게시글을 불러오는 중입니다.
+        </p>
+
+        <div class="post-table-wrapper">
+            <table class="post-table">
+                <thead>
+                <tr>
+                    <th class="post-number">번호</th>
+                    <th class="post-category">카테고리</th>
+                    <th>제목</th>
+                    <th class="post-writer">작성자</th>
+                    <th class="post-views">조회수</th>
+                    <th class="post-date">작성일</th>
+                </tr>
+                </thead>
+
+                <tbody id="post-list"></tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<script
+        src="/bookmate/js/pages/post-list.js"
+        defer
+></script>
+</body>
+</html>
