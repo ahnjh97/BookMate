@@ -1,64 +1,96 @@
+/* Figma 커뮤니티 페이지: 본문 폭, 배경, 여백을 맞춥니다. */
 .post-page-main {
     min-height: calc(100vh - var(--navbar-height));
-    padding: 48px 20px 80px;
-    background: var(--color-surface);
+    padding: 40px 24px 80px;
+    background: var(--color-background);
 }
 
 .post-page-content {
-    width: min(1120px, 100%);
+    width: min(1152px, 100%);
     margin: 0 auto;
 }
 
-.post-page-header {
+/* 제목·설명과 글쓰기 버튼을 한 행으로 배치합니다. */
+.post-page-header,
+.post-page-title {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    gap: 20px;
-    margin-bottom: 24px;
+    gap: 24px;
+    margin-bottom: 28px;
 }
 
-.post-page-header h1 {
-    margin: 0 0 6px;
-    font-size: 2rem;
+.post-page-header h1,
+.post-page-title h1 {
+    margin: 0 0 4px;
+    color: var(--color-text);
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1.45;
+    letter-spacing: -0.45px;
 }
 
-.post-page-header p {
+.post-page-header p,
+.post-page-title p {
     margin: 0;
     color: var(--color-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.post-page-header .button {
+    flex: 0 0 auto;
 }
 
 .post-status,
 .post-detail-status {
+    margin: 0 0 12px;
     color: var(--color-muted);
+    font-size: 13px;
 }
 
+.post-status:not(:empty) + .post-table-wrapper {
+    margin-top: 0;
+}
+
+/* Figma의 둥근 테두리형 커뮤니티 목록 표입니다. */
 .post-table-wrapper {
     overflow-x: auto;
     border: 1px solid var(--color-border);
     border-radius: 10px;
-    background: white;
+    background: var(--color-background);
 }
 
 .post-table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
 }
 
 .post-table th,
 .post-table td {
-    padding: 14px 12px;
+    height: 52px;
+    padding: 0 20px;
     border-bottom: 1px solid var(--color-border);
+    color: var(--color-text);
     text-align: center;
+    vertical-align: middle;
 }
 
 .post-table th {
+    height: 46px;
     color: var(--color-muted);
-    background: #fafafa;
-    font-size: 0.88rem;
+    background: var(--color-surface);
+    font-size: 13px;
+    font-weight: 600;
 }
 
 .post-table tbody tr:last-child td {
     border-bottom: 0;
+}
+
+.post-table tbody tr {
+    transition: background-color 0.16s ease;
 }
 
 .post-table tbody tr:hover {
@@ -66,48 +98,89 @@
 }
 
 .post-table .post-title {
-    min-width: 280px;
+    min-width: 360px;
     text-align: left;
 }
 
-.post-title a {
+/* 카테고리 배지와 게시글 제목을 같은 셀에 배치합니다. */
+.post-title-inner {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 10px;
+}
+
+.post-category-badge {
+    flex: 0 0 auto;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: var(--color-muted);
+    background: var(--color-surface);
+    font-size: 12px;
     font-weight: 600;
+    line-height: 1;
+}
+
+.post-title a {
+    overflow: hidden;
+    color: var(--color-text);
+    font-size: 15px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .post-title a:hover,
 .post-title a:focus-visible {
     color: var(--color-primary);
-    text-decoration: underline;
+    text-decoration: none;
     outline: none;
 }
 
 .post-number {
-    width: 80px;
+    width: 82px;
+    color: var(--color-muted);
+    font-size: 14px;
+    font-weight: 700;
 }
 
-.post-category {
-    width: 100px;
+/* 인기글 상위 3개의 순위를 브랜드 색상으로 강조합니다. */
+.post-table tbody tr:nth-child(-n + 3) .post-number {
+    color: var(--color-primary);
 }
 
 .post-writer {
-    width: 140px;
-}
-
-.post-views {
-    width: 90px;
+    width: 150px;
+    color: var(--color-muted);
+    font-size: 13px;
 }
 
 .post-date {
     width: 120px;
+    color: var(--color-muted);
+    font-size: 13px;
 }
 
+.post-views {
+    width: 92px;
+    color: var(--color-muted);
+    font-size: 13px;
+}
+
+.post-create-area {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 24px;
+}
+
+/* 아래 영역은 기존 게시글 상세 페이지 스타일을 유지합니다. */
 .post-detail {
     width: min(900px, 100%);
     margin: 0 auto;
     padding: 32px;
     border: 1px solid var(--color-border);
     border-radius: 12px;
-    background: white;
+    background: var(--color-background);
 }
 
 .post-detail-category span {
@@ -115,7 +188,7 @@
     padding: 5px 10px;
     border-radius: 999px;
     color: var(--color-primary);
-    background: #eaf2ef;
+    background: var(--color-primary-soft);
     font-size: 0.82rem;
     font-weight: 700;
 }
@@ -151,9 +224,22 @@
 }
 
 @media (max-width: 700px) {
-    .post-page-header {
+    .post-page-main {
+        padding: 32px 16px 56px;
+    }
+
+    .post-page-header,
+    .post-page-title {
         align-items: stretch;
         flex-direction: column;
+    }
+
+    .post-page-header .button {
+        align-self: flex-start;
+    }
+
+    .post-table {
+        min-width: 620px;
     }
 
     .post-detail {
@@ -161,8 +247,7 @@
     }
 
     .post-writer,
-    .post-views,
-    .post-date {
+    .post-views {
         display: none;
     }
 }

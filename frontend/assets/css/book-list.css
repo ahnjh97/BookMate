@@ -1,199 +1,320 @@
+/* Figma 책 페이지: 본문 폭과 상하 여백을 디자인 프레임에 맞춥니다. */
 [data-page="books"] {
-  min-height: calc(100vh - var(--navbar-height));
-  padding: 28px 18px 50px;
-  background: var(--color-surface);
+    min-height: calc(100vh - var(--navbar-height));
+    padding: 40px 24px 80px;
+    background: var(--color-background);
 }
 
 [data-page="books"] > section {
-  width: min(1320px, 100%);
-  margin: 0 auto;
+    width: min(1152px, 100%);
+    margin: 0 auto;
 }
 
-[data-page="books"] h1 {
-  margin: 0;
-  font-size: 1.8rem;
+.book-page-heading h1 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 26px;
+    font-weight: 900;
+    line-height: 1.5;
+    letter-spacing: -0.5px;
 }
 
-[data-page="books"] section > p {
-  margin: 4px 0 14px;
-  color: var(--color-muted);
-  font-size: 0.88rem;
+.book-page-heading p {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 14px;
+    line-height: 1.5;
 }
 
+/* 기존 검색 기능을 공통 입력 스타일과 어울리도록 정리합니다. */
 .book-tools {
-  display: grid;
-  grid-template-columns: minmax(180px, 1fr) 150px auto;
-  gap: 8px;
-  margin-bottom: 10px;
+    display: grid;
+    grid-template-columns: minmax(240px, 1fr) 170px auto;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.book-keyword-field {
+    position: relative;
 }
 
 .book-tools input,
 .book-tools select {
-  min-height: 36px;
-  padding: 0 10px;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  background: white;
-  font: inherit;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 13px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    color: var(--color-text);
+    background: var(--color-background);
+    font: inherit;
+    font-size: 14px;
 }
 
-.book-tools > div {
-  position: relative;
+.book-tools input::placeholder {
+    color: var(--color-muted);
 }
 
-.book-tools input {
-  width: 100%;
+.book-tools input:focus,
+.book-tools select:focus {
+    border-color: var(--color-primary);
+    outline: 2px solid rgb(15 163 193 / 18%);
 }
 
 #search-suggestions {
-  position: absolute;
-  z-index: 20;
-  top: calc(100% + 4px);
-  right: 0;
-  left: 0;
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-  border-radius: 7px;
-  background: white;
-  box-shadow: 0 8px 20px rgb(16 24 40 / 12%);
+    position: absolute;
+    z-index: 20;
+    top: calc(100% + 6px);
+    right: 0;
+    left: 0;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-background);
+    box-shadow: 0 8px 20px rgb(16 24 40 / 12%);
 }
 
 #search-suggestions button {
-  display: grid;
-  width: 100%;
-  grid-template-columns: 38px minmax(0, 1fr) auto;
-  gap: 8px;
-  padding: 9px 10px;
-  border: 0;
-  border-bottom: 1px solid var(--color-border);
-  background: white;
-  text-align: left;
-  cursor: pointer;
+    display: grid;
+    width: 100%;
+    grid-template-columns: 38px minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 0;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-background);
+    text-align: left;
+    cursor: pointer;
 }
 
 #search-suggestions button:last-child {
-  border-bottom: 0;
+    border-bottom: 0;
 }
 
 #search-suggestions button:hover,
 #search-suggestions button:focus-visible {
-  background: var(--color-surface);
-  outline: none;
+    background: var(--color-primary-soft);
+    outline: none;
 }
 
 #search-suggestions span {
-  color: var(--color-primary);
-  font-size: 0.75rem;
-  font-weight: 700;
+    color: var(--color-primary);
+    font-size: 12px;
+    font-weight: 700;
 }
 
 #search-suggestions strong,
 #search-suggestions small {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 #search-suggestions small {
-  color: var(--color-muted);
+    color: var(--color-muted);
 }
 
+/* Figma의 pill 형태 장르 필터와 선택 상태입니다. */
+.book-category-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 32px 0;
+}
+
+.book-category-tabs button {
+    min-height: 35px;
+    padding: 0 15px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    color: var(--color-muted);
+    background: var(--color-background);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.16s ease, color 0.16s ease, background-color 0.16s ease;
+}
+
+.book-category-tabs button:hover,
+.book-category-tabs button:focus-visible {
+    border-color: var(--color-text);
+    color: var(--color-text);
+    outline: none;
+}
+
+.book-category-tabs button.is-active {
+    border-color: var(--color-text);
+    color: var(--color-background);
+    background: var(--color-text);
+}
+
+#book-status {
+    margin: 0 0 12px;
+    color: var(--color-muted);
+    font-size: 13px;
+}
+
+/* 표지 중심의 5열 책 카드와 반응형 그리드입니다. */
 .book-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(230px, 100%), 1fr));
-  gap: 9px;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 32px 20px;
 }
 
 .book-card {
-  display: grid;
-  grid-template-columns: 62px minmax(0, 1fr);
-  gap: 10px;
-  min-height: 112px;
-  padding: 9px;
-  border: 1px solid var(--color-border);
-  border-radius: 7px;
-  background: white;
-  box-shadow: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    display: block;
+    min-width: 0;
+    color: var(--color-text);
+    background: transparent;
 }
 
-.book-card figure {
-  display: flex;
-  width: 62px;
-  height: 93px;
-  margin: 0;
-  overflow: hidden;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  color: var(--color-muted);
-  background: #e9ecef;
-  text-align: center;
-  font-size: 0.68rem;
-  font-weight: 700;
+/* 책 표지, 순위 배지, hover 피드백을 구성합니다. */
+.book-card-cover {
+    position: relative;
+    display: flex;
+    width: 100%;
+    aspect-ratio: 214.4 / 320.6;
+    margin: 0;
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    color: var(--color-muted);
+    background: var(--color-surface);
+    box-shadow: 0 2px 8px rgb(16 24 40 / 7%);
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
-.book-card:hover,
+.book-card:hover .book-card-cover,
+.book-card:focus-visible .book-card-cover {
+    border-color: var(--color-primary);
+    box-shadow: 0 10px 24px rgb(16 24 40 / 13%);
+    transform: translateY(-3px);
+}
+
 .book-card:focus-visible {
-  border-color: var(--color-primary);
-  box-shadow: 0 6px 16px rgb(16 24 40 / 10%);
-  outline: none;
-  transform: translateY(-2px);
+    outline: none;
 }
 
-.book-card:hover h2,
-.book-card:focus-visible h2 {
-  color: var(--color-primary);
+.book-card-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.book-card img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.book-rank {
+    position: absolute;
+    z-index: 1;
+    top: 10px;
+    left: 10px;
+    display: grid;
+    width: 24px;
+    height: 24px;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--color-background);
+    background: var(--color-text);
+    box-shadow: 0 2px 5px rgb(0 0 0 / 18%);
+    font-size: 12px;
+    font-weight: 800;
 }
 
-.book-card h2 {
-  display: -webkit-box;
-  margin: 0 0 2px;
-  overflow: hidden;
-  font-size: 0.98rem;
-  line-height: 1.25;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+.book-card-content {
+    padding-top: 12px;
 }
 
-.book-card p {
-  margin: 0;
-  overflow: hidden;
-  color: var(--color-muted);
-  font-size: 0.75rem;
-  line-height: 1.35;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.book-genre {
+    display: inline-block;
+    margin-bottom: 7px;
+    padding: 4px 7px;
+    border-radius: 4px;
+    color: var(--color-muted);
+    background: var(--color-surface);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
 }
 
-.book-card p:first-of-type {
-  color: var(--color-primary);
-  font-weight: 700;
+.book-title {
+    display: -webkit-box;
+    min-height: 44px;
+    margin: 0 0 2px;
+    overflow: hidden;
+    color: var(--color-text);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.45;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
 }
 
-.book-card p:nth-of-type(3) {
-  display: -webkit-box;
-  margin-top: 4px;
-  white-space: normal;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+.book-author {
+    margin: 0;
+    overflow: hidden;
+    color: var(--color-muted);
+    font-size: 13px;
+    line-height: 1.5;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.book-card strong {
-  display: block;
-  margin-top: 5px;
-  color: #9a6700;
-  font-size: 0.76rem;
+.book-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 7px;
+    color: var(--color-text);
+    font-size: 12px;
 }
 
-@media (max-width: 560px) {
-  .book-tools {
-    grid-template-columns: 1fr;
-  }
+.book-rating-star {
+    color: var(--color-primary);
+}
+
+.book-rating-score {
+    font-weight: 700;
+}
+
+.book-rating-count {
+    color: var(--color-muted);
+}
+
+@media (max-width: 1000px) {
+    .book-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    [data-page="books"] {
+        padding: 32px 16px 56px;
+    }
+
+    .book-tools {
+        grid-template-columns: 1fr;
+    }
+
+    .book-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 520px) {
+    .book-category-tabs {
+        margin: 24px 0;
+    }
+
+    .book-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 26px 14px;
+    }
+
+    .book-title {
+        font-size: 14px;
+    }
 }
