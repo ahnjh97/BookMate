@@ -37,9 +37,7 @@ function renderSummary(summary) {
 
 function renderHomeBooks(books) {
   const mosaic = document.querySelector("#home-book-mosaic");
-  const featured = document.querySelector("#home-featured-books");
   mosaic.replaceChildren();
-  featured.replaceChildren();
 
   books.slice(0, 6).forEach((book, index) => {
     const link = document.createElement("a");
@@ -50,22 +48,6 @@ function renderHomeBooks(books) {
     mosaic.append(link);
   });
 
-  books.slice(0, 5).forEach((book, index) => {
-    const card = document.createElement("article");
-    card.className = "featured-book-card";
-    const link = document.createElement("a");
-    link.href = `/pages/book/detail.html?id=${encodeURIComponent(book.bookId)}`;
-    const cover = document.createElement("div");
-    cover.className = `featured-book-cover c${index + 1}`;
-    appendCover(cover, book);
-    const title = document.createElement("h3");
-    title.textContent = book.title;
-    const author = document.createElement("p");
-    author.textContent = book.authorName;
-    link.append(cover, title, author);
-    card.append(link);
-    featured.append(card);
-  });
 }
 
 function appendCover(container, book) {
