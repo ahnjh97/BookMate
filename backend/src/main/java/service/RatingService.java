@@ -101,6 +101,23 @@ public class RatingService {
         }
     }
 
+    public void deleteRating(long ratingId, long bookId, long loginMemberId) {
+        validateBookAndMember(bookId, loginMemberId);
+        if (ratingId <= 0) {
+            throw new IllegalArgumentException("올바른 평점 번호가 필요합니다.");
+        }
+
+        try (Connection connection = DBUtil.getConnection()) {
+            if (ratingDAO.deleteRating(connection, ratingId, bookId, loginMemberId) == 0) {
+                throw new NoSuchElementException("삭제할 평점을 찾을 수 없습니다.");
+            }
+        } catch (NoSuchElementException exception) {
+            throw exception;
+        } catch (SQLException exception) {
+            throw new RuntimeException("평점 삭제 중 오류가 발생했습니다.", exception);
+        }
+    }
+
     private void validateRating(RatingDTO rating, long loginMemberId) {
         if (loginMemberId <= 0) {
             throw new IllegalArgumentException("로그인 회원 정보가 올바르지 않습니다.");

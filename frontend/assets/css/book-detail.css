@@ -401,9 +401,30 @@
 .reader-ratings-status[data-state="error"] { color: #b42318; }
 .reader-ratings-list { display: grid; gap: 10px; margin-top: 18px; }
 .reader-rating-card { padding: 16px 18px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface); }
+.reader-rating-card.is-my-rating { border-color: rgb(53 104 89 / 35%); }
+.reader-rating-card.is-deleted { opacity: .62; }
 .reader-rating-card-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
 .reader-rating-card-heading strong { color: var(--color-primary); }
+.reader-rating-card-meta { display: flex; position: relative; align-items: center; gap: 9px; }
 .reader-rating-score { color: #9a6700; font-size: .92rem; font-weight: 700; letter-spacing: .02em; }
+.reader-rating-delete-control { display: inline-flex; position: relative; align-items: center; }
+.reader-rating-delete-button,
+.reader-rating-delete-confirmation button { padding: 3px 7px; border: 1px solid transparent; border-radius: 5px; background: transparent; cursor: pointer; font: inherit; font-size: .75rem; font-weight: 700; }
+.reader-rating-delete-button { color: #b42318; }
+.reader-rating-delete-button:hover,
+.reader-rating-delete-button:focus-visible { border-color: #fecdca; background: #fffbfa; outline: none; }
+.reader-rating-delete-confirmation { display: inline-flex; align-items: center; gap: 5px; color: #475467; font-size: .78rem; white-space: nowrap; }
+.reader-rating-delete-confirmation[hidden] { display: none; }
+.reader-rating-confirm-button { color: #fff; background: #b42318 !important; }
+.reader-rating-cancel-button { color: #344054; border-color: var(--color-border) !important; background: var(--color-background) !important; }
+.reader-rating-delete-confirmation button:focus-visible { outline: 2px solid rgb(53 104 89 / 24%); outline-offset: 1px; }
+.reader-rating-delete-confirmation button:disabled,
+.reader-rating-delete-button:disabled { cursor: wait; opacity: .58; }
+.reader-rating-delete-toast { position: absolute; z-index: 5; top: calc(100% + 7px); right: 0; width: max-content; max-width: min(280px, 75vw); margin: 0 !important; padding: 8px 10px; border: 1px solid var(--color-border); border-radius: 7px; color: #344054 !important; background: rgb(255 255 255 / 98%); box-shadow: 0 6px 18px rgb(16 24 40 / 14%); font-size: .78rem !important; font-style: normal !important; font-weight: 700; opacity: 0; pointer-events: none; transform: translateY(-4px); transition: opacity .2s ease, transform .2s ease; }
+.reader-rating-delete-toast[data-visible="true"] { opacity: 1; transform: translateY(0); }
+.reader-rating-delete-toast[data-state="success"] { color: var(--color-primary) !important; border-color: rgb(53 104 89 / 25%); }
+.reader-rating-delete-toast[data-state="error"] { color: #b42318 !important; border-color: #fecdca; }
+.reader-rating-delete-toast[data-state="loading"] { color: var(--color-muted) !important; }
 .reader-rating-card p { margin: 10px 0 0; color: #344054; overflow-wrap: anywhere; }
 .reader-rating-card .reader-rating-empty-comment { color: var(--color-muted); font-style: italic; }
 .reader-ratings-pagination { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; margin-top: 20px; }
@@ -455,6 +476,9 @@
   .rating-editor-heading {
     flex-direction: column;
   }
+
+  .reader-rating-card-heading { align-items: flex-start; }
+  .reader-rating-card-meta { align-items: flex-end; flex-direction: column; }
 }
 
 @media (max-width: 420px) {
