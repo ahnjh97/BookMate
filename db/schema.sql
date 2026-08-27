@@ -12,8 +12,8 @@ BEGIN
         EXECUTE IMMEDIATE 'DROP TABLE ' || t.table_name || ' CASCADE CONSTRAINTS PURGE';
     END LOOP;
 END;
+/
 /*END*/
-
 BEGIN
     FOR s IN (
         SELECT sequence_name
@@ -28,6 +28,7 @@ BEGIN
         EXECUTE IMMEDIATE 'DROP SEQUENCE ' || s.sequence_name;
     END LOOP;
 END;
+/
 /*END*/
 
 CREATE SEQUENCE SEQ_MEMBER START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;

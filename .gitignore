@@ -17,6 +17,8 @@ target/
 *.class
 .tools/
 
+dependency-reduced-pom.xml
+
 # 프론트엔드
 node_modules/
 dist/

@@ -28,6 +28,7 @@ public class AllChecks {
 //            new ValidationCheck(),
 //            new FilterRoutingCheck(),
 //            new DtoCheck()
+            new ServerHealthCheck()
     );
 
     public static void main(String[] args) {

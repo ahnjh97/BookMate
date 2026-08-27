@@ -1,7 +1,7 @@
 # 여러 컨테이너를 한 번에 묶어서 매번 실행하는 orchestration 파일 → 루트에 위치.
 # 각 서비스가 "어떻게 빌드되는지"는 해당 폴더 Dockerfile이 담당
 # 지금은 db 서비스 하나뿐. frontend/backend에 Dockerfile 생기면 아래 주석 풀고 서비스만 추가.
-
+name: book-mate
 services:
   oracle-db:
     image: gvenzl/oracle-free:23-slim-faststart  # arm64 네이티브 지원 (Mac 칩 무관)
@@ -17,7 +17,7 @@ services:
     volumes:
       - oracle-data:/opt/oracle/oradata
       - ./db/schema.sql:/container-entrypoint-initdb.d/schema.sql  # 최초생성 시 테이블 초기화
-      # - ./db/seed.sql:/container-entrypoint-initdb.d/seed.sql
+      - ./db/seed.sql:/container-entrypoint-initdb.d/seed.sql
     healthcheck:
       test: ["CMD", "healthcheck.sh"]
       interval: 10s

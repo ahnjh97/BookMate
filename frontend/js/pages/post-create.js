@@ -13,7 +13,7 @@ form.addEventListener("submit", async (event) => {
     message.textContent = "등록 중입니다.";
 
     try {
-        const response = await fetch("/bookmate/api/posts/create", {
+        const response = await fetch("/api/posts/create", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json;charset=UTF-8"
@@ -27,7 +27,7 @@ form.addEventListener("submit", async (event) => {
             alert("로그인이 필요합니다.");
 
             location.href =
-                "/bookmate/pages/auth/login.html";
+                "/pages/auth/login.html";
 
             return;
         }
@@ -39,7 +39,7 @@ form.addEventListener("submit", async (event) => {
         }
 
         location.href =
-            `/bookmate/pages/post/detail.html?postId=${result.postId}`;
+            `/pages/post/detail.html?postId=${result.postId}`;
 
     } catch (error) {
         console.error(error);

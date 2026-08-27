@@ -103,7 +103,7 @@ async function loadBook() {
   }
 
   try {
-    const response = await fetch(`/bookmate/api/books/${bookId}`);
+    const response = await fetch(`/api/books/${bookId}`);
     const result = await response.json();
     if (!response.ok || !result.success) {
       throw new Error(result.message || "책 정보를 불러오지 못했습니다.");
@@ -121,7 +121,7 @@ async function loadBook() {
 
 async function loadMyRating(bookId) {
   try {
-    const response = await fetch(`/bookmate/api/ratings?bookId=${bookId}`);
+    const response = await fetch(`/api/ratings?bookId=${bookId}`);
     if (response.status === 401) {
       isLoggedIn = false;
       currentRating = null;
@@ -217,7 +217,7 @@ async function submitRating(event) {
   showRatingMessage(isUpdate ? "평점을 수정하는 중입니다." : "평점을 등록하는 중입니다.", "loading");
 
   try {
-    const response = await fetch("/bookmate/api/ratings", {
+    const response = await fetch("/api/ratings", {
       method: isUpdate ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

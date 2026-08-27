@@ -38,7 +38,7 @@ async function loadSuggestions(keyword) {
   suggestionRequest = new AbortController();
 
   try {
-    const response = await fetch(`/bookmate/api/search/suggestions?q=${encodeURIComponent(keyword)}`, {
+    const response = await fetch(`/api/search/suggestions?q=${encodeURIComponent(keyword)}`, {
       signal: suggestionRequest.signal
     });
     const result = await response.json();
@@ -101,7 +101,7 @@ async function loadBooks() {
 
   try {
     const query = params.toString();
-    const response = await fetch(`/bookmate/api/books${query ? `?${query}` : ""}`);
+    const response = await fetch(`/api/books${query ? `?${query}` : ""}`);
     const result = await response.json();
     if (!response.ok || !result.success) throw new Error(result.message);
     renderBooks(result.data.books);
@@ -117,7 +117,7 @@ function renderBooks(books) {
   }
 
   books.forEach((book) => {
-    const detailUrl = `/bookmate/pages/book/detail.html?id=${encodeURIComponent(book.bookId)}`;
+    const detailUrl = `/pages/book/detail.html?id=${encodeURIComponent(book.bookId)}`;
     const card = document.createElement("a");
     card.className = "book-card";
     card.href = detailUrl;
