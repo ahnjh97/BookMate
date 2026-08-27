@@ -173,6 +173,54 @@
     margin-bottom: 24px;
 }
 
+/* 게시글 작성 화면 */
+#post-create-form {
+    display: grid;
+    gap: 18px;
+    text-align: left;
+}
+
+#post-create-form > div {
+    display: grid;
+    gap: 8px;
+}
+
+#post-create-form label {
+    color: var(--color-text);
+    font-weight: 700;
+}
+
+#post-create-form input,
+#post-create-form select,
+#post-create-form textarea {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    color: var(--color-text);
+    background: var(--color-background);
+    font: inherit;
+}
+
+#post-create-form textarea {
+    min-height: 240px;
+    resize: vertical;
+}
+
+#post-create-form input:focus,
+#post-create-form select:focus,
+#post-create-form textarea:focus {
+    border-color: var(--color-primary);
+    outline: 2px solid rgb(15 163 193 / 18%);
+}
+
+#post-create-form > div:last-child {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
 /* 아래 영역은 기존 게시글 상세 페이지 스타일을 유지합니다. */
 .post-detail {
     width: min(900px, 100%);

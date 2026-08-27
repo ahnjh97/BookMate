@@ -12,18 +12,7 @@
   <link rel="stylesheet" href="/assets/css/home.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="container header-inner">
-      <a class="brand" href="/" aria-label="BOOKMATE 홈"><span class="brand-mark" aria-hidden="true">◈</span><strong>BOOKMATE</strong></a>
-      <nav class="main-nav" aria-label="주요 메뉴">
-        <a class="active" aria-current="page" href="/">홈</a><a href="/pages/book/list.html">책</a><a href="#books">랭킹</a><a href="#taste">책 취향</a><a href="/pages/post/list.html">커뮤니티</a>
-      </nav>
-      <div class="account-actions">
-        <a class="icon-button" href="/pages/book/list.html" aria-label="책 검색"><span aria-hidden="true">⌕</span></a>
-        <a class="login" href="/pages/auth/login.html">로그인</a><a class="button button-small button-primary" href="/pages/auth/signup.html">회원가입</a>
-      </div>
-    </div>
-  </header>
+  <header class="site-header" data-navbar></header>
 
   <main>
     <section class="hero section-bordered">
@@ -89,5 +78,6 @@
     </div>
     <div class="container copyright"><span>© 2026 BOOKMATE Inc. All rights reserved.</span><span>Designed for readers.</span></div>
   </footer>
+  <script src="/js/components/navbar.js" defer></script>
 </body>
 </html>
