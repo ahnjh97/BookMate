@@ -60,7 +60,7 @@ public class BookDAO {
                             resultSet.getLong("result_id"),
                             resultSet.getString("result_name"),
                             resultSet.getString("result_detail"),
-                            resultSet.getString("image_url")
+                            normalizeImageUrl(resultSet.getString("image_url"))
                     ));
                 }
             }
@@ -154,7 +154,7 @@ public class BookDAO {
         book.setPublisher(resultSet.getString("publisher"));
         book.setPublishedDate(resultSet.getDate("published_date"));
         book.setDescription(resultSet.getString("description"));
-        book.setImageUrl(resultSet.getString("image_url"));
+        book.setImageUrl(normalizeImageUrl(resultSet.getString("image_url")));
         book.setStatus(resultSet.getString("status"));
         book.setAverageRating(resultSet.getDouble("average_rating"));
         book.setRatingCount(resultSet.getInt("rating_count"));
@@ -166,5 +166,12 @@ public class BookDAO {
             return null;
         }
         return value.trim();
+    }
+
+    private String normalizeImageUrl(String imageUrl) {
+        if (imageUrl != null && imageUrl.startsWith("/bookmate/")) {
+            return imageUrl.substring("/bookmate".length());
+        }
+        return imageUrl;
     }
 }

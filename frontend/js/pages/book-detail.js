@@ -23,8 +23,14 @@ const ratingCommentElement = document.querySelector("#rating-comment");
 const ratingCommentCountElement = document.querySelector("#rating-comment-count");
 const ratingSubmitElement = document.querySelector("#rating-submit");
 const ratingMessageElement = document.querySelector("#rating-message");
+const readerRatingsElement = document.querySelector("#reader-ratings");
+const readerRatingsSummaryElement = document.querySelector("#reader-ratings-summary");
+const readerRatingsStatusElement = document.querySelector("#reader-ratings-status");
+const readerRatingsListElement = document.querySelector("#reader-ratings-list");
+const readerRatingsPaginationElement = document.querySelector("#reader-ratings-pagination");
 let currentRating = null;
 let isLoggedIn = false;
+let currentRatingsPage = 1;
 let ratingToastTimer = null;
 let ratingToastClearTimer = null;
 
@@ -109,7 +115,7 @@ async function loadBook() {
       throw new Error(result.message || "책 정보를 불러오지 못했습니다.");
     }
     renderBook(result.data);
-    await loadMyRating(bookId);
+    await Promise.all([loadMyRating(bookId), loadPublicRatings(bookId, currentRatingsPage)]);
   } catch (error) {
     const fallbackMessage = "책 정보를 불러오지 못했습니다. DB와 Tomcat 실행 상태를 확인해 주세요.";
     const message = error instanceof TypeError || error instanceof SyntaxError
@@ -117,6 +123,88 @@ async function loadBook() {
       : error.message || fallbackMessage;
     showError(message);
   }
+}
+
+async function loadPublicRatings(bookId, page = 1) {
+  readerRatingsStatusElement.textContent = "평가를 불러오는 중입니다.";
+  try {
+    const response = await fetch(`/api/ratings/public?bookId=${bookId}&page=${page}`);
+    const result = await response.json();
+    if (!response.ok || !result.success) throw new Error(result.message || "독자 평가를 불러오지 못했습니다.");
+    currentRatingsPage = result.data.page;
+    renderPublicRatings(result.data);
+  } catch (error) {
+    readerRatingsListElement.replaceChildren();
+    readerRatingsPaginationElement.replaceChildren();
+    readerRatingsStatusElement.textContent = error.message || "독자 평가를 불러오지 못했습니다.";
+    readerRatingsStatusElement.dataset.state = "error";
+  }
+}
+
+function renderPublicRatings(data) {
+  readerRatingsSummaryElement.textContent = `총 ${data.totalCount}개의 평가`;
+  readerRatingsStatusElement.textContent = "";
+  delete readerRatingsStatusElement.dataset.state;
+  readerRatingsListElement.replaceChildren();
+
+  if (data.ratings.length === 0) {
+    readerRatingsStatusElement.textContent = "아직 등록된 평가가 없습니다. 첫 평가를 남겨보세요.";
+  } else {
+    data.ratings.forEach((rating) => readerRatingsListElement.append(createRatingCard(rating)));
+  }
+  renderRatingsPagination(data.page, data.totalPages);
+}
+
+function createRatingCard(rating) {
+  const article = document.createElement("article");
+  article.className = "reader-rating-card";
+  const heading = document.createElement("div");
+  heading.className = "reader-rating-card-heading";
+  const nickname = document.createElement("strong");
+  nickname.textContent = rating.nickname;
+  const score = document.createElement("span");
+  score.className = "reader-rating-score";
+  score.setAttribute("aria-label", `5점 만점에 ${rating.score}점`);
+  score.textContent = `${"★".repeat(rating.score)}${"☆".repeat(5 - rating.score)} ${rating.score}.0`;
+  const comment = document.createElement("p");
+  comment.textContent = rating.commentText || "한줄평이 없습니다.";
+  if (!rating.commentText) comment.className = "reader-rating-empty-comment";
+  heading.append(nickname, score);
+  article.append(heading, comment);
+  return article;
+}
+
+function renderRatingsPagination(page, totalPages) {
+  readerRatingsPaginationElement.replaceChildren();
+  if (totalPages <= 1) return;
+
+  readerRatingsPaginationElement.append(createPageButton("이전", page - 1, page === 1));
+  const start = Math.max(1, page - 2);
+  const end = Math.min(totalPages, start + 4);
+  for (let number = Math.max(1, end - 4); number <= end; number += 1) {
+    const button = createPageButton(String(number), number, false);
+    if (number === page) {
+      button.setAttribute("aria-current", "page");
+      button.disabled = true;
+    }
+    readerRatingsPaginationElement.append(button);
+  }
+  readerRatingsPaginationElement.append(createPageButton("다음", page + 1, page === totalPages));
+}
+
+function createPageButton(label, page, disabled) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "reader-rating-page-button";
+  button.textContent = label;
+  button.disabled = disabled;
+  button.addEventListener("click", async () => {
+    const bookId = getBookId();
+    if (!bookId) return;
+    await loadPublicRatings(bookId, page);
+    readerRatingsElement.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  return button;
 }
 
 async function loadMyRating(bookId) {
@@ -189,6 +277,7 @@ function setRatingMode(isRatingMode) {
   detailContentElement.hidden = isRatingMode;
   ratingBookContextElement.hidden = !isRatingMode;
   ratingEditorElement.hidden = !isRatingMode;
+  readerRatingsElement.hidden = isRatingMode;
 
   if (isRatingMode) {
     prepareRatingForm();
@@ -233,6 +322,7 @@ async function submitRating(event) {
       throw new Error(result.message || `평점을 ${isUpdate ? "수정" : "등록"}하지 못했습니다.`);
     }
 
+    currentRatingsPage = 1;
     await loadBook();
     setRatingMode(false);
     showRatingToast(`평점 ${isUpdate ? "수정" : "등록"}이 완료되었습니다.`, "success");
@@ -259,14 +349,4 @@ openRatingFormElement.addEventListener("click", () => {
 });
 closeRatingFormElement.addEventListener("click", () => setRatingMode(false));
 ratingForm.addEventListener("submit", submitRating);
-document.addEventListener("bookmate:auth-changed", () => {
-  isLoggedIn = true;
-  window.clearTimeout(ratingToastTimer);
-  window.clearTimeout(ratingToastClearTimer);
-  ratingToastElement.textContent = "";
-  delete ratingToastElement.dataset.state;
-  delete ratingToastElement.dataset.visible;
-  const bookId = getBookId();
-  if (bookId) loadMyRating(bookId);
-});
 loadBook();

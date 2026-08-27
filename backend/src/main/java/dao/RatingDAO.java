@@ -6,6 +6,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RatingDAO {
 
@@ -119,6 +121,48 @@ public class RatingDAO {
             statement.setLong(5, rating.getMemberId());
             return statement.executeUpdate();
         }
+    }
+
+    public int countRatingsByBook(Connection connection, long bookId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM RATING WHERE book_id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, bookId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                resultSet.next();
+                return resultSet.getInt(1);
+            }
+        }
+    }
+
+    public List<RatingDTO> selectRatingsByBook(
+            Connection connection,
+            long bookId,
+            int offset,
+            int pageSize
+    ) throws SQLException {
+        String sql = """
+                SELECT R.rating_id, R.book_id, R.member_id, M.nickname,
+                       R.score, R.comment_text
+                  FROM RATING R
+                  JOIN MEMBER M ON M.member_id = R.member_id
+                 WHERE R.book_id = ?
+                 ORDER BY R.rating_id DESC
+                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+                """;
+        List<RatingDTO> ratings = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, bookId);
+            statement.setInt(2, offset);
+            statement.setInt(3, pageSize);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    RatingDTO rating = mapRating(resultSet);
+                    rating.setNickname(resultSet.getString("nickname"));
+                    ratings.add(rating);
+                }
+            }
+        }
+        return ratings;
     }
 
     private RatingDTO mapRating(ResultSet resultSet) throws SQLException {

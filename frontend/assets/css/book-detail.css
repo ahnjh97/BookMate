@@ -387,6 +387,31 @@
   white-space: pre-line;
 }
 
+.reader-ratings {
+  grid-column: 1 / -1;
+  padding-top: 28px;
+  border-top: 1px solid var(--color-border);
+}
+
+.reader-ratings[hidden] { display: none; }
+.reader-ratings-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+.reader-ratings-heading h2 { margin: 0; font-size: 1.35rem; }
+.reader-ratings-heading p { margin: 4px 0 0; color: var(--color-muted); font-size: .9rem; }
+.reader-ratings-status { margin: 18px 0 0; color: var(--color-muted); }
+.reader-ratings-status[data-state="error"] { color: #b42318; }
+.reader-ratings-list { display: grid; gap: 10px; margin-top: 18px; }
+.reader-rating-card { padding: 16px 18px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface); }
+.reader-rating-card-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.reader-rating-card-heading strong { color: var(--color-primary); }
+.reader-rating-score { color: #9a6700; font-size: .92rem; font-weight: 700; letter-spacing: .02em; }
+.reader-rating-card p { margin: 10px 0 0; color: #344054; overflow-wrap: anywhere; }
+.reader-rating-card .reader-rating-empty-comment { color: var(--color-muted); font-style: italic; }
+.reader-ratings-pagination { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; margin-top: 20px; }
+.reader-rating-page-button { min-width: 38px; min-height: 38px; padding: 0 11px; border: 1px solid var(--color-border); border-radius: 7px; color: var(--color-text); background: var(--color-background); cursor: pointer; font: inherit; font-size: .88rem; font-weight: 700; }
+.reader-rating-page-button:hover:not(:disabled), .reader-rating-page-button:focus-visible { border-color: var(--color-primary); color: var(--color-primary); outline: none; }
+.reader-rating-page-button[aria-current="page"] { border-color: var(--color-primary); color: #fff; background: var(--color-primary); }
+.reader-rating-page-button:disabled { cursor: default; opacity: .55; }
+
 @media (max-width: 700px) {
   .book-detail {
     grid-template-columns: 1fr;
