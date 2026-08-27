@@ -96,6 +96,29 @@ public class RatingController extends HttpServlet {
         }
     }
 
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        setJsonResponse(response);
+        Long loginMemberId = requireLoginMemberId(request, response);
+        if (loginMemberId == null) return;
+
+        try {
+            long ratingId = parsePositiveId(request.getParameter("ratingId"), "올바른 평점 번호가 필요합니다.");
+            long bookId = parseBookId(request.getParameter("bookId"));
+            ratingService.deleteRating(ratingId, bookId, loginMemberId);
+            gson.toJson(
+                    Map.of("success", true, "message", "평점이 삭제되었습니다."),
+                    response.getWriter()
+            );
+        } catch (IllegalArgumentException exception) {
+            sendError(response, HttpServletResponse.SC_BAD_REQUEST, exception.getMessage());
+        } catch (NoSuchElementException exception) {
+            sendError(response, HttpServletResponse.SC_NOT_FOUND, exception.getMessage());
+        } catch (RuntimeException exception) {
+            sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "평점 삭제 중 오류가 발생했습니다.");
+        }
+    }
+
     private RatingDTO readRating(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             request.setCharacterEncoding("UTF-8");
@@ -107,10 +130,16 @@ public class RatingController extends HttpServlet {
     }
 
     private long parseBookId(String value) {
+        return parsePositiveId(value, "올바른 책 번호가 필요합니다.");
+    }
+
+    private long parsePositiveId(String value, String message) {
         if (value == null || !value.matches("\\d+")) {
-            throw new IllegalArgumentException("올바른 책 번호가 필요합니다.");
+            throw new IllegalArgumentException(message);
         }
-        return Long.parseLong(value);
+        long id = Long.parseLong(value);
+        if (id <= 0) throw new IllegalArgumentException(message);
+        return id;
     }
 
     private Long requireLoginMemberId(HttpServletRequest request, HttpServletResponse response) throws IOException {

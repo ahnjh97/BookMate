@@ -115,7 +115,8 @@ async function loadBook() {
       throw new Error(result.message || "책 정보를 불러오지 못했습니다.");
     }
     renderBook(result.data);
-    await Promise.all([loadMyRating(bookId), loadPublicRatings(bookId, currentRatingsPage)]);
+    await loadMyRating(bookId);
+    await loadPublicRatings(bookId, currentRatingsPage);
   } catch (error) {
     const fallbackMessage = "책 정보를 불러오지 못했습니다. DB와 Tomcat 실행 상태를 확인해 주세요.";
     const message = error instanceof TypeError || error instanceof SyntaxError
@@ -169,9 +170,117 @@ function createRatingCard(rating) {
   const comment = document.createElement("p");
   comment.textContent = rating.commentText || "한줄평이 없습니다.";
   if (!rating.commentText) comment.className = "reader-rating-empty-comment";
-  heading.append(nickname, score);
+  const headingMeta = document.createElement("div");
+  headingMeta.className = "reader-rating-card-meta";
+  headingMeta.append(score);
+
+  if (currentRating?.ratingId === rating.ratingId) {
+    headingMeta.append(createRatingDeleteControl(rating, article));
+    article.classList.add("is-my-rating");
+  }
+
+  heading.append(nickname, headingMeta);
   article.append(heading, comment);
   return article;
+}
+
+function createRatingDeleteControl(rating, cardElement) {
+  const control = document.createElement("div");
+  control.className = "reader-rating-delete-control";
+
+  const deleteButton = document.createElement("button");
+  deleteButton.type = "button";
+  deleteButton.className = "reader-rating-delete-button";
+  deleteButton.textContent = "삭제";
+  deleteButton.setAttribute("aria-expanded", "false");
+
+  const confirmation = document.createElement("div");
+  confirmation.className = "reader-rating-delete-confirmation";
+  confirmation.hidden = true;
+  confirmation.setAttribute("role", "group");
+  confirmation.setAttribute("aria-label", "평점 삭제 확인");
+
+  const question = document.createElement("span");
+  question.textContent = "삭제할까요?";
+  const confirmButton = document.createElement("button");
+  confirmButton.type = "button";
+  confirmButton.className = "reader-rating-confirm-button";
+  confirmButton.textContent = "확인";
+  const cancelButton = document.createElement("button");
+  cancelButton.type = "button";
+  cancelButton.className = "reader-rating-cancel-button";
+  cancelButton.textContent = "취소";
+  confirmation.append(question, confirmButton, cancelButton);
+
+  const toast = document.createElement("p");
+  toast.className = "reader-rating-delete-toast";
+  toast.setAttribute("role", "status");
+  toast.setAttribute("aria-live", "polite");
+
+  deleteButton.addEventListener("click", () => {
+    confirmation.hidden = false;
+    deleteButton.hidden = true;
+    deleteButton.setAttribute("aria-expanded", "true");
+    confirmButton.focus();
+  });
+
+  cancelButton.addEventListener("click", () => {
+    confirmation.hidden = true;
+    deleteButton.hidden = false;
+    deleteButton.setAttribute("aria-expanded", "false");
+    showCardToast(toast, "삭제를 취소했습니다.", "neutral");
+    deleteButton.focus();
+  });
+
+  confirmButton.addEventListener("click", async () => {
+    await deleteMyRating(rating, cardElement, control, toast);
+  });
+
+  control.append(deleteButton, confirmation, toast);
+  return control;
+}
+
+function showCardToast(element, message, state) {
+  window.clearTimeout(Number(element.dataset.timerId));
+  element.textContent = message;
+  element.dataset.state = state;
+  element.dataset.visible = "true";
+  const timerId = window.setTimeout(() => {
+    delete element.dataset.visible;
+  }, 2200);
+  element.dataset.timerId = String(timerId);
+}
+
+async function deleteMyRating(rating, cardElement, controlElement, toastElement) {
+  const bookId = getBookId();
+  const buttons = controlElement.querySelectorAll("button");
+  buttons.forEach((button) => { button.disabled = true; });
+  showCardToast(toastElement, "삭제하는 중입니다.", "loading");
+
+  try {
+    const params = new URLSearchParams({
+      ratingId: String(rating.ratingId),
+      bookId: String(bookId)
+    });
+    const response = await fetch(`/api/ratings?${params}`, { method: "DELETE" });
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "평점을 삭제하지 못했습니다.");
+    }
+
+    currentRating = null;
+    cardElement.classList.add("is-deleted");
+    showCardToast(toastElement, "평점이 삭제되었습니다.", "success");
+    await new Promise((resolve) => window.setTimeout(resolve, 700));
+    await loadBook();
+  } catch (error) {
+    const fallbackMessage = "평점을 삭제하지 못했습니다. 잠시 후 다시 시도해 주세요.";
+    const message = error instanceof TypeError || error instanceof SyntaxError
+      ? fallbackMessage
+      : error.message || fallbackMessage;
+    showCardToast(toastElement, message, "error");
+    buttons.forEach((button) => { button.disabled = false; });
+  }
 }
 
 function renderRatingsPagination(page, totalPages) {

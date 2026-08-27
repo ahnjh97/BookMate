@@ -123,6 +123,27 @@ public class RatingDAO {
         }
     }
 
+    public int deleteRating(
+            Connection connection,
+            long ratingId,
+            long bookId,
+            long memberId
+    ) throws SQLException {
+        String sql = """
+                DELETE FROM RATING
+                 WHERE rating_id = ?
+                   AND book_id = ?
+                   AND member_id = ?
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, ratingId);
+            statement.setLong(2, bookId);
+            statement.setLong(3, memberId);
+            return statement.executeUpdate();
+        }
+    }
+
     public int countRatingsByBook(Connection connection, long bookId) throws SQLException {
         String sql = "SELECT COUNT(*) FROM RATING WHERE book_id = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
