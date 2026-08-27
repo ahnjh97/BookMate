@@ -109,8 +109,17 @@ public class DevProxyServer {
                 : connection.getInputStream();
         byte[] responseBody = responseBodyIn == null ? new byte[0] : responseBodyIn.readAllBytes();
 
-        // 백엔드 응답 그대로 브라우저에 전달
-        exchange.getResponseHeaders().add("Content-Type", connection.getContentType());
+        // 로그인 세션 쿠키와 응답 메타데이터를 브라우저까지 전달한다.
+        // 특히 Set-Cookie가 빠지면 로그인 직후 JSESSIONID가 저장되지 않는다.
+        connection.getHeaderFields().forEach((headerName, headerValues) -> {
+            if (headerName == null || headerValues == null) return;
+            if (headerName.equalsIgnoreCase("Content-Type")
+                    || headerName.equalsIgnoreCase("Set-Cookie")
+                    || headerName.equalsIgnoreCase("Cache-Control")
+                    || headerName.equalsIgnoreCase("Location")) {
+                headerValues.forEach(value -> exchange.getResponseHeaders().add(headerName, value));
+            }
+        });
         exchange.sendResponseHeaders(statusCode, responseBody.length);
         try (OutputStream responseOut = exchange.getResponseBody()) {
             responseOut.write(responseBody);
