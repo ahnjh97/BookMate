@@ -38,7 +38,8 @@ public class Main {
         resources.addPreResources(
                 new DirResourceSet(resources, "/WEB-INF/classes", classesRoot.toString(), "/")
         );
-        // HTML/CSS/JS를 같은 8080 서버에서 제공해 프록시와 CORS 설정이 필요 없습니다.
+        // 8080 직접 접근도 가능하도록 frontend를 연결한다.
+        // 일반적인 로컬 화면 개발은 DevProxyServer의 5501 포트를 사용한다.
         resources.addPreResources(
                 new DirResourceSet(resources, "/", frontendRoot.toString(), "/")
         );

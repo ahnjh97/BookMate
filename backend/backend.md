@@ -14,13 +14,13 @@ HTTP 요청
 
 ## 실행
 
-`Main.java`가 내장 Tomcat을 8080 포트의 루트 컨텍스트로 실행합니다. `frontend` 폴더도 같은 서버의 웹 루트로 연결되므로 별도 프록시나 외부 Tomcat이 필요 없습니다.
+`Main.java`가 내장 Tomcat을 8080 포트의 루트 컨텍스트로 실행합니다. 로컬 개발에서는 `DevProxyServer`가 `5501` 포트에서 프론트엔드를 제공하고 `/api/*` 요청을 이 백엔드로 전달합니다.
 
 ```bash
 mvn -f backend/pom.xml compile exec:java
 ```
 
-접속 주소는 `http://localhost:8080/`이며 Servlet API는 `/api/*`입니다.
+백엔드 직접 주소는 `http://localhost:8080/`이며 Servlet API는 `/api/*`입니다. 일반적인 브라우저 테스트는 프로젝트 루트에서 `scripts\proxy`를 실행한 뒤 `http://localhost:5501/`을 사용합니다.
 
 ## DB
 

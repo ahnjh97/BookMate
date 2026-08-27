@@ -1,18 +1,22 @@
 # BookMate
 
-정적 HTML/CSS/JavaScript, Jakarta Servlet, JDBC, 로컬 Oracle로 구성된 CRUD 미니프로젝트입니다. Java `Main`이 내장 Tomcat을 실행하고 프론트 화면과 `/api/*` Servlet을 같은 8080 포트에서 제공합니다.
+정적 HTML/CSS/JavaScript, Jakarta Servlet, JDBC, 로컬 Oracle로 구성된 CRUD 미니프로젝트입니다. 개발 환경에서는 내장 Tomcat 백엔드를 `8080`에서 실행하고, `DevProxyServer`가 프론트엔드를 `5501`에서 제공하면서 `/api/*` 요청을 백엔드로 전달합니다.
 
 ## 실행 구조
 
 ```text
-브라우저 http://localhost:8080/
+브라우저 http://localhost:5501/
+        ↓
+DevProxyServer
         ├─ /pages, /assets, /js  → frontend 정적 파일
-        └─ /api/*                → Jakarta Servlet
+        └─ /api/*                → http://localhost:8080/api/*
+                                      ↓
+                                Jakarta Servlet
                                       ↓
                                 Service → DAO → JDBC → 로컬 Oracle
 ```
 
-Docker, 별도 프론트 서버, 리버스 프록시, 외부 Tomcat은 사용하지 않습니다.
+로컬 개발의 기본 접속 주소는 `http://localhost:5501`입니다. 내장 Tomcat은 백엔드와 직접 확인용 정적 파일을 `8080`에서 제공하지만, 일반적인 화면 개발과 테스트는 프록시를 통해 진행합니다. Docker와 외부 Tomcat은 사용하지 않습니다.
 
 ## 필수 환경
 
@@ -57,11 +61,14 @@ bash scripts/db-init.sh
 1. `backend/pom.xml`을 Maven 프로젝트로 불러옵니다.
 2. 로컬 Oracle이 실행 중인지 확인합니다.
 3. `backend/src/main/java/Main.java`를 실행합니다.
-4. 브라우저에서 `http://localhost:8080/`에 접속합니다.
+4. 프로젝트 루트에서 `scripts\proxy`를 실행합니다.
+5. 브라우저에서 `http://localhost:5501/`에 접속합니다.
 
 `Main`은 실행 위치를 기준으로 프로젝트 루트를 자동 탐색하므로 별도의 Tomcat 실행 구성이나 `/bookmate` 컨텍스트 설정이 필요 없습니다.
 
 ### 터미널
+
+첫 번째 터미널에서 백엔드를 실행합니다.
 
 ```bat
 scripts\start.bat
@@ -71,21 +78,43 @@ scripts\start.bat
 bash scripts/start.sh
 ```
 
-또는 Maven 명령을 직접 사용할 수 있습니다.
+두 번째 터미널에서 프론트 개발 프록시를 실행합니다.
+
+```bat
+scripts\proxy
+```
+
+백엔드는 Maven 명령으로 직접 실행할 수도 있습니다.
 
 ```bash
 mvn -f backend/pom.xml compile exec:java
 ```
 
-서버 종료는 실행 중인 터미널에서 `Ctrl+C`를 누릅니다.
+백엔드와 프록시는 각각 실행 중인 터미널에서 `Ctrl+C`로 종료합니다.
 
 ## 주요 URL
 
-- 메인: `http://localhost:8080/`
-- 책 목록: `http://localhost:8080/pages/book/list.html`
-- 로그인: `http://localhost:8080/pages/auth/login.html`
-- 회원가입: `http://localhost:8080/pages/auth/signup.html`
-- 책 API: `GET http://localhost:8080/api/books`
-- 인증 상태: `GET http://localhost:8080/api/auth`
+- 메인: `http://localhost:5501/`
+- 책 목록: `http://localhost:5501/pages/book/list.html`
+- 로그인: `http://localhost:5501/pages/auth/login.html`
+- 회원가입: `http://localhost:5501/pages/auth/signup.html`
+- 책 API: `GET http://localhost:5501/api/books`
+- 인증 상태: `GET http://localhost:5501/api/auth`
+- 백엔드 직접 확인: `http://localhost:8080/`
 
-프론트엔드 파일은 `frontend` 폴더가 내장 Tomcat에 직접 연결되므로 HTML/CSS/JavaScript 수정 후 브라우저를 새로고침하면 반영됩니다. Java 코드를 수정한 경우 서버를 다시 시작합니다.
+## 프론트 개발 프록시
+
+백엔드를 `8080` 포트에서 먼저 실행한 다음, 프로젝트 루트에서 아래 명령을 실행합니다.
+
+```bat
+scripts\proxy
+```
+
+`proxy.bat`이 `scripts` 폴더 이동, `DevProxyServer.java` 컴파일, 실행을 모두 처리합니다. 브라우저에서는 `http://localhost:5501`에 접속합니다.
+
+- 프론트엔드 정적 파일: `frontend` 폴더에서 제공
+- `/api/*` 요청: `http://localhost:8080`으로 전달
+- 프록시 종료: 실행 중인 터미널에서 `Ctrl+C`
+- 백엔드 주소 변경: `BACKEND_URL` 환경변수 사용
+
+HTML/CSS/JavaScript 수정은 브라우저 새로고침으로 반영됩니다. 백엔드 Java 코드를 수정하면 백엔드를 다시 시작하고, `DevProxyServer.java`를 수정하면 `scripts\proxy`를 다시 실행합니다.
