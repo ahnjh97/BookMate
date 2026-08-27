@@ -18,32 +18,23 @@
     <section class="hero section-bordered">
       <div class="container hero-grid">
         <div class="hero-copy">
-          <p class="eyebrow"><span aria-hidden="true">✧</span>이번 주 인기 도서 업데이트</p>
+          <p class="eyebrow"><span aria-hidden="true">●</span>책으로 이어지는 새로운 취향</p>
           <h1>당신의 다음 책을<br><span>취향으로</span> 발견하세요</h1>
           <p class="hero-description">책을 평가하고, 나만의 순위를 만들고,<br>다른 독자와 이야기를 나눠보세요.</p>
           <div class="button-row"><a class="button button-primary" href="/pages/book/list.html">인기 책 둘러보기</a><a class="button" href="#taste">내 취향 알아보기</a></div>
-          <dl class="stats">
-            <div><dt>124,000+</dt><dd>등록 도서</dd></div><div><dt>38만+</dt><dd>독자 리뷰</dd></div><div><dt>5만+</dt><dd>티어리스트</dd></div>
+          <dl class="stats" aria-label="북메이트 현황">
+            <div><dt data-home-stat="books">-</dt><dd>등록 도서</dd></div><div><dt data-home-stat="ratings">-</dt><dd>독자 평가</dd></div><div><dt data-home-stat="tiers">-</dt><dd>티어리스트</dd></div>
           </dl>
         </div>
-        <div class="book-mosaic" aria-label="인기 도서 모음">
-          <article class="cover cover-1">모순</article><article class="cover cover-2">도둑맞은 집중력</article><article class="cover cover-3">불편한 편의점</article>
-          <article class="cover cover-4">사피엔스</article><article class="cover cover-5">아몬드</article><article class="cover cover-6">채식주의자</article>
-        </div>
+        <div id="home-book-mosaic" class="book-mosaic" aria-label="등록 도서 모음"></div>
       </div>
     </section>
 
     <section class="section" id="books">
       <div class="container">
-        <div class="section-heading"><div><h2>지금 주목받는 책</h2><p>최근 독자들 사이에서 가장 많이 읽고 평가한 책</p></div><a href="/pages/book/list.html">전체 보기 <span>›</span></a></div>
+        <div class="section-heading"><div><h2>북메이트의 책장</h2><p>현재 북메이트에 등록된 책을 만나보세요.</p></div><a href="/pages/book/list.html">전체 보기 <span>›</span></a></div>
         <div class="filters" aria-label="도서 장르"><button class="selected">전체</button><button>소설</button><button>인문/사회</button><button>경제/경영</button><button>자기계발</button></div>
-        <div class="featured-book-grid">
-          <article class="featured-book-card"><div class="featured-book-cover c1"><b>1</b><span>모순</span><em>8.8</em></div><h3>모순</h3><p>양귀자</p></article>
-          <article class="featured-book-card"><div class="featured-book-cover c2"><b>2</b><span>도둑맞은 집중력</span><em>8.6</em></div><h3>도둑맞은 집중력</h3><p>요한 하리</p></article>
-          <article class="featured-book-card"><div class="featured-book-cover c3"><b>3</b><span>불편한 편의점</span><em>8.7</em></div><h3>불편한 편의점</h3><p>김호연</p></article>
-          <article class="featured-book-card"><div class="featured-book-cover c4"><b>4</b><span>사피엔스</span><em>8.9</em></div><h3>사피엔스</h3><p>유발 하라리</p></article>
-          <article class="featured-book-card"><div class="featured-book-cover c5"><b>5</b><span>아몬드</span><em>8.5</em></div><h3>아몬드</h3><p>손원평</p></article>
-        </div>
+        <div id="home-featured-books" class="featured-book-grid" aria-live="polite"></div>
       </div>
     </section>
 
@@ -79,5 +70,6 @@
     <div class="container copyright"><span>© 2026 BOOKMATE Inc. All rights reserved.</span><span>Designed for readers.</span></div>
   </footer>
   <script src="/js/components/navbar.js" defer></script>
+  <script src="/js/pages/home.js" defer></script>
 </body>
 </html>
