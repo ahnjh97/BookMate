@@ -23,8 +23,14 @@ const ratingCommentElement = document.querySelector("#rating-comment");
 const ratingCommentCountElement = document.querySelector("#rating-comment-count");
 const ratingSubmitElement = document.querySelector("#rating-submit");
 const ratingMessageElement = document.querySelector("#rating-message");
+const readerRatingsElement = document.querySelector("#reader-ratings");
+const readerRatingsSummaryElement = document.querySelector("#reader-ratings-summary");
+const readerRatingsStatusElement = document.querySelector("#reader-ratings-status");
+const readerRatingsListElement = document.querySelector("#reader-ratings-list");
+const readerRatingsPaginationElement = document.querySelector("#reader-ratings-pagination");
 let currentRating = null;
 let isLoggedIn = false;
+let currentRatingsPage = 1;
 let ratingToastTimer = null;
 let ratingToastClearTimer = null;
 
@@ -110,6 +116,7 @@ async function loadBook() {
     }
     renderBook(result.data);
     await loadMyRating(bookId);
+    await loadPublicRatings(bookId, currentRatingsPage);
   } catch (error) {
     const fallbackMessage = "책 정보를 불러오지 못했습니다. DB와 Tomcat 실행 상태를 확인해 주세요.";
     const message = error instanceof TypeError || error instanceof SyntaxError
@@ -117,6 +124,196 @@ async function loadBook() {
       : error.message || fallbackMessage;
     showError(message);
   }
+}
+
+async function loadPublicRatings(bookId, page = 1) {
+  readerRatingsStatusElement.textContent = "평가를 불러오는 중입니다.";
+  try {
+    const response = await fetch(`/api/ratings/public?bookId=${bookId}&page=${page}`);
+    const result = await response.json();
+    if (!response.ok || !result.success) throw new Error(result.message || "독자 평가를 불러오지 못했습니다.");
+    currentRatingsPage = result.data.page;
+    renderPublicRatings(result.data);
+  } catch (error) {
+    readerRatingsListElement.replaceChildren();
+    readerRatingsPaginationElement.replaceChildren();
+    readerRatingsStatusElement.textContent = error.message || "독자 평가를 불러오지 못했습니다.";
+    readerRatingsStatusElement.dataset.state = "error";
+  }
+}
+
+function renderPublicRatings(data) {
+  readerRatingsSummaryElement.textContent = `총 ${data.totalCount}개의 평가`;
+  readerRatingsStatusElement.textContent = "";
+  delete readerRatingsStatusElement.dataset.state;
+  readerRatingsListElement.replaceChildren();
+
+  if (data.ratings.length === 0) {
+    readerRatingsStatusElement.textContent = "아직 등록된 평가가 없습니다. 첫 평가를 남겨보세요.";
+  } else {
+    data.ratings.forEach((rating) => readerRatingsListElement.append(createRatingCard(rating)));
+  }
+  renderRatingsPagination(data.page, data.totalPages);
+}
+
+function createRatingCard(rating) {
+  const article = document.createElement("article");
+  article.className = "reader-rating-card";
+  const heading = document.createElement("div");
+  heading.className = "reader-rating-card-heading";
+  const nickname = document.createElement("strong");
+  nickname.textContent = rating.nickname;
+  const score = document.createElement("span");
+  score.className = "reader-rating-score";
+  score.setAttribute("aria-label", `5점 만점에 ${rating.score}점`);
+  score.textContent = `${"★".repeat(rating.score)}${"☆".repeat(5 - rating.score)} ${rating.score}.0`;
+  const comment = document.createElement("p");
+  comment.textContent = rating.commentText || "한줄평이 없습니다.";
+  if (!rating.commentText) comment.className = "reader-rating-empty-comment";
+  const headingMeta = document.createElement("div");
+  headingMeta.className = "reader-rating-card-meta";
+  headingMeta.append(score);
+
+  if (currentRating?.ratingId === rating.ratingId) {
+    headingMeta.append(createRatingDeleteControl(rating, article));
+    article.classList.add("is-my-rating");
+  }
+
+  heading.append(nickname, headingMeta);
+  article.append(heading, comment);
+  return article;
+}
+
+function createRatingDeleteControl(rating, cardElement) {
+  const control = document.createElement("div");
+  control.className = "reader-rating-delete-control";
+
+  const deleteButton = document.createElement("button");
+  deleteButton.type = "button";
+  deleteButton.className = "reader-rating-delete-button";
+  deleteButton.textContent = "삭제";
+  deleteButton.setAttribute("aria-expanded", "false");
+
+  const confirmation = document.createElement("div");
+  confirmation.className = "reader-rating-delete-confirmation";
+  confirmation.hidden = true;
+  confirmation.setAttribute("role", "group");
+  confirmation.setAttribute("aria-label", "평점 삭제 확인");
+
+  const question = document.createElement("span");
+  question.textContent = "삭제할까요?";
+  const confirmButton = document.createElement("button");
+  confirmButton.type = "button";
+  confirmButton.className = "reader-rating-confirm-button";
+  confirmButton.textContent = "확인";
+  const cancelButton = document.createElement("button");
+  cancelButton.type = "button";
+  cancelButton.className = "reader-rating-cancel-button";
+  cancelButton.textContent = "취소";
+  confirmation.append(question, confirmButton, cancelButton);
+
+  const toast = document.createElement("p");
+  toast.className = "reader-rating-delete-toast";
+  toast.setAttribute("role", "status");
+  toast.setAttribute("aria-live", "polite");
+
+  deleteButton.addEventListener("click", () => {
+    confirmation.hidden = false;
+    deleteButton.hidden = true;
+    deleteButton.setAttribute("aria-expanded", "true");
+    confirmButton.focus();
+  });
+
+  cancelButton.addEventListener("click", () => {
+    confirmation.hidden = true;
+    deleteButton.hidden = false;
+    deleteButton.setAttribute("aria-expanded", "false");
+    showCardToast(toast, "삭제를 취소했습니다.", "neutral");
+    deleteButton.focus();
+  });
+
+  confirmButton.addEventListener("click", async () => {
+    await deleteMyRating(rating, cardElement, control, toast);
+  });
+
+  control.append(deleteButton, confirmation, toast);
+  return control;
+}
+
+function showCardToast(element, message, state) {
+  window.clearTimeout(Number(element.dataset.timerId));
+  element.textContent = message;
+  element.dataset.state = state;
+  element.dataset.visible = "true";
+  const timerId = window.setTimeout(() => {
+    delete element.dataset.visible;
+  }, 2200);
+  element.dataset.timerId = String(timerId);
+}
+
+async function deleteMyRating(rating, cardElement, controlElement, toastElement) {
+  const bookId = getBookId();
+  const buttons = controlElement.querySelectorAll("button");
+  buttons.forEach((button) => { button.disabled = true; });
+  showCardToast(toastElement, "삭제하는 중입니다.", "loading");
+
+  try {
+    const params = new URLSearchParams({
+      ratingId: String(rating.ratingId),
+      bookId: String(bookId)
+    });
+    const response = await fetch(`/api/ratings?${params}`, { method: "DELETE" });
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "평점을 삭제하지 못했습니다.");
+    }
+
+    currentRating = null;
+    cardElement.classList.add("is-deleted");
+    showCardToast(toastElement, "평점이 삭제되었습니다.", "success");
+    await new Promise((resolve) => window.setTimeout(resolve, 700));
+    await loadBook();
+  } catch (error) {
+    const fallbackMessage = "평점을 삭제하지 못했습니다. 잠시 후 다시 시도해 주세요.";
+    const message = error instanceof TypeError || error instanceof SyntaxError
+      ? fallbackMessage
+      : error.message || fallbackMessage;
+    showCardToast(toastElement, message, "error");
+    buttons.forEach((button) => { button.disabled = false; });
+  }
+}
+
+function renderRatingsPagination(page, totalPages) {
+  readerRatingsPaginationElement.replaceChildren();
+  if (totalPages <= 1) return;
+
+  readerRatingsPaginationElement.append(createPageButton("이전", page - 1, page === 1));
+  const start = Math.max(1, page - 2);
+  const end = Math.min(totalPages, start + 4);
+  for (let number = Math.max(1, end - 4); number <= end; number += 1) {
+    const button = createPageButton(String(number), number, false);
+    if (number === page) {
+      button.setAttribute("aria-current", "page");
+      button.disabled = true;
+    }
+    readerRatingsPaginationElement.append(button);
+  }
+  readerRatingsPaginationElement.append(createPageButton("다음", page + 1, page === totalPages));
+}
+
+function createPageButton(label, page, disabled) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "reader-rating-page-button";
+  button.textContent = label;
+  button.disabled = disabled;
+  button.addEventListener("click", async () => {
+    const bookId = getBookId();
+    if (!bookId) return;
+    await loadPublicRatings(bookId, page);
+    readerRatingsElement.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  return button;
 }
 
 async function loadMyRating(bookId) {
@@ -189,6 +386,7 @@ function setRatingMode(isRatingMode) {
   detailContentElement.hidden = isRatingMode;
   ratingBookContextElement.hidden = !isRatingMode;
   ratingEditorElement.hidden = !isRatingMode;
+  readerRatingsElement.hidden = isRatingMode;
 
   if (isRatingMode) {
     prepareRatingForm();
@@ -233,6 +431,7 @@ async function submitRating(event) {
       throw new Error(result.message || `평점을 ${isUpdate ? "수정" : "등록"}하지 못했습니다.`);
     }
 
+    currentRatingsPage = 1;
     await loadBook();
     setRatingMode(false);
     showRatingToast(`평점 ${isUpdate ? "수정" : "등록"}이 완료되었습니다.`, "success");
@@ -259,14 +458,4 @@ openRatingFormElement.addEventListener("click", () => {
 });
 closeRatingFormElement.addEventListener("click", () => setRatingMode(false));
 ratingForm.addEventListener("submit", submitRating);
-document.addEventListener("bookmate:auth-changed", () => {
-  isLoggedIn = true;
-  window.clearTimeout(ratingToastTimer);
-  window.clearTimeout(ratingToastClearTimer);
-  ratingToastElement.textContent = "";
-  delete ratingToastElement.dataset.state;
-  delete ratingToastElement.dataset.visible;
-  const bookId = getBookId();
-  if (bookId) loadMyRating(bookId);
-});
 loadBook();

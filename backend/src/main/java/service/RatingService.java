@@ -2,6 +2,7 @@ package service;
 
 import dao.RatingDAO;
 import dto.RatingDTO;
+import dto.RatingPageDTO;
 import exception.DuplicateRatingException;
 import util.DBUtil;
 
@@ -19,6 +20,32 @@ public class RatingService {
             return ratingDAO.selectRatingByBookAndMember(connection, bookId, loginMemberId);
         } catch (SQLException exception) {
             throw new RuntimeException("내 평점을 조회하는 중 오류가 발생했습니다.", exception);
+        }
+    }
+
+    public RatingPageDTO findPublicRatings(long bookId, int page, int pageSize) {
+        if (bookId <= 0) throw new IllegalArgumentException("올바른 책 번호가 필요합니다.");
+        if (page <= 0) throw new IllegalArgumentException("페이지 번호는 1 이상이어야 합니다.");
+        if (pageSize <= 0 || pageSize > 20) throw new IllegalArgumentException("페이지 크기는 1~20이어야 합니다.");
+
+        try (Connection connection = DBUtil.getConnection()) {
+            if (!ratingDAO.existsApprovedBook(connection, bookId)) {
+                throw new NoSuchElementException("책을 찾을 수 없습니다.");
+            }
+            int totalCount = ratingDAO.countRatingsByBook(connection, bookId);
+            int totalPages = Math.max(1, (totalCount + pageSize - 1) / pageSize);
+            int safePage = Math.min(page, totalPages);
+            return new RatingPageDTO(
+                    ratingDAO.selectRatingsByBook(connection, bookId, (safePage - 1) * pageSize, pageSize),
+                    safePage,
+                    pageSize,
+                    totalCount,
+                    totalPages
+            );
+        } catch (NoSuchElementException exception) {
+            throw exception;
+        } catch (SQLException exception) {
+            throw new RuntimeException("독자 평가를 조회하는 중 오류가 발생했습니다.", exception);
         }
     }
 
@@ -71,6 +98,23 @@ public class RatingService {
             }
         } catch (SQLException exception) {
             throw new RuntimeException("평점 수정 중 오류가 발생했습니다.", exception);
+        }
+    }
+
+    public void deleteRating(long ratingId, long bookId, long loginMemberId) {
+        validateBookAndMember(bookId, loginMemberId);
+        if (ratingId <= 0) {
+            throw new IllegalArgumentException("올바른 평점 번호가 필요합니다.");
+        }
+
+        try (Connection connection = DBUtil.getConnection()) {
+            if (ratingDAO.deleteRating(connection, ratingId, bookId, loginMemberId) == 0) {
+                throw new NoSuchElementException("삭제할 평점을 찾을 수 없습니다.");
+            }
+        } catch (NoSuchElementException exception) {
+            throw exception;
+        } catch (SQLException exception) {
+            throw new RuntimeException("평점 삭제 중 오류가 발생했습니다.", exception);
         }
     }
 

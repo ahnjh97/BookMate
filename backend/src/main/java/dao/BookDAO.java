@@ -60,7 +60,7 @@ public class BookDAO {
                             resultSet.getLong("result_id"),
                             resultSet.getString("result_name"),
                             resultSet.getString("result_detail"),
-                            resultSet.getString("image_url")
+                            normalizeImageUrl(resultSet.getString("image_url"))
                     ));
                 }
             }
@@ -144,6 +144,50 @@ public class BookDAO {
         }
     }
 
+    public List<BookDTO> selectBookRankings(
+            Connection connection,
+            String genre,
+            String sort,
+            int minimumRatings,
+            int limit
+    ) throws SQLException {
+        String averageExpression = "NVL(ROUND(AVG(R.score), 1), 0)";
+        String countExpression = "COUNT(R.rating_id)";
+        String orderBy = "count".equals(sort)
+                ? countExpression + " DESC, " + averageExpression + " DESC, B.title ASC"
+                : averageExpression + " DESC, " + countExpression + " DESC, B.title ASC";
+        String sql = """
+                SELECT B.book_id, B.author_id, A.author_name, B.title, B.genre,
+                       B.publisher, B.published_date, B.description, B.image_url, B.status,
+                       NVL(ROUND(AVG(R.score), 1), 0) AS average_rating,
+                       COUNT(R.rating_id) AS rating_count
+                  FROM BOOK B
+                  JOIN AUTHOR A ON A.author_id = B.author_id
+                  LEFT JOIN RATING R ON R.book_id = B.book_id
+                 WHERE B.status = 'APPROVED'
+                   AND B.genre = ?
+                 GROUP BY B.book_id, B.author_id, A.author_name, B.title, B.genre,
+                          B.publisher, B.published_date, B.description, B.image_url, B.status
+                HAVING COUNT(R.rating_id) >= ?
+                 ORDER BY """ + " " + orderBy + " OFFSET 0 ROWS FETCH NEXT ? ROWS ONLY";
+
+        List<BookDTO> rankings = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, genre);
+            statement.setInt(2, minimumRatings);
+            statement.setInt(3, limit);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    BookDTO book = mapBook(resultSet);
+                    book.setAverageRating(resultSet.getDouble("average_rating"));
+                    book.setRatingCount(resultSet.getInt("rating_count"));
+                    rankings.add(book);
+                }
+            }
+        }
+        return rankings;
+    }
+
     private BookDTO mapBook(ResultSet resultSet) throws SQLException {
         BookDTO book = new BookDTO();
         book.setBookId(resultSet.getLong("book_id"));
@@ -154,7 +198,7 @@ public class BookDAO {
         book.setPublisher(resultSet.getString("publisher"));
         book.setPublishedDate(resultSet.getDate("published_date"));
         book.setDescription(resultSet.getString("description"));
-        book.setImageUrl(resultSet.getString("image_url"));
+        book.setImageUrl(normalizeImageUrl(resultSet.getString("image_url")));
         book.setStatus(resultSet.getString("status"));
         book.setAverageRating(resultSet.getDouble("average_rating"));
         book.setRatingCount(resultSet.getInt("rating_count"));
@@ -166,5 +210,12 @@ public class BookDAO {
             return null;
         }
         return value.trim();
+    }
+
+    private String normalizeImageUrl(String imageUrl) {
+        if (imageUrl != null && imageUrl.startsWith("/bookmate/")) {
+            return imageUrl.substring("/bookmate".length());
+        }
+        return imageUrl;
     }
 }

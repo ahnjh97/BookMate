@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>책 상세 | BookMate</title>
     <link rel="stylesheet" href="/assets/css/style.css">
-    <link rel="stylesheet" href="/assets/css/book-detail.css?v=20260826-4">
+    <link rel="stylesheet" href="/assets/css/book-detail.css?v=20260827-5">
   </head>
   <body>
     <header class="site-header" data-navbar></header>
@@ -60,6 +60,18 @@
             </section>
           </div>
 
+          <section id="reader-ratings" class="reader-ratings" aria-labelledby="reader-ratings-heading">
+            <div class="reader-ratings-heading">
+              <div>
+                <h2 id="reader-ratings-heading">독자 평가</h2>
+                <p id="reader-ratings-summary">평가를 불러오는 중입니다.</p>
+              </div>
+            </div>
+            <p id="reader-ratings-status" class="reader-ratings-status" role="status" aria-live="polite"></p>
+            <div id="reader-ratings-list" class="reader-ratings-list"></div>
+            <nav id="reader-ratings-pagination" class="reader-ratings-pagination" aria-label="독자 평가 페이지"></nav>
+          </section>
+
           <section id="rating-editor" class="rating-editor" aria-labelledby="rating-form-heading" hidden>
             <div class="rating-editor-heading">
               <div>
@@ -101,6 +113,6 @@
       </section>
     </main>
     <script src="/js/components/navbar.js" defer></script>
-    <script src="/js/pages/book-detail.js?v=20260826-5" defer></script>
+    <script src="/js/pages/book-detail.js?v=20260827-2" defer></script>
   </body>
 </html>

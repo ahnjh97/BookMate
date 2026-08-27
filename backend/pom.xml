@@ -7,7 +7,7 @@
     <groupId>bookmate</groupId>
     <artifactId>backend</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -87,17 +87,11 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>3.4.0</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.5.0</version>
                 <configuration>
-                    <failOnMissingWebXml>false</failOnMissingWebXml>
-                    <webResources>
-                        <resource>
-                            <directory>${project.basedir}/../frontend</directory>
-                            <filtering>false</filtering>
-                        </resource>
-                    </webResources>
+                    <mainClass>Main</mainClass>
                 </configuration>
             </plugin>
         </plugins>

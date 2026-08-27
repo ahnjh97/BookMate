@@ -1,21 +1,93 @@
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BookMate</title>
-    <link rel="stylesheet" href="/assets/css/style.css">
-  </head>
-  <body>
-    <header class="site-header" data-navbar></header>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="취향으로 발견하는 나의 다음 책, BOOKMATE">
+  <title>BOOKMATE — 취향으로 발견하는 다음 책</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/home.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/" aria-label="BOOKMATE 홈"><span class="brand-mark" aria-hidden="true">◈</span><strong>BOOKMATE</strong></a>
+      <nav class="main-nav" aria-label="주요 메뉴">
+        <a class="active" aria-current="page" href="/">홈</a><a href="/pages/book/list.html">책</a><a href="#books">랭킹</a><a href="#taste">책 취향</a><a href="/pages/post/list.html">커뮤니티</a>
+      </nav>
+      <div class="account-actions">
+        <a class="icon-button" href="/pages/book/list.html" aria-label="책 검색"><span aria-hidden="true">⌕</span></a>
+        <a class="login" href="/pages/auth/login.html">로그인</a><a class="button button-small button-primary" href="/pages/auth/signup.html">회원가입</a>
+      </div>
+    </div>
+  </header>
 
-    <main class="page-main">
-      <section class="page-content">
-        <h1>BookMate</h1>
-        <p>책을 기록하고 관리해 보세요.</p>
-        <a class="button button-primary" href="/pages/book/list.html">책 목록 보기</a>
-      </section>
-    </main>
-    <script src="/js/components/navbar.js" defer></script>
-  </body>
+  <main>
+    <section class="hero section-bordered">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow"><span aria-hidden="true">✧</span>이번 주 인기 도서 업데이트</p>
+          <h1>당신의 다음 책을<br><span>취향으로</span> 발견하세요</h1>
+          <p class="hero-description">책을 평가하고, 나만의 순위를 만들고,<br>다른 독자와 이야기를 나눠보세요.</p>
+          <div class="button-row"><a class="button button-primary" href="/pages/book/list.html">인기 책 둘러보기</a><a class="button" href="#taste">내 취향 알아보기</a></div>
+          <dl class="stats">
+            <div><dt>124,000+</dt><dd>등록 도서</dd></div><div><dt>38만+</dt><dd>독자 리뷰</dd></div><div><dt>5만+</dt><dd>티어리스트</dd></div>
+          </dl>
+        </div>
+        <div class="book-mosaic" aria-label="인기 도서 모음">
+          <article class="cover cover-1">모순</article><article class="cover cover-2">도둑맞은 집중력</article><article class="cover cover-3">불편한 편의점</article>
+          <article class="cover cover-4">사피엔스</article><article class="cover cover-5">아몬드</article><article class="cover cover-6">채식주의자</article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="books">
+      <div class="container">
+        <div class="section-heading"><div><h2>지금 주목받는 책</h2><p>최근 독자들 사이에서 가장 많이 읽고 평가한 책</p></div><a href="/pages/book/list.html">전체 보기 <span>›</span></a></div>
+        <div class="filters" aria-label="도서 장르"><button class="selected">전체</button><button>소설</button><button>인문/사회</button><button>경제/경영</button><button>자기계발</button></div>
+        <div class="featured-book-grid">
+          <article class="featured-book-card"><div class="featured-book-cover c1"><b>1</b><span>모순</span><em>8.8</em></div><h3>모순</h3><p>양귀자</p></article>
+          <article class="featured-book-card"><div class="featured-book-cover c2"><b>2</b><span>도둑맞은 집중력</span><em>8.6</em></div><h3>도둑맞은 집중력</h3><p>요한 하리</p></article>
+          <article class="featured-book-card"><div class="featured-book-cover c3"><b>3</b><span>불편한 편의점</span><em>8.7</em></div><h3>불편한 편의점</h3><p>김호연</p></article>
+          <article class="featured-book-card"><div class="featured-book-cover c4"><b>4</b><span>사피엔스</span><em>8.9</em></div><h3>사피엔스</h3><p>유발 하라리</p></article>
+          <article class="featured-book-card"><div class="featured-book-cover c5"><b>5</b><span>아몬드</span><em>8.5</em></div><h3>아몬드</h3><p>손원평</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section taste-section section-bordered" id="taste">
+      <div class="container">
+        <div class="center-heading"><h2>나만의 책 취향</h2><p>좋아하는 책에서 시작하는 새로운 독서 경험</p></div>
+        <div class="feature-grid">
+          <article class="feature-card"><span class="feature-icon cyan">✓</span><h3>다수가 뽑은 책 티어</h3><p>독자들이 직접 만들어낸 장르별 믿을 만한 추천</p><ol><li><b>S</b><span>2024년 한국 소설 명작</span><small>12,400명 참여</small></li><li><b>A</b><span>편하게 읽는 에세이</span><small>8,920명 참여</small></li><li><b>B</b><span>올해 꼭 읽어야 할 인문서</span><small>6,120명 참여</small></li></ol><a href="/pages/book/list.html">추천 도서 보기 →</a></article>
+          <article class="feature-card"><span class="feature-icon coral">⚑</span><h3>이상형 월드컵 인기 순위</h3><p>두 권씩 골라 완성하는 재미있는 취향 토너먼트</p><ol><li><b>1</b><span>인생책 월드컵 베스트 32강</span><small>9.8시간</small></li><li><b>2</b><span>가장 좋아한 장편 소설 16강</span><small>6.1시간</small></li><li><b>3</b><span>감정에 위로가 되는 시집 16강</span><small>4.3시간</small></li></ol><a href="/pages/book/list.html">도서 목록 보기 →</a></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="community">
+      <div class="container">
+        <div class="section-heading"><div><h2>커뮤니티 인기글</h2><p>독자들의 생각이 모인 따뜻한 이야기들</p></div><a href="/pages/post/list.html">전체 보기 <span>›</span></a></div>
+        <div class="community-table" role="table" aria-label="커뮤니티 인기글">
+          <div class="table-head" role="row"><span>순위 · 제목</span><span>작성자</span><span>작성일</span><span>반응</span></div>
+          <article><b>1</b><div><small>책 리뷰</small><h3>세계문학을 읽고 느낀 작은 이야기</h3></div><span>독서광</span><time>3시간 전</time><span>♡ 124 · ◇ 42</span></article>
+          <article><b>2</b><div><small>자유게시판</small><h3>주말에 가볍게 읽기 좋은 책 추천해주세요</h3></div><span>구름책장</span><time>5시간 전</time><span>♡ 89 · ◇ 35</span></article>
+          <article><b>3</b><div><small>티어리스트</small><h3>올해 읽은 SF 소설 개인적인 티어 정리</h3></div><span>우주탐험가</span><time>1일 전</time><span>♡ 56 · ◇ 12</span></article>
+          <article><b>4</b><div><small>자유게시판</small><h3>요즘 어떤 책 읽으시나요? 추천 부탁드려요</h3></div><span>책장정리</span><time>2일 전</time><span>♡ 34 · ◇ 28</span></article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-top">
+      <div class="footer-brand"><a class="brand" href="/"><span class="brand-mark" aria-hidden="true">◈</span><strong>BOOKMATE</strong></a><p>당신의 다음 책을 취향으로 발견하세요.<br>책을 사랑하는 사람들의 커뮤니티, 북메이트.</p><div><a href="#">이용약관</a><a href="#">개인정보처리방침</a><a href="#">고객센터</a></div></div>
+      <nav class="footer-nav" aria-label="하단 메뉴"><div><b>탐색</b><a href="/pages/book/list.html">인기 도서</a><a href="#books">랭킹</a><a href="/pages/book/list.html">신간 도서</a></div><div><b>취향</b><a href="#taste">티어리스트</a><a href="#taste">이상형 월드컵</a><a href="/pages/book/list.html">맞춤 추천</a></div><div><b>커뮤니티</b><a href="/pages/post/list.html">인기글</a><a href="/pages/post/list.html">책 리뷰</a><a href="/pages/post/list.html">공지사항</a></div></nav>
+    </div>
+    <div class="container copyright"><span>© 2026 BOOKMATE Inc. All rights reserved.</span><span>Designed for readers.</span></div>
+  </footer>
+</body>
 </html>
