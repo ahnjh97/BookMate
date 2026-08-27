@@ -144,6 +144,29 @@
 .footer-nav a { color: #99a5af; }
 .copyright { display: flex; justify-content: space-between; padding-block: 18px; border-top: 1px solid #2a343d; color: #7f8c96; font-size: .82rem; }
 
+@media (min-width: 901px) and (min-height: 700px) and (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+    scroll-snap-type: y mandatory;
+    scroll-padding-top: var(--navbar-height);
+  }
+
+  .home-page main > section,
+  .home-page .site-footer {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  .home-page main > section {
+    min-height: calc(100svh - var(--navbar-height));
+  }
+
+  .home-page main > .section {
+    display: flex;
+    align-items: center;
+  }
+}
+
 @media (max-width: 900px) {
   .main-nav { display: none; }
   .hero-grid { grid-template-columns: 1fr; min-height: auto; }
