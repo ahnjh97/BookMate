@@ -64,4 +64,32 @@ public class BookService {
             throw new RuntimeException("책 정보를 조회하는 중 오류가 발생했습니다.", exception);
         }
     }
+
+    public List<BookDTO> findBookRankings(
+            String genre,
+            String sort,
+            int minimumRatings,
+            int limit
+    ) {
+        String normalizedGenre = genre == null ? "" : genre.trim();
+        if (normalizedGenre.isEmpty() || normalizedGenre.length() > 50) {
+            throw new IllegalArgumentException("장르를 선택해 주세요.");
+        }
+        String normalizedSort = sort == null || sort.isBlank() ? "average" : sort.trim().toLowerCase();
+        if (!"average".equals(normalizedSort) && !"count".equals(normalizedSort)) {
+            throw new IllegalArgumentException("올바른 정렬 기준이 필요합니다.");
+        }
+        if (minimumRatings < 1 || minimumRatings > 1000) {
+            throw new IllegalArgumentException("최소 평가 인원은 1명 이상이어야 합니다.");
+        }
+        if (limit < 1 || limit > 100) {
+            throw new IllegalArgumentException("랭킹은 최대 100권까지 조회할 수 있습니다.");
+        }
+
+        try (Connection connection = DBUtil.getConnection()) {
+            return bookDAO.selectBookRankings(connection, normalizedGenre, normalizedSort, minimumRatings, limit);
+        } catch (SQLException exception) {
+            throw new RuntimeException("책 랭킹을 조회하는 중 오류가 발생했습니다.", exception);
+        }
+    }
 }
