@@ -55,7 +55,7 @@ import com.sun.net.httpserver.HttpServer;
 public class DevProxyServer {
 
     // 이 프록시 서버 자신이 쓰는 포트 - 브라우저는 항상 여기로 접속
-    private static final int PROXY_PORT = 5500;
+    private static final int PROXY_PORT = 5501;
 
     // 실제 API를 처리하는 백엔드 주소
     // 코드에 고정값 안 박고 환경변수로 뺌 - 백엔드 포트 바뀌어도 코드 수정 불필요
@@ -86,16 +86,20 @@ public class DevProxyServer {
         HttpURLConnection connection = (HttpURLConnection) targetUrl.toURL().openConnection();
 
         // 원래 요청과 같은 메서드(GET/POST/DELETE 등)로 재요청
-        connection.setRequestMethod(exchange.getRequestMethod());
-        connection.setDoOutput(true);
+        String requestMethod = exchange.getRequestMethod();
+        connection.setRequestMethod(requestMethod);
 
         // 요청 헤더 그대로 복사
         exchange.getRequestHeaders().forEach((headerName, headerValues) ->
                 headerValues.forEach(value -> connection.addRequestProperty(headerName, value)));
 
-        // 요청 본문(JSON 등) 있으면 그대로 흘려보냄
-        try (OutputStream requestBodyOut = connection.getOutputStream()) {
-            exchange.getRequestBody().transferTo(requestBodyOut);
+        // 요청 본문(JSON 등)이 있는 메서드만 출력 스트림을 연다.
+        // GET에서도 getOutputStream()을 호출하면 HttpURLConnection이 POST로 바꿔 버린다.
+        if (requestMethod.equals("POST") || requestMethod.equals("PUT") || requestMethod.equals("PATCH")) {
+            connection.setDoOutput(true);
+            try (OutputStream requestBodyOut = connection.getOutputStream()) {
+                exchange.getRequestBody().transferTo(requestBodyOut);
+            }
         }
 
         // 4xx/5xx는 getErrorStream, 나머지는 getInputStream에서 읽어야 함
@@ -117,9 +121,17 @@ public class DevProxyServer {
     private static void serveStatic(HttpExchange exchange) throws IOException {
         String requestPath = exchange.getRequestURI().getPath();
 
+        // DB의 이미지 URL은 배포 컨텍스트 경로(/bookmate)를 포함한다.
+        // 로컬 개발 서버는 frontend를 루트(/)에서 제공하므로 접두사를 제거한다.
+        if (requestPath.equals("/bookmate")) {
+            requestPath = "/";
+        } else if (requestPath.startsWith("/bookmate/")) {
+            requestPath = requestPath.substring("/bookmate".length());
+        }
+
         // 루트("/") 접속 시 보여줄 시작 페이지 - 실제 경로에 맞게 수정 필요
         if (requestPath.equals("/")) {
-            requestPath = "/pages/book-list.html";
+            requestPath = "/pages/index.html";
         }
 
         // scripts 폴더 기준 상대경로로 frontend 폴더 접근
@@ -143,6 +155,11 @@ public class DevProxyServer {
         if (path.endsWith(".css")) return "text/css";
         if (path.endsWith(".js")) return "application/javascript";
         if (path.endsWith(".html")) return "text/html; charset=UTF-8";
+        if (path.endsWith(".jpg") || path.endsWith(".jpeg")) return "image/jpeg";
+        if (path.endsWith(".png")) return "image/png";
+        if (path.endsWith(".gif")) return "image/gif";
+        if (path.endsWith(".webp")) return "image/webp";
+        if (path.endsWith(".svg")) return "image/svg+xml";
         return "application/octet-stream";
     }
 }
