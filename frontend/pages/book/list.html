@@ -1,45 +1,66 @@
 <!doctype html>
 <html lang="ko">
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>책 목록 | BookMate</title>
+    <title>책 | BookMate</title>
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="/assets/css/book-list.css">
-  </head>
-  <body>
-    <header class="site-header" data-navbar></header>
+</head>
+<body>
+<header class="site-header" data-navbar></header>
 
-    <main data-page="books">
-      <section>
-        <h1>책 목록</h1>
-        <p>제목과 작가명으로 승인된 책을 찾아보세요.</p>
+<main data-page="books">
+    <section>
+        <!-- Figma 책 페이지의 제목과 설명 영역 -->
+        <div class="book-page-heading">
+            <h1>책</h1>
+            <p>독자들이 추천하는 다양한 책을 만나보세요.</p>
+        </div>
 
+        <!-- 기존 책 검색 기능을 유지한 검색 영역 -->
         <form id="book-search-form" class="book-tools" role="search">
-          <div>
-            <input id="book-keyword" name="keyword" type="search" aria-label="책 검색어" aria-autocomplete="list" aria-controls="search-suggestions" placeholder="책 제목 또는 작가명" autocomplete="off">
-            <div id="search-suggestions" role="listbox" hidden></div>
-          </div>
-          <select id="book-genre" name="genre" aria-label="장르">
-            <option value="">전체 장르</option>
-            <option value="판타지">판타지</option>
-            <option value="SF">SF</option>
-            <option value="디스토피아">디스토피아</option>
-            <option value="추리">추리</option>
-            <option value="스릴러">스릴러</option>
-            <option value="인문">인문</option>
-            <option value="과학">과학</option>
-            <option value="자기계발">자기계발</option>
-            <option value="IT">IT</option>
-          </select>
-          <button class="button button-primary" type="submit">검색</button>
+            <div class="book-keyword-field">
+                <input id="book-keyword" name="keyword" type="search"
+                       aria-label="책 검색어" aria-autocomplete="list"
+                       aria-controls="search-suggestions"
+                       placeholder="책 제목 또는 작가명" autocomplete="off">
+                <div id="search-suggestions" role="listbox" hidden></div>
+            </div>
+            <select id="book-genre" name="genre" aria-label="장르">
+                <option value="">전체 장르</option>
+                <option value="판타지">판타지</option>
+                <option value="SF">SF</option>
+                <option value="디스토피아">디스토피아</option>
+                <option value="추리">추리</option>
+                <option value="스릴러">스릴러</option>
+                <option value="인문">인문</option>
+                <option value="과학">과학</option>
+                <option value="자기계발">자기계발</option>
+                <option value="IT">IT</option>
+            </select>
+            <button class="button button-primary" type="submit">검색</button>
         </form>
 
+        <!-- Figma 디자인에 추가된 장르 필터 칩 -->
+        <div class="book-category-tabs" role="group" aria-label="책 장르">
+            <button class="is-active" type="button" data-genre="">전체</button>
+            <button type="button" data-genre="판타지">판타지</button>
+            <button type="button" data-genre="SF">SF</button>
+            <button type="button" data-genre="추리">추리</button>
+            <button type="button" data-genre="인문">인문/사회</button>
+            <button type="button" data-genre="자기계발">자기계발</button>
+            <button type="button" data-genre="과학">과학</button>
+            <button type="button" data-genre="IT">IT</button>
+        </div>
+
         <p id="book-status" aria-live="polite">책 목록을 불러오는 중입니다.</p>
+        <!-- JavaScript가 Figma 형태의 책 카드를 렌더링하는 영역 -->
         <div id="book-list" class="book-grid"></div>
-      </section>
-    </main>
-    <script src="/js/components/navbar.js" defer></script>
-    <script src="/js/pages/book-list.js" defer></script>
-  </body>
+    </section>
+</main>
+
+<script src="/js/components/navbar.js" defer></script>
+<script src="/js/pages/book-list.js" defer></script>
+</body>
 </html>
