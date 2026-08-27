@@ -20,7 +20,7 @@
   } catch (error) {
     console.error(error);
     navbarHosts.forEach((host) => {
-      host.innerHTML = '<nav class="navbar"><a class="logo" href="/">BookMate</a></nav>';
+      host.innerHTML = '<nav class="navbar"><a class="brand" href="/"><strong>BOOKMATE</strong></a></nav>';
     });
   }
 })();
@@ -29,15 +29,15 @@ function renderAuthMenu(navbarHost, auth) {
   const menu = navbarHost.querySelector(".auth-menu");
   menu.replaceChildren();
   if (!auth.loggedIn) {
-    menu.append(createLink("로그인", "/pages/auth/login.html", "button"));
-    menu.append(createLink("회원가입", "/pages/auth/signup.html", "button button-primary"));
+    menu.append(createLink("로그인", "/pages/auth/login.html", "login-link"));
+    menu.append(createLink("회원가입", "/pages/auth/signup.html", "button button-small button-primary"));
     return;
   }
-  menu.append(createLink("마이페이지", "/pages/member/mypage.html", "button"));
-  menu.append(createLink("회원정보수정", "/pages/member/edit.html", "button"));
+  menu.append(createLink("마이페이지", "/pages/member/mypage.html", "login-link"));
+  menu.append(createLink("회원정보수정", "/pages/member/edit.html", "login-link account-edit-link"));
   const logout = document.createElement("button");
   logout.type = "button";
-  logout.className = "button button-primary";
+  logout.className = "button button-small button-primary";
   logout.textContent = "로그아웃";
   logout.addEventListener("click", async () => {
     logout.disabled = true;
@@ -57,7 +57,12 @@ function createLink(label, href, className) {
 
 function markCurrentPage(host, currentPath) {
   host.querySelectorAll("a[href]").forEach((link) => {
-    if (normalizePath(new URL(link.href, window.location.origin).pathname) === currentPath) link.setAttribute("aria-current", "page");
+    const linkUrl = new URL(link.href, window.location.origin);
+    const samePath = normalizePath(linkUrl.pathname) === currentPath;
+    const sameSection = window.location.hash
+      ? linkUrl.hash === window.location.hash
+      : !linkUrl.hash;
+    if (samePath && sameSection) link.setAttribute("aria-current", "page");
   });
 }
 

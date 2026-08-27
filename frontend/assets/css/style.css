@@ -53,9 +53,77 @@ button {
   display: flex;
   align-items: center;
   width: min(1200px, 100%);
-  min-height: var(--navbar-height);
+  min-height: 68px;
   padding: 0 24px;
   margin: 0 auto;
+}
+
+.brand {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.22rem;
+  letter-spacing: -0.04em;
+}
+
+.brand-mark {
+  color: var(--color-primary);
+  font-size: 1.25rem;
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin-left: 42px;
+}
+
+.main-nav a {
+  padding: 23px 0 20px;
+  border-bottom: 3px solid transparent;
+  color: var(--color-muted);
+  font-weight: 700;
+}
+
+.main-nav a:hover,
+.main-nav a:focus-visible,
+.main-nav a[aria-current="page"] {
+  border-bottom-color: var(--color-primary);
+  color: var(--color-text);
+  outline: none;
+}
+
+.account-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+}
+
+.account-actions .auth-menu {
+  gap: 14px;
+  margin-left: 0;
+}
+
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.login-link {
+  font-weight: 700;
+}
+
+.login-link:hover,
+.login-link:focus-visible {
+  color: var(--color-primary-dark);
+  outline: none;
 }
 
 .logo {
@@ -458,5 +526,35 @@ button {
 
   .book-card {
     grid-template-columns: 86px 1fr;
+  }
+}
+
+@media (max-width: 860px) {
+  .main-nav {
+    gap: 18px;
+    margin-left: 24px;
+  }
+
+  .main-nav a:nth-child(4) {
+    display: none;
+  }
+
+  .account-edit-link,
+  .icon-button {
+    display: none;
+  }
+}
+
+@media (max-width: 650px) {
+  .navbar {
+    padding: 0 14px;
+  }
+
+  .main-nav {
+    display: none;
+  }
+
+  .brand {
+    font-size: 1.05rem;
   }
 }

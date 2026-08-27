@@ -1,35 +1,8 @@
-.header-inner,
-.account-actions,
-.main-nav,
 .footer-top,
 .footer-nav {
   display: flex;
   align-items: center;
 }
-
-.header-inner {
-  min-height: 68px;
-  gap: 36px;
-}
-
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1.22rem;
-  letter-spacing: -0.04em;
-}
-
-.brand-mark { color: var(--color-primary); }
-
-.main-nav { gap: 28px; }
-.main-nav a { color: var(--color-muted); font-weight: 700; }
-.main-nav a:hover,
-.main-nav a.active { color: var(--color-text); }
-
-.account-actions { gap: 16px; margin-left: auto; }
-.account-actions .login { font-weight: 700; }
-.icon-button { font-size: 1.5rem; line-height: 1; }
 
 .hero { overflow: hidden; background: linear-gradient(135deg, #f7fcfd 0%, #fff 58%); }
 .hero-grid {
