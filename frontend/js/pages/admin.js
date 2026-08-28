@@ -13,9 +13,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     await loadMembers();
     await loadPosts();
+    await loadTierTemplates();
 
     const memberRefreshButton = document.getElementById("member-refresh-button");
     const postRefreshButton = document.getElementById("post-refresh-button");
+    const tierRefreshButton = document.getElementById("tier-refresh-button");
 
     if (memberRefreshButton) {
         memberRefreshButton.addEventListener("click", loadMembers);
@@ -24,7 +26,38 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (postRefreshButton) {
         postRefreshButton.addEventListener("click", loadPosts);
     }
+    if (tierRefreshButton) tierRefreshButton.addEventListener("click", loadTierTemplates);
 });
+
+async function loadTierTemplates() {
+    const tbody = document.getElementById("tier-table-body");
+    if (!tbody) return;
+    try {
+        const response = await fetch("/api/admin/tier-templates", {credentials: "include"});
+        const data = await response.json();
+        if (!response.ok) { handleApiError(response.status, data.message); return; }
+        const templates = data.templates || [];
+        tbody.innerHTML = templates.length ? "" : '<tr><td colspan="8" class="admin-empty">신청된 템플릿이 없습니다.</td></tr>';
+        templates.forEach(template => {
+            const row = document.createElement("tr");
+            const pending = template.status === "PENDING";
+            row.innerHTML = `<td>${template.templateId}</td><td>${escapeHtml(template.creatorNickname)}</td><td>${escapeHtml(template.category)}</td><td>${escapeHtml(template.title)}</td><td>${template.itemCount}권</td><td><span class="admin-badge">${escapeHtml(template.status)}</span></td><td>${formatValue(template.requestedAt)}</td><td>${pending ? `<button class="admin-action-button" onclick="reviewTierTemplate(${template.templateId}, true)">승인</button> <button class="admin-action-button admin-action-danger" onclick="reviewTierTemplate(${template.templateId}, false)">반려</button>` : "처리 완료"}</td>`;
+            tbody.append(row);
+        });
+    } catch (error) { console.error(error); showMessage("티어 템플릿 신청을 불러오지 못했습니다."); }
+}
+
+async function reviewTierTemplate(templateId, approved) {
+    const reason = approved ? "" : prompt("반려 사유를 입력해 주세요.");
+    if (!approved && !reason) return;
+    if (approved && !confirm(`${templateId}번 템플릿을 공개 승인할까요?`)) return;
+    try {
+        const response = await fetch("/api/admin/tier-templates", {method:"POST", headers:{"Content-Type":"application/json"}, credentials:"include", body:JSON.stringify({templateId, approved, reason})});
+        const data = await response.json();
+        if (!response.ok) { handleApiError(response.status, data.message); return; }
+        showMessage(data.message); await loadTierTemplates();
+    } catch (error) { console.error(error); showMessage("검토 결과를 저장하지 못했습니다."); }
+}
 
 
 /*

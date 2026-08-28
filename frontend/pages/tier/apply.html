@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>새 티어 템플릿 신청 | BookMate</title>
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260828-5">
+  <link rel="stylesheet" href="/assets/css/tier.css?v=20260828-37">
+  <script src="/js/components/auth-guard.js"></script>
+</head>
+<body>
+  <header class="site-header" data-navbar></header>
+
+  <main class="tier-page tier-create-page">
+    <div class="tier-container tier-narrow">
+      <header class="page-heading">
+        <h1 class="page-gradient-title">새 티어 템플릿 신청</h1>
+      </header>
+
+      <form id="template-form" class="template-form">
+        <label>
+          템플릿 이름
+          <input id="template-title" maxlength="200" required placeholder="예: 해리 포터 시리즈">
+        </label>
+
+        <div class="form-row">
+          <label>
+            템플릿 유형
+            <select id="template-category" required>
+              <option value="자유" selected>자유</option>
+              <option value="장르">장르</option>
+              <option value="작가">작가</option>
+            </select>
+          </label>
+
+          <label id="template-filter-label" hidden>
+            장르 선택
+            <select id="template-filter"></select>
+            <span class="author-combobox">
+              <span id="template-author-error" class="author-error" role="alert" hidden>
+                목록에 있는 작가명을 정확히 입력하거나 선택해 주세요.
+              </span>
+              <input
+                id="template-author-filter"
+                type="text"
+                placeholder="작가명을 입력하거나 선택"
+                autocomplete="off"
+                aria-controls="template-author-options"
+                aria-describedby="template-author-error"
+                aria-expanded="false"
+                hidden
+              >
+              <span id="template-author-options" class="author-options" role="listbox" hidden></span>
+            </span>
+          </label>
+        </div>
+
+        <label>
+          소개
+          <textarea
+            id="template-description"
+            maxlength="1000"
+            rows="3"
+            placeholder="어떤 책을 모은 템플릿인지 알려주세요."
+          ></textarea>
+        </label>
+
+        <div class="tier-book-search">
+          <div class="tier-search-field">
+            <input
+              id="book-search"
+              type="search"
+              aria-label="책 제목 검색어"
+              aria-autocomplete="list"
+              aria-controls="tier-search-suggestions"
+              aria-expanded="false"
+              placeholder="책 제목"
+              autocomplete="off"
+            >
+            <div id="tier-search-suggestions" role="listbox" hidden></div>
+          </div>
+          <button id="book-search-button" class="button button-teal" type="button">검색</button>
+        </div>
+
+        <section class="book-selection-panel">
+          <div class="selection-heading">
+            <strong>책 선택</strong>
+            <span id="selection-count">선택된 책 수 : 0권</span>
+          </div>
+          <div id="book-picker" class="book-picker"></div>
+        </section>
+
+        <p id="form-message" class="tier-status" aria-live="polite"></p>
+        <div class="template-form-actions">
+          <button id="selection-reset-button" class="button button-white" type="button">선택 초기화</button>
+          <button class="button button-teal template-submit-button" type="submit">관리자 검토 요청</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script src="/js/components/navbar.js" defer></script>
+  <script src="/js/pages/tier-apply.js?v=20260828-1" defer></script>
+</body>
+</html>

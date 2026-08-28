@@ -11,8 +11,8 @@ const selectedAuthorNameElement = document.querySelector("#selected-author-name"
 const searchFilterHeading = document.querySelector("#search-filter-heading");
 const selectedSearchKeywordElement = document.querySelector("#selected-search-keyword");
 const pageParams = new URLSearchParams(window.location.search);
-const selectedAuthorId = pageParams.get("authorId");
-const selectedAuthorName = pageParams.get("authorName");
+let selectedAuthorId = pageParams.get("authorId");
+let selectedAuthorName = pageParams.get("authorName");
 const suggestionCache = new Map();
 let suggestionTimer;
 let suggestionRequest;
@@ -250,6 +250,20 @@ searchForm.addEventListener("submit", (event) => {
 });
 
 sortSelect.addEventListener("change", () => {
+    loadBooks();
+});
+
+document.querySelector("#book-reset-button")?.addEventListener("click", () => {
+    selectedAuthorId = null;
+    selectedAuthorName = null;
+    selectedGenre = "";
+    keywordInput.value = "";
+    sortSelect.value = "rating";
+    authorFilterHeading.hidden = true;
+    searchFilterHeading.hidden = true;
+    closeSuggestions();
+    updateActiveCategory();
+    window.history.replaceState({}, "", "/pages/book/list.html");
     loadBooks();
 });
 

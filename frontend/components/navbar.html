@@ -7,7 +7,13 @@
   <div class="main-nav">
     <a href="/">홈</a>
     <a href="/pages/book/list.html">책</a>
-    <a href="/#taste">책 취향</a>
+    <div class="dropdown taste-dropdown">
+      <button type="button" class="dropdown-trigger">책 취향</button>
+      <div class="dropdown-menu">
+        <a href="/pages/tier/list.html">티어리스트</a>
+        <a href="/#taste">이상형 월드컵</a>
+      </div>
+    </div>
     <a href="/pages/post/list.html">커뮤니티</a>
     <!--    관리자페이지용 네비게이션 바-->
     <a href="/pages/admin/admin.html" id="admin-menu" style="display: none;">관리자페이지</a>

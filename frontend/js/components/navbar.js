@@ -65,12 +65,16 @@ function markCurrentPage(host, currentPath) {
     const linkPath = normalizePath(linkUrl.pathname);
     const isBookSection = currentPath.startsWith("/pages/book/")
       && linkPath === "/pages/book/list.html";
-    const samePath = linkPath === currentPath || isBookSection;
+    const isTierSection = currentPath.startsWith("/pages/tier/")
+      && linkPath === "/pages/tier/list.html";
+    const samePath = linkPath === currentPath || isBookSection || isTierSection;
     const sameSection = window.location.hash
       ? linkUrl.hash === window.location.hash
       : !linkUrl.hash;
     if (samePath && sameSection) link.setAttribute("aria-current", "page");
   });
+  const activeTasteLink = host.querySelector(".taste-dropdown a[aria-current='page']");
+  if (activeTasteLink) host.querySelector(".taste-dropdown .dropdown-trigger")?.setAttribute("aria-current", "page");
 }
 
 function normalizePath(path) {

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>티어리스트 통계 | BookMate</title>
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260828-5">
+  <link rel="stylesheet" href="/assets/css/tier.css?v=20260828-22">
+  <script src="/js/components/auth-guard.js"></script>
+</head>
+<body>
+  <header class="site-header" data-navbar></header>
+
+  <main class="tier-page">
+    <div class="tier-container">
+      <header class="stats-heading">
+        <div>
+          <h1 class="stats-title">
+            <span id="stats-template-title" class="page-gradient-title">티어리스트</span>
+            <span class="stats-title-suffix">전체 통계</span>
+          </h1>
+          <p>이 템플릿으로 완성된 모든 티어리스트를 합산한 읽기 전용 결과입니다.</p>
+        </div>
+        <a id="back-to-maker" class="button button-sky" href="/pages/tier/list.html">
+          내 티어리스트 만들기
+        </a>
+      </header>
+
+      <p id="stats-status" class="tier-status">통계를 불러오는 중입니다.</p>
+      <div id="stats-grid"></div>
+    </div>
+  </main>
+
+  <script src="/js/components/navbar.js" defer></script>
+  <script src="/js/pages/tier-stats.js?v=20260828-6" defer></script>
+</body>
+</html>

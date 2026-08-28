@@ -15,7 +15,15 @@ loginForm.addEventListener("submit", async (event) => {
     });
     const result = await response.json();
     if (!response.ok) throw new Error(result.message || "로그인에 실패했습니다.");
-    window.location.href = "/";
+    const redirect = new URLSearchParams(window.location.search).get("redirect");
+    let safeRedirect = "/";
+    if (redirect?.startsWith("/")) {
+      const target = new URL(redirect, window.location.origin);
+      if (target.origin === window.location.origin) {
+        safeRedirect = `${target.pathname}${target.search}${target.hash}`;
+      }
+    }
+    window.location.href = safeRedirect;
   } catch (error) {
     loginMessage.textContent = error.message;
     loginMessage.className = "form-message error";

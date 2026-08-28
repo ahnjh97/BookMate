@@ -24,6 +24,12 @@
 .cover-5, .c5 { background: linear-gradient(145deg, #4a896c, #163f35); }
 .cover-6 { background: linear-gradient(145deg, #d19377, #643a36); }
 
+@media (min-width: 901px) {
+  .hero-copy { transform: translateX(-16px); }
+  .hero h1 { font-size: clamp(2.55rem, 4.35vw, 4.15rem); transform: translateY(-8px); }
+  .book-mosaic { transform: translateX(16px) rotate(2deg); }
+}
+
 .section { padding: 80px 0; }
 .section-heading { display: flex; align-items: end; justify-content: space-between; margin-bottom: 28px; }
 .section-heading h2, .center-heading h2 { margin: 0 0 8px; font-size: clamp(1.8rem, 3vw, 2.35rem); letter-spacing: -.04em; }
@@ -98,6 +104,7 @@
   html { scroll-behavior: smooth; scroll-snap-type: y mandatory; scroll-padding-top: var(--navbar-height); }
   .home-page main > section, .home-page .site-footer { scroll-snap-align: start; scroll-snap-stop: always; }
   .home-page main > section { min-height: calc(100svh - var(--navbar-height)); }
+  .home-page main > .hero { display: flex; align-items: center; }
   .home-page main > .section { display: flex; align-items: center; }
 }
 

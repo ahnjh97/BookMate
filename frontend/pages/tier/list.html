@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>책 티어리스트 | BookMate</title>
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260828-5">
+  <link rel="stylesheet" href="/assets/css/tier.css?v=20260828-7">
+</head>
+<body>
+  <header class="site-header" data-navbar></header>
+
+  <main class="tier-page">
+    <div class="tier-container">
+      <header class="tier-list-header">
+        <button id="template-reset-button" class="page-gradient-title page-title-button" type="button">
+          티어리스트 템플릿
+        </button>
+
+        <div class="tier-tools-row">
+          <form id="template-search" role="search">
+            <input
+              id="template-keyword"
+              type="search"
+              aria-label="티어리스트 템플릿 검색"
+              placeholder="시리즈·장르로 검색"
+            >
+            <button class="button button-primary" type="submit">검색</button>
+          </form>
+          <a class="button button-teal tier-apply-button" href="/pages/tier/apply.html">
+            새 템플릿 신청
+          </a>
+        </div>
+      </header>
+
+      <p id="template-search-context" class="tier-search-context" hidden>
+        <strong></strong><span>로 검색한 결과입니다.</span>
+      </p>
+      <p id="template-status" class="tier-status" aria-live="polite">
+        템플릿을 불러오는 중입니다.
+      </p>
+      <div id="template-grid" class="template-grid"></div>
+    </div>
+  </main>
+
+  <script src="/js/components/navbar.js" defer></script>
+  <script src="/js/pages/tier-list.js?v=20260828-3" defer></script>
+</body>
+</html>

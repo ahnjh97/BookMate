@@ -178,5 +178,32 @@ SELECT SEQ_BOOK.NEXTVAL, A.author_id, S.title, S.genre, S.publisher,
   JOIN AUTHOR A ON A.author_name = S.author_name;
 /*END*/
 
+-- 승인된 티어 템플릿 예시 (로그인에 사용하지 않는 시스템 작성자)
+INSERT INTO MEMBER (member_id, login_id, password, nickname, email, role)
+VALUES (SEQ_MEMBER.NEXTVAL, 'bookmate_system', 'disabled', 'BookMate 큐레이터', 'curator@bookmate.local', 'USER');
+/*END*/
+
+INSERT INTO TIER_TEMPLATE (template_id, member_id, title, description, category, status, processed_at)
+SELECT SEQ_TIER_TEMPLATE.NEXTVAL, member_id, '해리 포터 시리즈', '호그와트에서 시작된 일곱 편의 모험을 내 취향대로 나눠보세요.', '시리즈', 'APPROVED', SYSDATE
+FROM MEMBER WHERE login_id = 'bookmate_system';
+/*END*/
+INSERT INTO TIER_TEMPLATE_ITEM (template_item_id, template_id, book_id, sort_order)
+SELECT SEQ_TIER_TEMPLATE_ITEM.NEXTVAL, T.template_id, B.book_id,
+       ROW_NUMBER() OVER (ORDER BY B.published_date, B.book_id) - 1
+  FROM TIER_TEMPLATE T CROSS JOIN BOOK B
+ WHERE T.title = '해리 포터 시리즈' AND B.title LIKE '해리 포터%';
+/*END*/
+
+INSERT INTO TIER_TEMPLATE (template_id, member_id, title, description, category, status, processed_at)
+SELECT SEQ_TIER_TEMPLATE.NEXTVAL, member_id, 'SF 입문 명작', '우주와 미래, 과학적 상상력을 담은 SF 책을 골라 티어를 완성해 보세요.', '장르', 'APPROVED', SYSDATE
+FROM MEMBER WHERE login_id = 'bookmate_system';
+/*END*/
+INSERT INTO TIER_TEMPLATE_ITEM (template_item_id, template_id, book_id, sort_order)
+SELECT SEQ_TIER_TEMPLATE_ITEM.NEXTVAL, T.template_id, B.book_id,
+       ROW_NUMBER() OVER (ORDER BY B.title, B.book_id) - 1
+  FROM TIER_TEMPLATE T CROSS JOIN BOOK B
+ WHERE T.title = 'SF 입문 명작' AND B.genre = 'SF';
+/*END*/
+
 COMMIT;
 /*END*/
