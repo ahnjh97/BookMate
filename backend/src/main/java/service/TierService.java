@@ -7,16 +7,25 @@ import java.util.*;
 
 public class TierService {
     public List<Map<String, Object>> findTemplates(String keyword, boolean includePending) {
+        return findTemplates(keyword, includePending, null, null);
+    }
+
+    public List<Map<String, Object>> findTemplates(String keyword, boolean includePending, Long memberId, Long bookId) {
         String sql = """
                 SELECT T.template_id, T.title, T.description, T.category, T.status,
-                       T.requested_at, M.nickname, COUNT(I.template_item_id) item_count,
-                       MIN(B.image_url) KEEP (DENSE_RANK FIRST ORDER BY I.sort_order) cover_image
+                       T.requested_at, M.nickname, COUNT(DISTINCT I.template_item_id) item_count,
+                       MIN(B.image_url) KEEP (DENSE_RANK FIRST ORDER BY I.sort_order) cover_image,
+                       CASE WHEN COUNT(DISTINCT L.tier_list_id) > 0 THEN 'Y' ELSE 'N' END participated
                   FROM TIER_TEMPLATE T
                   JOIN MEMBER M ON M.member_id = T.member_id
                   LEFT JOIN TIER_TEMPLATE_ITEM I ON I.template_id = T.template_id
                   LEFT JOIN BOOK B ON B.book_id = I.book_id
+                  LEFT JOIN TIER_LIST L ON L.template_id = T.template_id AND L.member_id = ?
                  WHERE (? = 'Y' OR T.status = 'APPROVED')
                    AND (? IS NULL OR LOWER(T.title) LIKE ?)
+                   AND (? IS NULL OR EXISTS (
+                       SELECT 1 FROM TIER_TEMPLATE_ITEM BI WHERE BI.template_id = T.template_id AND BI.book_id = ?
+                   ))
                  GROUP BY T.template_id, T.title, T.description, T.category, T.status,
                           T.requested_at, M.nickname
                  ORDER BY CASE T.status WHEN 'PENDING' THEN 0 ELSE 1 END, T.requested_at DESC
@@ -25,9 +34,12 @@ public class TierService {
         String pattern = normalized == null ? null : "%" + normalized.toLowerCase() + "%";
         List<Map<String, Object>> result = new ArrayList<>();
         try (Connection connection = DBUtil.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, includePending ? "Y" : "N");
-            statement.setString(2, normalized);
-            statement.setString(3, pattern);
+            if (memberId == null) statement.setNull(1, Types.NUMERIC); else statement.setLong(1, memberId);
+            statement.setString(2, includePending ? "Y" : "N");
+            statement.setString(3, normalized);
+            statement.setString(4, pattern);
+            if (bookId == null) { statement.setNull(5, Types.NUMERIC); statement.setNull(6, Types.NUMERIC); }
+            else { statement.setLong(5, bookId); statement.setLong(6, bookId); }
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) result.add(templateSummary(rs));
             }
@@ -197,13 +209,31 @@ public class TierService {
                     check.setLong(1, templateId);
                     try (ResultSet rs = check.executeQuery()) { if (!rs.next()) throw new IllegalArgumentException("사용할 수 없는 템플릿입니다."); }
                 }
-                long listId;
+                Long existingListId = null;
                 try (PreparedStatement statement = connection.prepareStatement(
-                        "INSERT INTO TIER_LIST(tier_list_id, member_id, template_id, title, description, is_public) VALUES(SEQ_TIER_LIST.NEXTVAL,?,?,?,?,?)",
-                        new String[]{"tier_list_id"})) {
-                    statement.setLong(1, memberId); statement.setLong(2, templateId); statement.setString(3, safeTitle);
-                    statement.setString(4, safeDescription); statement.setString(5, isPublic ? "Y" : "N"); statement.executeUpdate();
-                    try (ResultSet keys = statement.getGeneratedKeys()) { keys.next(); listId = keys.getLong(1); }
+                        "SELECT tier_list_id FROM TIER_LIST WHERE member_id=? AND template_id=? FOR UPDATE")) {
+                    statement.setLong(1, memberId); statement.setLong(2, templateId);
+                    try (ResultSet rs = statement.executeQuery()) { if (rs.next()) existingListId = rs.getLong(1); }
+                }
+                long listId;
+                if (existingListId == null) {
+                    try (PreparedStatement statement = connection.prepareStatement(
+                            "INSERT INTO TIER_LIST(tier_list_id, member_id, template_id, title, description, is_public) VALUES(SEQ_TIER_LIST.NEXTVAL,?,?,?,?,?)",
+                            new String[]{"tier_list_id"})) {
+                        statement.setLong(1, memberId); statement.setLong(2, templateId); statement.setString(3, safeTitle);
+                        statement.setString(4, safeDescription); statement.setString(5, isPublic ? "Y" : "N"); statement.executeUpdate();
+                        try (ResultSet keys = statement.getGeneratedKeys()) { keys.next(); listId = keys.getLong(1); }
+                    }
+                } else {
+                    listId = existingListId;
+                    try (PreparedStatement statement = connection.prepareStatement(
+                            "UPDATE TIER_LIST SET title=?, description=?, is_public=? WHERE tier_list_id=?")) {
+                        statement.setString(1, safeTitle); statement.setString(2, safeDescription);
+                        statement.setString(3, isPublic ? "Y" : "N"); statement.setLong(4, listId); statement.executeUpdate();
+                    }
+                    try (PreparedStatement statement = connection.prepareStatement("DELETE FROM TIER_ITEM WHERE tier_list_id=?")) {
+                        statement.setLong(1, listId); statement.executeUpdate();
+                    }
                 }
                 try (PreparedStatement statement = connection.prepareStatement(
                         "INSERT INTO TIER_ITEM(tier_item_id,tier_list_id,book_id,tier_grade,sort_order) " +
@@ -290,6 +320,7 @@ public class TierService {
         item.put("description", rs.getString("description")); item.put("category", rs.getString("category"));
         item.put("status", rs.getString("status")); item.put("creatorNickname", rs.getString("nickname"));
         item.put("itemCount", rs.getInt("item_count")); item.put("coverImage", rs.getString("cover_image"));
+        item.put("participated", "Y".equals(rs.getString("participated")));
         item.put("requestedAt", rs.getTimestamp("requested_at")); return item;
     }
 

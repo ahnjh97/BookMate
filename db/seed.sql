@@ -184,7 +184,7 @@ VALUES (SEQ_MEMBER.NEXTVAL, 'bookmate_system', 'disabled', 'BookMate 큐레이�
 /*END*/
 
 INSERT INTO TIER_TEMPLATE (template_id, member_id, title, description, category, status, processed_at)
-SELECT SEQ_TIER_TEMPLATE.NEXTVAL, member_id, '해리 포터 시리즈', '호그와트에서 시작된 일곱 편의 모험을 내 취향대로 나눠보세요.', '시리즈', 'APPROVED', SYSDATE
+SELECT SEQ_TIER_TEMPLATE.NEXTVAL, member_id, '해리 포터 시리즈', '호그와트에서 시작된 일곱 편의 모험을 내 취향대로 나눠보세요.', '작가', 'APPROVED', SYSDATE
 FROM MEMBER WHERE login_id = 'bookmate_system';
 /*END*/
 INSERT INTO TIER_TEMPLATE_ITEM (template_item_id, template_id, book_id, sort_order)

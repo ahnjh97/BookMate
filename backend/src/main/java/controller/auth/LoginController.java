@@ -62,6 +62,10 @@ public class LoginController extends HttpServlet {
                     member.getRole()
             );
 
+            session.setAttribute("loginNickname", member.getNickname());
+            session.setAttribute("loginId", member.getLoginId());
+            session.setAttribute("loginRole", member.getRole());
+
             gson.toJson(
                     Map.of(
                             "success", true,

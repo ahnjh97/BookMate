@@ -27,6 +27,16 @@ public class AuthService {
         }
     }
 
+    public MemberDTO findMember(long memberId) {
+        try (Connection connection = DBUtil.getConnection()) {
+            MemberDTO member = authDAO.selectById(connection, memberId);
+            if (member != null) member.setPassword(null);
+            return member;
+        } catch (SQLException exception) {
+            throw new RuntimeException("회원 정보를 불러오지 못했습니다.", exception);
+        }
+    }
+
     public long signup(MemberDTO member) {
         validateSignup(member);
         member.setLoginId(member.getLoginId().trim());

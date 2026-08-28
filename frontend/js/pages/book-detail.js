@@ -16,6 +16,7 @@ const ratingBookAuthorElement = document.querySelector("#rating-book-author");
 const ratingBookDescriptionElement = document.querySelector("#rating-book-description");
 const ratingEditorElement = document.querySelector("#rating-editor");
 const openRatingFormElement = document.querySelector("#open-rating-form");
+const myRatingSummaryElement = document.querySelector("#my-rating-summary");
 const ratingToastElement = document.querySelector("#rating-toast");
 const closeRatingFormElement = document.querySelector("#close-rating-form");
 const ratingForm = document.querySelector("#rating-form");
@@ -23,11 +24,16 @@ const ratingCommentElement = document.querySelector("#rating-comment");
 const ratingCommentCountElement = document.querySelector("#rating-comment-count");
 const ratingSubmitElement = document.querySelector("#rating-submit");
 const ratingMessageElement = document.querySelector("#rating-message");
+const ratingScoreOptionsElement = document.querySelector(".rating-score-options");
+const ratingStarLabels = [...ratingScoreOptionsElement.querySelectorAll("label")];
 const readerRatingsElement = document.querySelector("#reader-ratings");
 const readerRatingsSummaryElement = document.querySelector("#reader-ratings-summary");
 const readerRatingsStatusElement = document.querySelector("#reader-ratings-status");
 const readerRatingsListElement = document.querySelector("#reader-ratings-list");
 const readerRatingsPaginationElement = document.querySelector("#reader-ratings-pagination");
+const bookCommunityElement = document.querySelector("#book-community");
+const bookTierTemplatesStatusElement = document.querySelector("#book-tier-templates-status");
+const bookTierTemplatesListElement = document.querySelector("#book-tier-templates-list");
 let currentRating = null;
 let isLoggedIn = false;
 let currentRatingsPage = 1;
@@ -115,6 +121,7 @@ async function loadBook() {
       throw new Error(result.message || "책 정보를 불러오지 못했습니다.");
     }
     renderBook(result.data);
+    await loadBookTierTemplates(bookId);
     await loadMyRating(bookId);
     await loadPublicRatings(bookId, currentRatingsPage);
   } catch (error) {
@@ -124,6 +131,31 @@ async function loadBook() {
       : error.message || fallbackMessage;
     showError(message);
   }
+}
+
+async function loadBookTierTemplates(bookId) {
+  try {
+    const response = await fetch(`/api/tier-templates?bookId=${bookId}`);
+    const result = await response.json();
+    if (!response.ok || !result.success) throw new Error(result.message || "티어리스트를 불러오지 못했습니다.");
+    const templates = result.templates || [];
+    bookTierTemplatesListElement.replaceChildren();
+    bookTierTemplatesStatusElement.textContent = templates.length ? `${templates.length}개의 템플릿에 포함되어 있습니다.` : "이 책이 포함된 승인된 템플릿이 없습니다.";
+    templates.forEach((template) => {
+      const link = document.createElement("a");
+      link.className = "book-tier-template-link";
+      link.href = `/pages/tier/maker.html?id=${template.templateId}`;
+      link.innerHTML = `<strong>${escapeHtml(template.title)}</strong><span class="category-chip">${escapeHtml(template.category)}</span>`;
+      bookTierTemplatesListElement.append(link);
+    });
+  } catch (error) {
+    bookTierTemplatesListElement.replaceChildren();
+    bookTierTemplatesStatusElement.textContent = error.message || "티어리스트를 불러오지 못했습니다.";
+  }
+}
+
+function escapeHtml(value) {
+  return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
 }
 
 async function loadPublicRatings(bookId, page = 1) {
@@ -166,7 +198,7 @@ function createRatingCard(rating) {
   const score = document.createElement("span");
   score.className = "reader-rating-score";
   score.setAttribute("aria-label", `5점 만점에 ${rating.score}점`);
-  score.textContent = `${"★".repeat(rating.score)}${"☆".repeat(5 - rating.score)} ${rating.score}.0`;
+  score.textContent = `${"★".repeat(rating.score)}${"☆".repeat(5 - rating.score)}`;
   const comment = document.createElement("p");
   comment.textContent = rating.commentText || "한줄평이 없습니다.";
   if (!rating.commentText) comment.className = "reader-rating-empty-comment";
@@ -361,6 +393,8 @@ function renderRatingState() {
   const isUpdate = Boolean(currentRating);
   openRatingFormElement.textContent = isUpdate ? "평점 수정하기" : "평점 등록하기";
   ratingSubmitElement.textContent = isUpdate ? "평점 수정 완료" : "평점 기록 완료";
+  myRatingSummaryElement.hidden = !isUpdate;
+  myRatingSummaryElement.textContent = isUpdate ? `내 평점 ★ ${Number(currentRating.score).toFixed(1)}` : "";
 }
 
 function prepareRatingForm() {
@@ -373,7 +407,13 @@ function prepareRatingForm() {
     ratingCommentElement.value = currentRating.commentText || "";
   }
 
+  paintRatingStars(Number(ratingForm.querySelector('input[name="score"]:checked')?.value || 0));
+
   ratingCommentCountElement.textContent = `${ratingCommentElement.value.length} / 500`;
+}
+
+function paintRatingStars(score) {
+  ratingStarLabels.forEach((label, index) => label.classList.toggle("is-filled", index < score));
 }
 
 function showRatingMessage(message, state) {
@@ -386,7 +426,7 @@ function setRatingMode(isRatingMode) {
   detailContentElement.hidden = isRatingMode;
   ratingBookContextElement.hidden = !isRatingMode;
   ratingEditorElement.hidden = !isRatingMode;
-  readerRatingsElement.hidden = isRatingMode;
+  bookCommunityElement.hidden = isRatingMode;
 
   if (isRatingMode) {
     prepareRatingForm();
@@ -448,6 +488,20 @@ async function submitRating(event) {
 
 ratingCommentElement.addEventListener("input", () => {
   ratingCommentCountElement.textContent = `${ratingCommentElement.value.length} / 500`;
+});
+ratingStarLabels.forEach((label) => {
+  const input = label.querySelector('input[name="score"]');
+  label.addEventListener("mouseenter", () => paintRatingStars(Number(input.value)));
+  input.addEventListener("change", () => {
+    paintRatingStars(Number(input.value));
+    label.classList.remove("is-clicked");
+    void label.offsetWidth;
+    label.classList.add("is-clicked");
+    window.setTimeout(() => label.classList.remove("is-clicked"), 450);
+  });
+});
+ratingScoreOptionsElement.addEventListener("mouseleave", () => {
+  paintRatingStars(Number(ratingForm.querySelector('input[name="score"]:checked')?.value || 0));
 });
 openRatingFormElement.addEventListener("click", () => {
   if (!isLoggedIn) {

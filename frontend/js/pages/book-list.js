@@ -25,6 +25,8 @@ keywordInput.addEventListener("input", () => {
     const keyword = keywordInput.value.trim();
     if (!keyword) {
         closeSuggestions();
+        searchFilterHeading.hidden = true;
+        loadBooks();
         return;
     }
 
@@ -246,6 +248,7 @@ searchForm.addEventListener("submit", (event) => {
     closeSuggestions();
     const keyword = keywordInput.value.trim();
     if (keyword) showSearchResults(keyword);
+    else searchFilterHeading.hidden = true;
     loadBooks();
 });
 

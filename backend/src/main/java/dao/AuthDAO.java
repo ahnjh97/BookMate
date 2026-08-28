@@ -40,6 +40,24 @@ public class AuthDAO {
         }
     }
 
+    public MemberDTO selectById(Connection connection, long memberId) throws SQLException {
+        String sql = "SELECT member_id, login_id, password, nickname, email, role FROM MEMBER WHERE member_id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, memberId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (!resultSet.next()) return null;
+                MemberDTO member = new MemberDTO();
+                member.setMemberId(resultSet.getLong("member_id"));
+                member.setLoginId(resultSet.getString("login_id"));
+                member.setPassword(resultSet.getString("password"));
+                member.setNickname(resultSet.getString("nickname"));
+                member.setEmail(resultSet.getString("email"));
+                member.setRole(resultSet.getString("role"));
+                return member;
+            }
+        }
+    }
+
     public long insert(Connection connection, MemberDTO member) throws SQLException {
         String sql = """
                 INSERT INTO MEMBER (member_id, login_id, password, nickname, email, role)

@@ -29,6 +29,14 @@ public class AuthController extends HttpServlet {
         result.put("success", true);
         result.put("loggedIn", memberId instanceof Number);
         if (memberId instanceof Number) {
+            if (session.getAttribute("loginNickname") == null) {
+                MemberDTO member = authService.findMember(((Number) memberId).longValue());
+                if (member != null) {
+                    session.setAttribute("loginId", member.getLoginId());
+                    session.setAttribute("loginNickname", member.getNickname());
+                    session.setAttribute("loginRole", member.getRole());
+                }
+            }
             result.put("memberId", ((Number) memberId).longValue());
             result.put("loginId", session.getAttribute("loginId"));
             result.put("nickname", session.getAttribute("loginNickname"));

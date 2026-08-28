@@ -22,7 +22,8 @@ public class TierTemplateController extends HttpServlet {
                 error(response, 401, "로그인이 필요한 기능입니다.");
                 return;
             }
-            Object data = id == null ? service.findTemplates(request.getParameter("keyword"), false)
+            Long bookId = optionalPositiveLong(request.getParameter("bookId"), "올바른 책 번호가 필요합니다.");
+            Object data = id == null ? service.findTemplates(request.getParameter("keyword"), false, memberId(request), bookId)
                     : service.findTemplate(Long.parseLong(id));
             gson.toJson(Map.of("success", true, id == null ? "templates" : "template", data), response.getWriter());
         } catch (IllegalArgumentException e) { error(response, 400, e.getMessage());
@@ -43,6 +44,11 @@ public class TierTemplateController extends HttpServlet {
         } catch (RuntimeException e) { e.printStackTrace(); error(response, 500, e.getMessage()); }
     }
     private Long memberId(HttpServletRequest request) { HttpSession s=request.getSession(false); Object id=s==null?null:s.getAttribute("loginMemberId"); return id instanceof Number n?n.longValue():null; }
+    private Long optionalPositiveLong(String value, String message) {
+        if (value == null || value.isBlank()) return null;
+        try { long parsed = Long.parseLong(value); if (parsed > 0) return parsed; } catch (NumberFormatException ignored) {}
+        throw new IllegalArgumentException(message);
+    }
     private void json(HttpServletResponse r){r.setContentType("application/json");r.setCharacterEncoding("UTF-8");}
     private void error(HttpServletResponse r,int status,String message)throws IOException{r.setStatus(status);gson.toJson(Map.of("success",false,"message",message==null?"요청을 처리하지 못했습니다.":message),r.getWriter());}
     private static class TemplateRequest { String title; String description; String category; List<Long> bookIds; }

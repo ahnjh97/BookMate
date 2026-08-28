@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>책 티어리스트 | BookMate</title>
   <link rel="stylesheet" href="/assets/css/style.css?v=20260828-5">
-  <link rel="stylesheet" href="/assets/css/tier.css?v=20260828-7">
+  <link rel="stylesheet" href="/assets/css/book-list.css">
+  <link rel="stylesheet" href="/assets/css/tier.css?v=20260828-12">
 </head>
 <body>
   <header class="site-header" data-navbar></header>
@@ -35,7 +36,15 @@
 
       <p id="template-search-context" class="tier-search-context" hidden>
         <strong></strong><span>로 검색한 결과입니다.</span>
+        <a href="/pages/tier/list.html">전체 템플릿 보기</a>
       </p>
+      <div class="book-filter-bar">
+        <div class="book-category-tabs" role="group" aria-label="티어리스트 참여 상태">
+          <button class="is-active" type="button" data-participation="all" aria-pressed="true">전체</button>
+          <button type="button" data-participation="participated" aria-pressed="false">참여 템플릿</button>
+          <button type="button" data-participation="not-participated" aria-pressed="false">미참여 템플릿</button>
+        </div>
+      </div>
       <p id="template-status" class="tier-status" aria-live="polite">
         템플릿을 불러오는 중입니다.
       </p>
@@ -44,6 +53,6 @@
   </main>
 
   <script src="/js/components/navbar.js" defer></script>
-  <script src="/js/pages/tier-list.js?v=20260828-3" defer></script>
+  <script src="/js/pages/tier-list.js?v=20260828-6" defer></script>
 </body>
 </html>
