@@ -10,6 +10,9 @@ import java.sql.Statement;
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class DBInit {
+    private static final String SQLPLUS_BLOCK_TERMINATOR = "(?m)^\\s*/\\s*$";
+    private static final String SQLPLUS_SET_DEFINE = "(?im)^\\s*SET\\s+DEFINE\\s+OFF\\s*;?\\s*$";
+
     private static final Path PROJECT_ROOT = ProjectPaths.findProjectRoot();
     private static final Dotenv dotenv = Dotenv.configure()
             .directory(PROJECT_ROOT.toString())
@@ -49,7 +52,11 @@ public class DBInit {
 
         try (Statement stmt = conn.createStatement()) {
             for (String sql : script.split("/\\*END\\*/")) {
-                sql = sql.trim();
+                // '/'와 SET DEFINE은 SQL*Plus 명령이며 Oracle SQL 문법이 아니다.
+                // JDBC로 실행할 때는 제거해야 한다.
+                sql = sql.replaceAll(SQLPLUS_BLOCK_TERMINATOR, "")
+                        .replaceAll(SQLPLUS_SET_DEFINE, "")
+                        .trim();
                 if (sql.isEmpty()) continue;
                 if (!sql.toUpperCase().startsWith("BEGIN") && sql.endsWith(";")) {
                     sql = sql.substring(0, sql.length() - 1);
