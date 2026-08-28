@@ -38,7 +38,7 @@ public class AllChecks {
             System.out.println(c.name() + " ... " + (pass ? "PASS" : "FAIL"));
         }
         System.out.println("===== 순수 로직 검증 종료 =====");
-        System.out.println("(Dao/Service는 DB 연동 필요 — 별도 DbLinkedChecks 실행)");
+        System.out.println("(Dao/Service는 DB 연동 필요: 별도 DbLinkedChecks 실행)");
     }
 
     private static boolean safeCheck(Checkable c) {

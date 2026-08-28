@@ -2,34 +2,22 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>게시글 | BookMate</title>
 
-    <link
-            rel="stylesheet"
-            href="/assets/css/style.css"
-    >
-    <link
-            rel="stylesheet"
-            href="/assets/css/post.css"
-    >
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/post.css?v=20260828-5">
 </head>
 
 <body>
 <header class="site-header" data-navbar></header>
 
 <main class="post-page-main">
-    <article
-            id="post-detail"
-            class="post-detail"
-            hidden
-    >
+    <article id="post-detail" class="post-detail" hidden>
         <div class="post-detail-category">
             <span id="post-category"></span>
+            <span id="post-genre"></span>
         </div>
 
         <h1 id="post-title"></h1>
@@ -49,36 +37,41 @@
                 작성일:
                 <time id="post-created-at"></time>
             </span>
+
+            <span>
+                좋아요:
+                <strong id="post-like-count">0</strong>
+            </span>
         </div>
 
-        <div
-                id="post-content"
-                class="post-detail-content"
-        ></div>
+        <div id="post-content" class="post-detail-content"></div>
+        <section id="post-tier-list" class="post-tier-list" aria-labelledby="post-tier-list-heading" hidden>
+            <h2 id="post-tier-list-heading">티어리스트 결과</h2>
+            <div id="post-tier-board" class="post-tier-board"></div>
+        </section>
 
         <div class="post-detail-actions">
-            <a
-                    class="button"
-                    href="/pages/post/list.html"
-            >
-                목록으로
-            </a>
+            <div id="writer-actions" class="post-action-group" hidden>
+                <a id="post-edit-link" class="button" href="#">수정</a>
+                <button id="post-hide-button" class="button" type="button">숨김</button>
+                <button id="post-delete-button" class="button" type="button">삭제</button>
+            </div>
+
+            <div id="member-actions" class="post-action-group" hidden>
+                <button id="post-like-button" class="button" type="button">좋아요</button>
+                <button id="post-report-button" class="button" type="button">신고</button>
+            </div>
+
+            <a class="button" href="/pages/post/list.html">목록으로</a>
         </div>
     </article>
 
-    <p
-            id="post-detail-status"
-            class="post-detail-status"
-            aria-live="polite"
-    >
+    <p id="post-detail-status" class="post-detail-status" aria-live="polite">
         게시글을 불러오는 중입니다.
     </p>
 </main>
 
-<script src="/js/components/navbar.js" defer></script>
-<script
-        src="/js/pages/post-detail.js"
-        defer
-></script>
+<script src="/js/components/navbar.js" charset="UTF-8" defer></script>
+<script src="/js/pages/post-detail.js?v=20260829-1" charset="UTF-8" defer></script>
 </body>
 </html>

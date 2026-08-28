@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>책 티어리스트 | BookMate</title>
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260830-3">
+  <link rel="stylesheet" href="/assets/css/book-list.css?v=20260830-3">
+  <link rel="stylesheet" href="/assets/css/tier.css?v=20260830-6">
+</head>
+<body>
+  <header class="site-header" data-navbar></header>
+
+  <main class="tier-page">
+    <div class="tier-container">
+      <header class="tier-list-header">
+        <button id="template-reset-button" class="page-gradient-title page-title-button" type="button">
+          <span class="page-title-icon page-title-icon-medal" aria-hidden="true"></span>티어리스트
+        </button>
+      </header>
+
+      <div class="book-filter-bar">
+        <div class="book-category-tabs choice-tabs" role="group" aria-label="티어리스트 참여 상태">
+          <button class="is-active" type="button" data-participation="all" aria-pressed="true">전체</button>
+          <button type="button" data-participation="participated" aria-pressed="false">참여 템플릿</button>
+          <button type="button" data-participation="not-participated" aria-pressed="false">미참여 템플릿</button>
+        </div>
+        <a class="button button-teal tier-create-button" href="/pages/tier/create.html">
+          새 템플릿 만들기
+        </a>
+      </div>
+      <div id="template-grid" class="template-grid"></div>
+    </div>
+  </main>
+
+  <script src="/js/components/navbar.js" defer></script>
+  <script src="/js/pages/tier-list.js?v=20260830-3" defer></script>
+</body>
+</html>

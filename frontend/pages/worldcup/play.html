@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>이상형 월드컵 | BookMate</title>
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260828-5">
+  <link rel="stylesheet" href="/assets/css/worldcup.css?v=1">
+  <script src="/js/components/auth-guard.js"></script>
+</head>
+<body>
+  <header class="site-header" data-navbar></header>
+  <main class="worldcup-page">
+    <div class="worldcup-container">
+      <header class="worldcup-header">
+        <div>
+          <h1 id="title">이상형 월드컵</h1>
+          <p id="description"></p>
+        </div><a id="stats-link" class="button button-white">전체 통계</a>
+      </header>
+      <section id="setup">
+        <h2 style="text-align: center">몇 강으로 시작할까요?</h2>
+        <div class="round-picker">
+          <label class="round-choice"><input
+              type="radio"
+              name="size"
+              value="8"
+              checked
+            ><span>8강</span></label><label class="round-choice"><input
+              type="radio"
+              name="size"
+              value="16"
+            ><span>16강</span></label>
+        </div>
+        <p id="setup-message" class="worldcup-status" style="text-align: center">
+        </p>
+        <div style="text-align: center">
+          <a id="previous-result" class="button button-white" hidden>
+            내 참여 결과 보기
+          </a>
+          <button id="start" class="button button-teal">
+            월드컵 시작
+          </button>
+        </div>
+      </section>
+      <section id="game" hidden>
+        <div class="match-progress">
+          <strong id="round-label"></strong><p id="match-label"></p>
+          <div class="progress-track"><i id="progress"></i></div>
+        </div>
+        <div id="versus" class="versus"></div>
+      </section>
+    </div>
+  </main>
+  <script src="/js/components/navbar.js" defer></script>
+  <script src="/js/pages/worldcup-play.js?v=1" defer></script>
+</body>
+</html>

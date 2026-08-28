@@ -8,7 +8,7 @@
 // ▶ 왜 필요한가
 //   로컬에서 프론트(html/js)랑 백엔드(Main.java, Tomcat)는 포트가 다름
 //     - 백엔드: localhost:8080
-//     - 프론트: localhost:5500 (이 서버가 띄우는 포트)
+//     - 프론트: localhost:5501 (이 서버가 띄우는 포트)
 //   브라우저는 포트 다른 서버끼리 통신을 CORS로 기본 차단
 //   fetch('/api/...') 호출불가
 //
@@ -24,19 +24,16 @@
 //   배포 환경엔 원래 있는 중계 기능을 처리
 //
 // ▶ 이 파일이 뭘 하는가
-//   5500번 하나에서 두 가지 처리
+//   5501번 하나에서 두 가지 처리
 //     1) /api로 시작하는 요청 -> 그대로 8080(백엔드)으로 전달, 응답 그대로 돌려줌
 //     2) 그 외 요청 -> frontend 폴더 안 html/css/js 파일 직접 읽어서 응답
-//   결과: 브라우저 입장에선 전부 같은 서버(5500)에서 오는 것처럼 보여서
+//   결과: 브라우저 입장에선 전부 같은 서버(5501)에서 오는 것처럼 보여서
 //         CORS 차단 자체가 아예 발동 안 함
 //
 // ▶ 실행 방법
 //   1) 백엔드 먼저 실행 (IntelliJ에서 Main 클래스 Run:  8080에서)
-//   2) 터미널에서
-//        cd scripts
-//        javac DevProxyServer.java
-//        java DevProxyServer
-//   3) 브라우저에서 localhost:5500 접속
+//   2) 프로젝트 루트에서 scripts\proxy 실행
+//   3) 브라우저에서 localhost:5501 접속
 // ================================================================================
 
 import java.io.IOException;
@@ -75,8 +72,8 @@ public class DevProxyServer {
         server.setExecutor(null); // 개발용 서버라 별도 스레드풀 설정 불필요
         server.start();
 
-        System.out.println("프론트 개발 서버 실행 : http://localhost:" + PROXY_PORT);
-        System.out.println("API 요청 중계 대상 : " + BACKEND_URL);
+        System.out.println("Frontend dev server: http://localhost:" + PROXY_PORT);
+        System.out.println("API proxy target: " + BACKEND_URL);
     }
 
     // /api/... 요청을 그대로 백엔드로 넘기고 응답을 그대로 돌려주는 중계 역할
@@ -109,8 +106,17 @@ public class DevProxyServer {
                 : connection.getInputStream();
         byte[] responseBody = responseBodyIn == null ? new byte[0] : responseBodyIn.readAllBytes();
 
-        // 백엔드 응답 그대로 브라우저에 전달
-        exchange.getResponseHeaders().add("Content-Type", connection.getContentType());
+        // 로그인 세션 쿠키와 응답 메타데이터를 브라우저까지 전달한다.
+        // 특히 Set-Cookie가 빠지면 로그인 직후 JSESSIONID가 저장되지 않는다.
+        connection.getHeaderFields().forEach((headerName, headerValues) -> {
+            if (headerName == null || headerValues == null) return;
+            if (headerName.equalsIgnoreCase("Content-Type")
+                    || headerName.equalsIgnoreCase("Set-Cookie")
+                    || headerName.equalsIgnoreCase("Cache-Control")
+                    || headerName.equalsIgnoreCase("Location")) {
+                headerValues.forEach(value -> exchange.getResponseHeaders().add(headerName, value));
+            }
+        });
         exchange.sendResponseHeaders(statusCode, responseBody.length);
         try (OutputStream responseOut = exchange.getResponseBody()) {
             responseOut.write(responseBody);

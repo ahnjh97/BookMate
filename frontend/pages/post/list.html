@@ -2,76 +2,79 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>커뮤니티 | BookMate</title>
-
-    <link
-            rel="stylesheet"
-            href="/assets/css/style.css"
-    >
-    <link
-            rel="stylesheet"
-            href="/assets/css/post.css"
-    >
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/post.css?v=20260830-3">
 </head>
 
 <body>
 <header class="site-header" data-navbar></header>
 
-<<main class="post-page-main">
-    <section class="post-page-content">
-        <!-- 좌측 상단 글쓰기 버튼 -->
-        <div class="post-create-area">
-            <a
-                    class="button button-primary"
-                    href="/pages/post/create.html"
-            >
-                게시글 작성
-            </a>
+<main class="page-main" data-page="community">
+    <section class="page-content">
+        <div class="community-page-hero">
+            <button id="community-reset-button" class="page-gradient-title page-title-button" type="button">
+                <span class="page-title-icon page-title-icon-community" aria-hidden="true"></span>커뮤니티
+            </button>
         </div>
 
-        <div class="post-page-title">
-            <h1>커뮤니티</h1>
-            <p>
-                BookMate 회원들의 게시글을 확인해 보세요.
-            </p>
+        <div id="community-filter">
+            <div class="post-filter-group">
+                <span class="post-filter-label">카테고리</span>
+
+                <div class="post-category-tabs choice-tabs">
+                    <button class="is-active" type="button" data-category="">전체</button>
+                    <button type="button" data-category="FREE">자유</button>
+                    <button type="button" data-category="RECOMMEND">추천</button>
+                    <button type="button" data-category="REVIEW">리뷰</button>
+                    <button type="button" data-category="TIER">티어리스트</button>
+                    <button type="button" data-category="AUTHOR">작가</button>
+                </div>
+            </div>
+
+            <div class="post-filter-group">
+                <span class="post-filter-label">장르</span>
+
+                <div class="post-genre-tabs choice-tabs">
+                    <button class="is-active" type="button" data-genre="">전체</button>
+                    <button type="button" data-genre="판타지">판타지</button>
+                    <button type="button" data-genre="SF">SF</button>
+                    <button type="button" data-genre="추리">추리</button>
+                    <button type="button" data-genre="인문">인문/사회</button>
+                    <button type="button" data-genre="자기계발">자기계발</button>
+                    <button type="button" data-genre="과학">과학</button>
+                    <button type="button" data-genre="IT">IT</button>
+                </div>
+            </div>
         </div>
 
-        <p
-                id="post-status"
-                class="post-status"
-                aria-live="polite"
-        >
-            게시글을 불러오는 중입니다.
-        </p>
+        <!-- 검색 및 게시글 작성 -->
+        <div class="post-list-toolbar">
+            <form id="post-search-form" class="post-search-form" role="search">
+                <input id="post-keyword" type="search" placeholder="게시글 제목 또는 작성자 검색">
+                <button class="button button-primary" type="submit">검색</button>
+            </form>
+            <a class="button button-primary" href="/pages/post/create.html">게시글 작성</a>
+        </div>
 
-        <div class="post-table-wrapper">
+        <p id="post-result-message" class="post-result-message"></p>
+
+        <!-- 게시글 목록 -->
+        <div class="post-table-wrap">
             <table class="post-table">
-                <thead>
-                <tr>
-                    <th class="post-number">번호</th>
-                    <th class="post-category">카테고리</th>
-                    <th>제목</th>
-                    <th class="post-writer">작성자</th>
-                    <th class="post-views">조회수</th>
-                    <th class="post-date">작성일</th>
-                </tr>
-                </thead>
-
+                <thead id="post-table-head"></thead>
                 <tbody id="post-list"></tbody>
             </table>
         </div>
+
+        <p id="post-status" aria-live="polite">게시글을 불러오는 중입니다.</p>
+
+        <div id="post-pagination"></div>
     </section>
 </main>
 
-<script src="/js/components/navbar.js" defer></script>
-<script
-        src="/js/pages/post-list.js"
-        defer
-></script>
+<script src="/js/components/navbar.js" charset="UTF-8" defer></script>
+<script src="/js/pages/post-list.js?v=20260830-1" charset="UTF-8" defer></script>
 </body>
 </html>

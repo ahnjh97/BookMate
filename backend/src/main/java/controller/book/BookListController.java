@@ -26,11 +26,14 @@ public class BookListController extends HttpServlet {
             body.put("data", bookService.findBooks(
                     request.getParameter("keyword"),
                     request.getParameter("genre"),
+                    parsePositiveLong(request.getParameter("authorId")),
+                    request.getParameter("sort"),
                     parsePositiveInt(request.getParameter("page"), 1),
                     parsePositiveInt(request.getParameter("size"), 100)
             ));
             gson.toJson(body, response.getWriter());
         } catch (RuntimeException exception) {
+            exception.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             gson.toJson(Map.of("success", false, "message", "책 목록을 불러오지 못했습니다."), response.getWriter());
         }
@@ -48,6 +51,16 @@ public class BookListController extends HttpServlet {
             return parsed > 0 ? parsed : defaultValue;
         } catch (NumberFormatException exception) {
             return defaultValue;
+        }
+    }
+
+    private Long parsePositiveLong(String value) {
+        if (value == null || value.isBlank()) return null;
+        try {
+            long parsed = Long.parseLong(value);
+            return parsed > 0 ? parsed : null;
+        } catch (NumberFormatException exception) {
+            return null;
         }
     }
 }

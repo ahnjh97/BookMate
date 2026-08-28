@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>월드컵 전체 통계 | BookMate</title>
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260828-5">
+  <link rel="stylesheet" href="/assets/css/worldcup.css?v=1">
+</head>
+<body>
+  <header class="site-header" data-navbar></header>
+  <main class="worldcup-page">
+    <div class="worldcup-container">
+      <header class="worldcup-header">
+        <div>
+          <h1 id="title">전체 통계</h1>
+          <p id="summary">
+            모든 참가자의 선택 결과를 합산합니다.
+          </p>
+        </div><a id="play" class="button button-teal">나도 참여하기</a>
+      </header>
+      <p id="status" class="worldcup-status">
+        통계를 불러오는 중입니다.
+      </p>
+      <div id="table" class="stats-table-wrap" hidden></div>
+    </div>
+  </main>
+  <script src="/js/components/navbar.js" defer></script>
+  <script src="/js/pages/worldcup-stats.js?v=1" defer></script>
+</body>
+</html>

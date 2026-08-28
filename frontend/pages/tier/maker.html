@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>티어리스트 만들기 | BookMate</title>
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260830-3">
+  <link rel="stylesheet" href="/assets/css/tier.css?v=20260830-2">
+  <script src="/js/components/auth-guard.js"></script>
+</head>
+<body>
+  <header class="site-header" data-navbar></header>
+
+  <main class="tier-page">
+    <div class="tier-container">
+      <header class="maker-heading">
+        <div>
+          <h1 id="maker-title" class="page-gradient-title">티어리스트 만들기</h1>
+          <p id="maker-description"></p>
+        </div>
+        <div class="maker-actions">
+          <a id="stats-button" class="button button-sky maker-stats-spacing" href="#">통계 보기</a>
+          <button id="reset-button" class="button button-white" type="button">초기화</button>
+          <button id="save-open-button" class="button button-teal" type="button">저장하기</button>
+        </div>
+      </header>
+
+      <p class="drag-help">
+        책 표지를 끌어 원하는 티어에 놓으세요. 같은 티어 안에서도 순서를 바꿀 수 있습니다.
+      </p>
+      <div id="tier-board" class="tier-board" aria-label="티어리스트 편집판"></div>
+
+      <section>
+        <div class="pool-heading">
+          <h2>아직 배치하지 않은 책</h2>
+          <span id="pool-count"></span>
+        </div>
+        <div id="book-pool" class="book-pool tier-dropzone" data-grade="UNRANKED"></div>
+      </section>
+
+      <p id="maker-message" class="tier-status" aria-live="polite"></p>
+
+      <dialog id="save-dialog" class="save-dialog">
+        <form id="save-form">
+          <h2>내 티어리스트 저장</h2>
+          <label>
+            제목
+            <input id="list-title" maxlength="200" required>
+          </label>
+          <label>
+            한 줄 설명
+            <textarea id="list-description" maxlength="1000" rows="3"></textarea>
+          </label>
+          <label class="check-line">
+            <input id="list-public" type="checkbox" checked>
+            게시판에 등록
+          </label>
+          <div class="dialog-actions">
+            <button id="save-cancel" class="button" type="button">취소</button>
+            <button class="button button-primary" type="submit">저장</button>
+          </div>
+        </form>
+      </dialog>
+    </div>
+  </main>
+
+  <script src="/js/components/navbar.js" defer></script>
+  <script src="/js/pages/tier-maker.js?v=20260828-8" defer></script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+.admin-main {
+  min-height: calc(100vh - var(--navbar-height));
+  padding: 56px 0 90px;
+  background: var(--color-surface);
+}
+.admin-hero {
+  padding: 34px 38px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: #fff;
+}
+.admin-label {
+  color: var(--color-primary);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+}
+.admin-hero h1 {
+  margin: 8px 0 5px;
+  font-size: 2.4rem;
+  letter-spacing: -0.05em;
+}
+.admin-hero p, .admin-section-header p {
+  margin: 0;
+  color: var(--color-muted);
+}
+.admin-message {
+  min-height: 24px;
+  margin: 18px 0;
+  color: var(--color-primary-dark);
+  font-weight: 700;
+}
+.admin-section {
+  margin-top: 20px;
+  padding: 28px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: #fff;
+}
+.admin-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.admin-section-header h2 {
+  margin: 0 0 4px;
+}
+.admin-table-wrapper {
+  overflow: auto;
+}
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+.admin-table th, .admin-table td {
+  padding: 13px 11px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  white-space: nowrap;
+}
+.admin-table th {
+  color: var(--color-muted);
+  background: #f8fafb;
+  font-size: 0.78rem;
+}
+.admin-empty {
+  text-align: center !important;
+  color: var(--color-muted);
+}
+.admin-badge, .admin-self-label {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary-dark);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+.admin-action-button {
+  padding: 6px 9px;
+  border: 1px solid var(--color-primary);
+  border-radius: 6px;
+  color: var(--color-primary-dark);
+  background: #fff;
+  cursor: pointer;
+}
+.admin-action-danger {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+@media (max-width: 650px) {
+  .admin-section {
+    padding: 18px;
+  }
+  .admin-section-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

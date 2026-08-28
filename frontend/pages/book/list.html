@@ -1,45 +1,81 @@
 <!doctype html>
 <html lang="ko">
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>책 목록 | BookMate</title>
-    <link rel="stylesheet" href="/assets/css/style.css">
-    <link rel="stylesheet" href="/assets/css/book-list.css">
-  </head>
-  <body>
-    <header class="site-header" data-navbar></header>
+    <title>책 | BookMate</title>
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260828-3">
+    <link rel="stylesheet" href="/assets/css/book-list.css?v=20260830-3">
+</head>
+<body>
+<header class="site-header" data-navbar></header>
 
-    <main data-page="books">
-      <section>
-        <h1>책 목록</h1>
-        <p>제목과 작가명으로 승인된 책을 찾아보세요.</p>
+<main data-page="books">
+    <section>
+        <div class="book-page-hero">
+            <div class="book-page-heading">
+                <button id="book-reset-button" class="page-gradient-title page-title-button" type="button"><span class="page-title-icon page-title-icon-bookshelf" aria-hidden="true"></span>책 목록</button>
+            </div>
 
-        <form id="book-search-form" class="book-tools" role="search">
-          <div>
-            <input id="book-keyword" name="keyword" type="search" aria-label="책 검색어" aria-autocomplete="list" aria-controls="search-suggestions" placeholder="책 제목 또는 작가명" autocomplete="off">
-            <div id="search-suggestions" role="listbox" hidden></div>
-          </div>
-          <select id="book-genre" name="genre" aria-label="장르">
-            <option value="">전체 장르</option>
-            <option value="판타지">판타지</option>
-            <option value="SF">SF</option>
-            <option value="디스토피아">디스토피아</option>
-            <option value="추리">추리</option>
-            <option value="스릴러">스릴러</option>
-            <option value="인문">인문</option>
-            <option value="과학">과학</option>
-            <option value="자기계발">자기계발</option>
-            <option value="IT">IT</option>
-          </select>
-          <button class="button button-primary" type="submit">검색</button>
-        </form>
+            <form id="book-search-form" class="book-tools" role="search">
+                <div class="book-keyword-field">
+                    <input id="book-keyword" name="keyword" type="search"
+                           aria-label="책 검색어" aria-autocomplete="list"
+                           aria-controls="search-suggestions"
+                           aria-expanded="false"
+                           placeholder="책 제목 또는 작가명" autocomplete="off">
+                    <div id="search-suggestions" role="listbox" hidden></div>
+                </div>
+                <button class="button button-primary" type="submit">검색</button>
+            </form>
+        </div>
 
-        <p id="book-status" aria-live="polite">책 목록을 불러오는 중입니다.</p>
-        <div id="book-list" class="book-grid"></div>
-      </section>
-    </main>
-    <script src="/js/components/navbar.js" defer></script>
-    <script src="/js/pages/book-list.js" defer></script>
-  </body>
+        <div class="book-result-context" aria-live="polite">
+            <div id="author-filter-heading" class="author-filter-heading" hidden>
+                <strong id="selected-author-name"></strong><span> 님의 작품입니다.</span>
+                <a href="/pages/book/list.html">전체 책 보기</a>
+            </div>
+            <div id="search-filter-heading" class="search-filter-heading" hidden>
+                <strong id="selected-search-keyword"></strong><span>에 대한 검색결과입니다.</span>
+                <a href="/pages/book/list.html">전체 책 보기</a>
+            </div>
+        </div>
+
+        <div class="book-filter-bar">
+            <div class="book-category-tabs choice-tabs" role="group" aria-label="책 장르">
+                <button class="is-active" type="button" data-genre="">전체</button>
+                <button type="button" data-genre="판타지">판타지</button>
+                <button type="button" data-genre="SF">SF</button>
+                <button type="button" data-genre="추리">추리</button>
+                <button type="button" data-genre="인문">인문/사회</button>
+                <button type="button" data-genre="자기계발">자기계발</button>
+                <button type="button" data-genre="과학">과학</button>
+                <button type="button" data-genre="IT">IT</button>
+            </div>
+            <div class="book-filter-actions">
+                <span id="book-total-count" class="book-total-count"></span>
+                <label class="book-sort-control" for="book-sort">
+                    <select id="book-sort" name="sort">
+                        <option value="rating">평점 높은 순</option>
+                        <option value="title">제목순</option>
+                        <option value="newest">최신 출간순</option>
+                    </select>
+                </label>
+            </div>
+        </div>
+
+        <div class="book-results-panel">
+            <div id="book-list" class="book-grid"></div>
+            <nav id="book-pagination" class="book-pagination" aria-label="책 목록 페이지">
+                <button id="book-prev-page" class="button button-outline" type="button">이전</button>
+                <div id="book-page-numbers" class="book-page-numbers" aria-live="polite"></div>
+                <button id="book-next-page" class="button button-outline" type="button">다음</button>
+            </nav>
+        </div>
+    </section>
+</main>
+
+<script src="/js/components/navbar.js" defer></script>
+<script src="/js/pages/book-list.js?v=20260830-4" defer></script>
+</body>
 </html>
