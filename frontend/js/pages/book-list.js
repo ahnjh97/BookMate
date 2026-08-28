@@ -1,14 +1,22 @@
 // Figma 책 목록 UI: 검색, 장르 필터, 카드 렌더링을 페이지 구조에 맞게 연결합니다.
 const searchForm = document.querySelector("#book-search-form");
 const keywordInput = document.querySelector("#book-keyword");
-const genreSelect = document.querySelector("#book-genre");
+const sortSelect = document.querySelector("#book-sort");
 const statusElement = document.querySelector("#book-status");
 const listElement = document.querySelector("#book-list");
 const suggestionsElement = document.querySelector("#search-suggestions");
 const categoryButtons = document.querySelectorAll(".book-category-tabs [data-genre]");
+const authorFilterHeading = document.querySelector("#author-filter-heading");
+const selectedAuthorNameElement = document.querySelector("#selected-author-name");
+const searchFilterHeading = document.querySelector("#search-filter-heading");
+const selectedSearchKeywordElement = document.querySelector("#selected-search-keyword");
+const pageParams = new URLSearchParams(window.location.search);
+const selectedAuthorId = pageParams.get("authorId");
+const selectedAuthorName = pageParams.get("authorName");
 const suggestionCache = new Map();
 let suggestionTimer;
 let suggestionRequest;
+let selectedGenre = "";
 
 keywordInput.addEventListener("input", () => {
     clearTimeout(suggestionTimer);
@@ -21,6 +29,11 @@ keywordInput.addEventListener("input", () => {
     }
 
     suggestionTimer = setTimeout(() => loadSuggestions(keyword), 250);
+});
+
+keywordInput.addEventListener("focus", () => {
+    const keyword = keywordInput.value.trim();
+    if (keyword) loadSuggestions(keyword);
 });
 
 keywordInput.addEventListener("keydown", (event) => {
@@ -59,6 +72,7 @@ async function loadSuggestions(keyword) {
 
 function renderSuggestions(suggestions) {
     suggestionsElement.replaceChildren();
+    const keyword = keywordInput.value.trim();
 
     suggestions.forEach((suggestion) => {
         const option = document.createElement("button");
@@ -66,44 +80,58 @@ function renderSuggestions(suggestions) {
         option.setAttribute("role", "option");
 
         const type = document.createElement("span");
+        type.className = `suggestion-type ${suggestion.type === "BOOK" ? "is-book" : "is-author"}`;
         type.textContent = suggestion.type === "BOOK" ? "책" : "작가";
 
         const name = document.createElement("strong");
-        name.textContent = suggestion.name;
+        appendHighlightedText(name, suggestion.name, keyword);
 
         const detail = document.createElement("small");
-        detail.textContent = suggestion.detail;
+        appendHighlightedText(detail, suggestion.detail, keyword);
 
-        option.append(type, name, detail);
+        option.append(type, name);
+        if (suggestion.type === "BOOK") option.append(detail);
         option.addEventListener("click", () => {
-            keywordInput.value = suggestion.name;
-            closeSuggestions();
-            loadBooks();
+            if (suggestion.type === "AUTHOR") {
+                window.location.href = `/pages/book/list.html?authorId=${encodeURIComponent(suggestion.id)}&authorName=${encodeURIComponent(suggestion.name)}`;
+                return;
+            }
+            window.location.href = `/pages/book/detail.html?id=${encodeURIComponent(suggestion.id)}`;
         });
         suggestionsElement.append(option);
     });
 
-    suggestionsElement.hidden = suggestions.length === 0;
+    const hasSuggestions = suggestions.length > 0;
+    suggestionsElement.hidden = !hasSuggestions;
+    keywordInput.setAttribute("aria-expanded", String(hasSuggestions));
 }
 
 function closeSuggestions() {
     suggestionsElement.hidden = true;
     suggestionsElement.replaceChildren();
+    keywordInput.setAttribute("aria-expanded", "false");
 }
 
-// 장르 칩과 기존 select의 선택 상태를 동기화합니다.
 function updateActiveCategory() {
     categoryButtons.forEach((button) => {
-        const isActive = button.dataset.genre === genreSelect.value;
+        const isActive = button.dataset.genre === selectedGenre;
         button.classList.toggle("is-active", isActive);
         button.setAttribute("aria-pressed", String(isActive));
     });
 }
 
+function showSearchResults(keyword) {
+    authorFilterHeading.hidden = true;
+    searchFilterHeading.hidden = false;
+    selectedSearchKeywordElement.textContent = `'${keyword}'`;
+}
+
 async function loadBooks() {
     const params = new URLSearchParams();
     if (keywordInput.value.trim()) params.set("keyword", keywordInput.value.trim());
-    if (genreSelect.value) params.set("genre", genreSelect.value);
+    if (selectedGenre) params.set("genre", selectedGenre);
+    if (selectedAuthorId) params.set("authorId", selectedAuthorId);
+    params.set("sort", sortSelect.value);
     params.set("page", 1);
     params.set("size", 100);
 
@@ -115,7 +143,10 @@ async function loadBooks() {
         const response = await fetch(`/api/books${query ? `?${query}` : ""}`);
         const result = await response.json();
         if (!response.ok || !result.success) throw new Error(result.message);
-        renderBooks(result.data.books);
+        const books = selectedAuthorId
+            ? result.data.books.filter((book) => String(book.authorId) === String(selectedAuthorId))
+            : result.data.books;
+        renderBooks(books);
     } catch (error) {
         statusElement.textContent = "책 목록을 불러오지 못했습니다. DB와 Tomcat 실행 상태를 확인해 주세요.";
     }
@@ -128,19 +159,23 @@ function renderBooks(books) {
         return;
     }
 
-    books.forEach((book, index) => {
+    books.forEach((book) => {
         const detailUrl = `/pages/book/detail.html?id=${encodeURIComponent(book.bookId)}`;
-        const card = document.createElement("a");
+        const card = document.createElement("article");
         card.className = "book-card";
-        card.href = detailUrl;
-        card.setAttribute("aria-label", `${book.title} 상세 보기`);
+
+        const coverLink = document.createElement("a");
+        coverLink.className = "book-cover-link";
+        coverLink.href = detailUrl;
+        coverLink.setAttribute("aria-label", `${book.title} 상세 보기`);
 
         const cover = document.createElement("figure");
         cover.className = "book-card-cover";
 
-        const rank = document.createElement("span");
-        rank.className = "book-rank";
-        rank.textContent = index + 1;
+        const coverGenre = document.createElement("span");
+        coverGenre.className = "book-cover-genre";
+        coverGenre.textContent = book.genre || "도서";
+        coverGenre.dataset.genre = book.genre || "도서";
 
         const image = document.createElement("img");
         image.src = book.imageUrl || "";
@@ -149,26 +184,29 @@ function renderBooks(books) {
         image.decoding = "async";
         image.addEventListener("error", () => {
             cover.textContent = book.title;
-            cover.prepend(rank);
+            cover.prepend(coverGenre);
             image.remove();
         }, {once: true});
 
-        cover.append(rank, image);
+        cover.append(coverGenre, image);
 
         const content = document.createElement("div");
         content.className = "book-card-content";
 
-        const genre = document.createElement("span");
-        genre.className = "book-genre";
-        genre.textContent = book.genre || "도서";
-
         const heading = document.createElement("h2");
         heading.className = "book-title";
-        heading.textContent = book.title;
 
-        const author = document.createElement("p");
+        const titleLink = document.createElement("a");
+        titleLink.href = detailUrl;
+        appendHighlightedText(titleLink, book.title, keywordInput.value.trim());
+        titleLink.title = book.title;
+        heading.append(titleLink);
+
+        const author = document.createElement("a");
         author.className = "book-author";
-        author.textContent = book.authorName;
+        author.href = `/pages/book/list.html?authorId=${encodeURIComponent(book.authorId)}&authorName=${encodeURIComponent(book.authorName)}`;
+        appendHighlightedText(author, book.authorName, keywordInput.value.trim());
+        author.title = `${book.authorName}의 책 보기`;
 
         const rating = document.createElement("p");
         rating.className = "book-rating";
@@ -186,18 +224,18 @@ function renderBooks(books) {
         count.textContent = `(${book.ratingCount || 0}명)`;
 
         rating.append(star, score, count);
-        content.append(genre, heading, author, rating);
-        card.append(cover, content);
+        content.append(heading, author, rating);
+        coverLink.append(cover);
+        card.append(coverLink, content);
         listElement.append(card);
     });
 
     statusElement.textContent = `현재 ${listElement.childElementCount}권을 표시하고 있습니다.`;
 }
 
-// 새로 추가한 장르 칩으로 기존 책 목록 API를 다시 조회합니다.
 categoryButtons.forEach((button) => {
     button.addEventListener("click", () => {
-        genreSelect.value = button.dataset.genre;
+        selectedGenre = button.dataset.genre;
         updateActiveCategory();
         loadBooks();
     });
@@ -206,13 +244,43 @@ categoryButtons.forEach((button) => {
 searchForm.addEventListener("submit", (event) => {
     event.preventDefault();
     closeSuggestions();
+    const keyword = keywordInput.value.trim();
+    if (keyword) showSearchResults(keyword);
     loadBooks();
 });
 
-genreSelect.addEventListener("change", () => {
+sortSelect.addEventListener("change", () => {
+    loadBooks();
+});
+
+if (selectedAuthorId) {
+    authorFilterHeading.hidden = false;
+    selectedAuthorNameElement.textContent = selectedAuthorName || "선택한 작가";
+} else {
     updateActiveCategory();
-    loadBooks();
-});
-
-updateActiveCategory();
+}
 loadBooks();
+
+function appendHighlightedText(element, text, keyword) {
+    if (!keyword) {
+        element.textContent = text;
+        return;
+    }
+
+    const source = String(text || "");
+    const lowerSource = source.toLocaleLowerCase("ko");
+    const lowerKeyword = keyword.toLocaleLowerCase("ko");
+    let cursor = 0;
+    let matchIndex = lowerSource.indexOf(lowerKeyword, cursor);
+
+    while (matchIndex !== -1) {
+        element.append(document.createTextNode(source.slice(cursor, matchIndex)));
+        const mark = document.createElement("mark");
+        mark.className = "book-search-highlight";
+        mark.textContent = source.slice(matchIndex, matchIndex + keyword.length);
+        element.append(mark);
+        cursor = matchIndex + keyword.length;
+        matchIndex = lowerSource.indexOf(lowerKeyword, cursor);
+    }
+    element.append(document.createTextNode(source.slice(cursor)));
+}

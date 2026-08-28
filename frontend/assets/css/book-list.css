@@ -1,19 +1,26 @@
 /* Figma 책 페이지: 본문 폭과 상하 여백을 디자인 프레임에 맞춥니다. */
 [data-page="books"] {
     min-height: calc(100vh - var(--navbar-height));
-    padding: 40px 24px 80px;
+    padding: 32px 24px 72px;
     background: var(--color-background);
 }
 
 [data-page="books"] > section {
-    width: min(1152px, 100%);
+    width: min(1080px, 100%);
     margin: 0 auto;
+}
+
+.book-page-hero {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
 }
 
 .book-page-heading h1 {
     margin: 0;
     color: var(--color-text);
-    font-size: 26px;
+    font-size: 30px;
     font-weight: 900;
     line-height: 1.5;
     letter-spacing: -0.5px;
@@ -21,25 +28,36 @@
 
 .book-page-heading p {
     margin: 0;
-    color: var(--color-muted);
-    font-size: 14px;
-    line-height: 1.5;
+    color: #079fbd;
+    background: linear-gradient(100deg, #00b8d4 0%, #1689f2 32%, #5b5df0 62%, #d946b9 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1.4;
+    letter-spacing: -0.35px;
+    text-shadow: 0 4px 18px rgb(22 137 242 / 22%);
 }
 
 /* 기존 검색 기능을 공통 입력 스타일과 어울리도록 정리합니다. */
 .book-tools {
-    display: grid;
-    grid-template-columns: minmax(240px, 1fr) 170px auto;
+    position: relative;
+    z-index: 5;
+    display: flex;
+    width: min(460px, 100%);
+    flex: none;
     gap: 10px;
-    margin-top: 24px;
+    margin: 0;
 }
 
 .book-keyword-field {
+    flex: 1 1 auto;
     position: relative;
+    min-width: 0;
 }
 
-.book-tools input,
-.book-tools select {
+.book-tools input {
     width: 100%;
     min-height: 44px;
     padding: 0 13px;
@@ -48,30 +66,29 @@
     color: var(--color-text);
     background: var(--color-background);
     font: inherit;
-    font-size: 14px;
+    font-size: 15px;
 }
 
 .book-tools input::placeholder {
     color: var(--color-muted);
 }
 
-.book-tools input:focus,
-.book-tools select:focus {
+.book-tools input:focus {
     border-color: var(--color-primary);
     outline: 2px solid rgb(15 163 193 / 18%);
 }
 
 #search-suggestions {
     position: absolute;
-    z-index: 20;
+    z-index: 100;
     top: calc(100% + 6px);
     right: 0;
     left: 0;
     overflow: hidden;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
+    border: 1px solid rgb(15 163 193 / 28%);
+    border-radius: 12px;
     background: var(--color-background);
-    box-shadow: 0 8px 20px rgb(16 24 40 / 12%);
+    box-shadow: 0 14px 30px rgb(16 24 40 / 15%);
 }
 
 #search-suggestions button {
@@ -103,6 +120,26 @@
     font-weight: 700;
 }
 
+#search-suggestions .suggestion-type {
+    display: inline-grid;
+    min-height: 23px;
+    padding: 0 7px;
+    place-items: center;
+    justify-self: start;
+    border-radius: 999px;
+    line-height: 1;
+}
+
+#search-suggestions .suggestion-type.is-book {
+    color: #087fbd;
+    background: #e2f5fb;
+}
+
+#search-suggestions .suggestion-type.is-author {
+    color: #7656d6;
+    background: #f0eafe;
+}
+
 #search-suggestions strong,
 #search-suggestions small {
     overflow: hidden;
@@ -114,23 +151,95 @@
     color: var(--color-muted);
 }
 
-/* Figma의 pill 형태 장르 필터와 선택 상태입니다. */
+.book-filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin: 8px 0 22px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.book-result-context {
+    display: flex;
+    min-height: 45px;
+    align-items: flex-end;
+    margin-top: 12px;
+}
+
 .book-category-tabs {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin: 32px 0;
+}
+
+.book-category-tabs[hidden] {
+    display: none;
+}
+
+.author-filter-heading {
+    display: flex;
+    min-height: 37px;
+    align-items: center;
+    gap: 0;
+    color: var(--color-text);
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.search-filter-heading {
+    display: flex;
+    min-height: 37px;
+    align-items: baseline;
+    color: var(--color-text);
+    font-size: 19px;
+    font-weight: 800;
+}
+
+.search-filter-heading[hidden] {
+    display: none;
+}
+
+.search-filter-heading strong {
+    margin-right: 4px;
+    color: var(--color-primary);
+    font-size: 21px;
+    font-weight: 900;
+}
+
+.author-filter-heading[hidden] {
+    display: none;
+}
+
+.author-filter-heading strong {
+    color: var(--color-primary);
+    font-weight: 900;
+}
+
+.author-filter-heading a {
+    margin-left: 14px;
+    padding-left: 14px;
+    border-left: 1px solid var(--color-border);
+    color: var(--color-muted);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.author-filter-heading a:hover,
+.author-filter-heading a:focus-visible {
+    color: var(--color-primary);
 }
 
 .book-category-tabs button {
-    min-height: 35px;
-    padding: 0 15px;
+    min-height: 37px;
+    padding: 0 16px;
     border: 1px solid var(--color-border);
     border-radius: 999px;
     color: var(--color-muted);
     background: var(--color-background);
     font: inherit;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: border-color 0.16s ease, color 0.16s ease, background-color 0.16s ease;
@@ -138,35 +247,91 @@
 
 .book-category-tabs button:hover,
 .book-category-tabs button:focus-visible {
-    border-color: var(--color-text);
-    color: var(--color-text);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
     outline: none;
 }
 
 .book-category-tabs button.is-active {
-    border-color: var(--color-text);
+    border-color: var(--color-primary);
     color: var(--color-background);
-    background: var(--color-text);
+    background: var(--color-primary);
+    box-shadow: 0 5px 13px rgb(15 163 193 / 24%);
+}
+
+.book-sort-control {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+}
+
+.book-sort-control select {
+    min-height: 37px;
+    padding: 0 36px 0 16px;
+    appearance: none;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    color: var(--color-muted);
+    background-color: var(--color-background);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23667085' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right 13px center;
+    background-repeat: no-repeat;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: none;
+    transition: border-color 0.16s ease, color 0.16s ease, background-color 0.16s ease;
+}
+
+.book-sort-control select:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background-color: var(--color-primary-soft);
+}
+
+.book-sort-control option {
+    color: var(--color-text);
+    background: var(--color-background);
+}
+
+.book-sort-control select:focus {
+    border-color: var(--color-primary);
+    outline: 2px solid rgb(15 163 193 / 18%);
 }
 
 #book-status {
     margin: 0 0 12px;
     color: var(--color-muted);
-    font-size: 13px;
+    font-size: 14px;
 }
 
-/* 표지 중심의 5열 책 카드와 반응형 그리드입니다. */
+.book-results-panel {
+    padding: 0;
+    border: 0;
+    background: transparent;
+}
+
+/* 카드 크기를 줄여 더 많은 책을 한눈에 비교할 수 있게 합니다. */
 .book-grid {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 32px 20px;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 28px 18px;
 }
 
 .book-card {
     display: block;
     min-width: 0;
+    padding: 0;
+    border: 0;
     color: var(--color-text);
     background: transparent;
+}
+
+.book-cover-link {
+    display: block;
+    border-radius: 11px;
 }
 
 /* 책 표지, 순위 배지, hover 피드백을 구성합니다. */
@@ -174,16 +339,16 @@
     position: relative;
     display: flex;
     width: 100%;
-    aspect-ratio: 214.4 / 320.6;
+    aspect-ratio: 3 / 4;
     margin: 0;
     overflow: hidden;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
+    border: 0;
+    border-radius: 11px;
     color: var(--color-muted);
     background: var(--color-surface);
-    box-shadow: 0 2px 8px rgb(16 24 40 / 7%);
+    box-shadow: 0 3px 10px rgb(16 24 40 / 8%);
     text-align: center;
     font-size: 12px;
     font-weight: 700;
@@ -191,13 +356,11 @@
 }
 
 .book-card:hover .book-card-cover,
-.book-card:focus-visible .book-card-cover {
-    border-color: var(--color-primary);
-    box-shadow: 0 10px 24px rgb(16 24 40 / 13%);
-    transform: translateY(-3px);
+.book-cover-link:focus-visible .book-card-cover {
+    box-shadow: 0 12px 26px rgb(15 163 193 / 18%);
 }
 
-.book-card:focus-visible {
+.book-cover-link:focus-visible {
     outline: none;
 }
 
@@ -205,71 +368,112 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.28s ease;
 }
 
-.book-rank {
+.book-cover-link:hover img,
+.book-cover-link:focus-visible img {
+    transform: scale(1.07);
+}
+
+.book-cover-genre {
     position: absolute;
     z-index: 1;
-    top: 10px;
-    left: 10px;
-    display: grid;
-    width: 24px;
-    height: 24px;
-    place-items: center;
-    border-radius: 50%;
-    color: var(--color-background);
-    background: var(--color-text);
-    box-shadow: 0 2px 5px rgb(0 0 0 / 18%);
-    font-size: 12px;
+    top: 7px;
+    left: 7px;
+    padding: 5px 9px;
+    border: 1px solid rgb(255 255 255 / 58%);
+    border-radius: 6px;
+    color: #fff;
+    background: rgb(8 120 143 / 90%);
+    box-shadow: 0 3px 9px rgb(0 0 0 / 22%);
+    font-size: 12.5px;
     font-weight: 800;
+    line-height: 1;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 22%);
+    backdrop-filter: blur(4px);
 }
 
+.book-cover-genre[data-genre="판타지"] { background: rgb(105 76 190 / 91%); }
+.book-cover-genre[data-genre="SF"] { background: rgb(28 111 189 / 92%); }
+.book-cover-genre[data-genre="디스토피아"] { background: rgb(91 98 112 / 92%); }
+.book-cover-genre[data-genre="추리"] { background: rgb(184 94 28 / 92%); }
+.book-cover-genre[data-genre="스릴러"] { background: rgb(177 52 65 / 92%); }
+.book-cover-genre[data-genre="인문"] { background: rgb(36 137 104 / 92%); }
+.book-cover-genre[data-genre="과학"] { background: rgb(21 137 162 / 92%); }
+.book-cover-genre[data-genre="자기계발"] { background: rgb(202 128 18 / 93%); }
+.book-cover-genre[data-genre="IT"] { background: rgb(45 91 177 / 92%); }
+
 .book-card-content {
-    padding-top: 12px;
+    padding-top: 6px;
 }
 
 .book-genre {
     display: inline-block;
     margin-bottom: 7px;
-    padding: 4px 7px;
-    border-radius: 4px;
-    color: var(--color-muted);
-    background: var(--color-surface);
+    padding: 5px 9px;
+    border: 1px solid rgb(15 163 193 / 16%);
+    border-radius: 6px;
+    color: #08788f;
+    background: rgb(15 163 193 / 11%);
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 750;
     line-height: 1;
 }
 
-.book-title {
+.book-card .book-title {
     display: -webkit-box;
-    min-height: 44px;
     margin: 0 0 2px;
     overflow: hidden;
     color: var(--color-text);
     font-size: 15px;
     font-weight: 700;
-    line-height: 1.45;
+    line-height: 1.35;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
 }
 
-.book-author {
+.book-title a:hover,
+.book-title a:focus-visible {
+    color: var(--color-primary);
+}
+
+.book-search-highlight {
+    padding: 0;
+    color: #00a8e8;
+    background: transparent;
+    font-weight: 900;
+    text-shadow: none;
+}
+
+.book-card .book-author {
+    display: block;
     margin: 0;
     overflow: hidden;
     color: var(--color-muted);
     font-size: 13px;
-    line-height: 1.5;
+    line-height: 1.35;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.book-rating {
+.book-author:hover,
+.book-author:focus-visible {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-decoration-color: rgb(15 163 193 / 55%);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+}
+
+.book-card .book-rating {
     display: flex;
     align-items: center;
     gap: 4px;
-    margin-top: 7px;
+    margin: 2px 0 0;
     color: var(--color-text);
-    font-size: 12px;
+    font-size: 13px;
+    line-height: 1.3;
 }
 
 .book-rating-star {
@@ -286,35 +490,71 @@
 
 @media (max-width: 1000px) {
     .book-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(6, minmax(0, 1fr));
     }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 820px) {
+    .book-filter-bar {
+        align-items: flex-end;
+    }
+
+    .book-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 680px) {
     [data-page="books"] {
         padding: 32px 16px 56px;
     }
 
+    .book-page-hero {
+        gap: 12px;
+    }
+
     .book-tools {
-        grid-template-columns: 1fr;
+        width: 100%;
+        flex: none;
+    }
+
+    .book-filter-bar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .book-sort-control {
+        justify-content: flex-end;
+    }
+
+    .book-sort-control select {
+        flex: 0 1 190px;
+    }
+
+}
+
+@media (max-width: 520px) {
+    .book-page-heading h1 {
+        font-size: 27px;
+    }
+
+    .book-tools .button {
+        padding-inline: 17px;
     }
 
     .book-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 520px) {
-    .book-category-tabs {
-        margin: 24px 0;
-    }
-
-    .book-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 26px 14px;
     }
 
+
     .book-title {
-        font-size: 14px;
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 390px) {
+    .book-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }

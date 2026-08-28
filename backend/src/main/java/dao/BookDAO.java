@@ -21,7 +21,13 @@ public class BookDAO {
                                B.title AS result_name,
                                A.author_name AS result_detail,
                                B.image_url,
-                               1 AS type_order
+                               1 AS type_order,
+                               CASE
+                                   WHEN LOWER(B.title) = ? THEN 1
+                                   WHEN LOWER(B.title) LIKE ? THEN 2
+                                   ELSE 3
+                               END AS match_priority,
+                               INSTR(LOWER(B.title), ?) AS match_position
                           FROM BOOK B
                           JOIN AUTHOR A ON A.author_id = B.author_id
                          WHERE B.status = 'APPROVED'
@@ -32,7 +38,13 @@ public class BookDAO {
                                A.author_name AS result_name,
                                '작가' AS result_detail,
                                NULL AS image_url,
-                               2 AS type_order
+                               2 AS type_order,
+                               CASE
+                                   WHEN LOWER(A.author_name) = ? THEN 1
+                                   WHEN LOWER(A.author_name) LIKE ? THEN 2
+                                   ELSE 3
+                               END AS match_priority,
+                               INSTR(LOWER(A.author_name), ?) AS match_position
                           FROM AUTHOR A
                          WHERE LOWER(A.author_name) LIKE ?
                            AND EXISTS (
@@ -42,16 +54,24 @@ public class BookDAO {
                                   AND B.status = 'APPROVED'
                            )
                        )
-                 ORDER BY type_order, result_name
+                 ORDER BY match_priority, match_position, type_order, result_name
                  FETCH FIRST 10 ROWS ONLY
                 """;
 
-        String pattern = keyword.trim().toLowerCase() + "%";
+        String normalizedKeyword = keyword.trim().toLowerCase();
+        String prefixPattern = normalizedKeyword + "%";
+        String containsPattern = "%" + normalizedKeyword + "%";
         List<SearchSuggestionDTO> suggestions = new ArrayList<>();
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, pattern);
-            statement.setString(2, pattern);
+            statement.setString(1, normalizedKeyword);
+            statement.setString(2, prefixPattern);
+            statement.setString(3, normalizedKeyword);
+            statement.setString(4, containsPattern);
+            statement.setString(5, normalizedKeyword);
+            statement.setString(6, prefixPattern);
+            statement.setString(7, normalizedKeyword);
+            statement.setString(8, containsPattern);
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
@@ -72,32 +92,32 @@ public class BookDAO {
             Connection connection,
             String keyword,
             String genre,
+            Long authorId,
+            String sort,
             int offset,
             int limit
     )
             throws SQLException {
+        String orderBy = switch (sort) {
+            case "title" -> "B.title ASC, B.book_id DESC";
+            case "newest" -> "B.published_date DESC NULLS LAST, B.book_id DESC";
+            default -> "NVL(ROUND(AVG(R.score), 1), 0) DESC, COUNT(R.rating_id) DESC, B.title ASC";
+        };
         String sql = """
-                WITH PAGE_BOOKS AS (
-                    SELECT B.book_id, B.author_id, A.author_name, B.title, B.genre,
-                           B.publisher, B.published_date, B.description, B.image_url, B.status
-                      FROM BOOK B
-                      JOIN AUTHOR A ON A.author_id = B.author_id
-                     WHERE B.status = 'APPROVED'
-                       AND (? IS NULL OR LOWER(B.title) LIKE ? OR LOWER(A.author_name) LIKE ?)
-                       AND (? IS NULL OR B.genre = ?)
-                     ORDER BY B.book_id DESC
-                     OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
-                )
-                SELECT B.book_id, B.author_id, B.author_name, B.title, B.genre,
+                SELECT B.book_id, B.author_id, A.author_name, B.title, B.genre,
                        B.publisher, B.published_date, B.description, B.image_url, B.status,
                        NVL(ROUND(AVG(R.score), 1), 0) AS average_rating,
                        COUNT(R.rating_id) AS rating_count
-                  FROM PAGE_BOOKS B
+                  FROM BOOK B
+                  JOIN AUTHOR A ON A.author_id = B.author_id
                   LEFT JOIN RATING R ON R.book_id = B.book_id
-                 GROUP BY B.book_id, B.author_id, B.author_name, B.title, B.genre,
+                 WHERE B.status = 'APPROVED'
+                   AND (? IS NULL OR LOWER(B.title) LIKE ? OR LOWER(A.author_name) LIKE ?)
+                   AND (? IS NULL OR B.genre = ?)
+                   AND (? IS NULL OR B.author_id = ?)
+                 GROUP BY B.book_id, B.author_id, A.author_name, B.title, B.genre,
                           B.publisher, B.published_date, B.description, B.image_url, B.status
-                 ORDER BY B.book_id DESC
-                """;
+                 ORDER BY """ + " " + orderBy + " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
         String normalizedKeyword = normalize(keyword);
         String keywordPattern = normalizedKeyword == null ? null : "%" + normalizedKeyword.toLowerCase() + "%";
@@ -110,8 +130,15 @@ public class BookDAO {
             statement.setString(3, keywordPattern);
             statement.setString(4, normalizedGenre);
             statement.setString(5, normalizedGenre);
-            statement.setInt(6, offset);
-            statement.setInt(7, limit);
+            if (authorId == null) {
+                statement.setNull(6, java.sql.Types.NUMERIC);
+                statement.setNull(7, java.sql.Types.NUMERIC);
+            } else {
+                statement.setLong(6, authorId);
+                statement.setLong(7, authorId);
+            }
+            statement.setInt(8, offset);
+            statement.setInt(9, limit);
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {

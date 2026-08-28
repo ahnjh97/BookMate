@@ -12,55 +12,62 @@
 
 <main data-page="books">
     <section>
-        <!-- Figma 책 페이지의 제목과 설명 영역 -->
-        <div class="book-page-heading">
-            <h1>책</h1>
-            <p>독자들이 추천하는 다양한 책을 만나보세요.</p>
-        </div>
-
-        <!-- 기존 책 검색 기능을 유지한 검색 영역 -->
-        <form id="book-search-form" class="book-tools" role="search">
-            <div class="book-keyword-field">
-                <input id="book-keyword" name="keyword" type="search"
-                       aria-label="책 검색어" aria-autocomplete="list"
-                       aria-controls="search-suggestions"
-                       placeholder="책 제목 또는 작가명" autocomplete="off">
-                <div id="search-suggestions" role="listbox" hidden></div>
+        <div class="book-page-hero">
+            <div class="book-page-heading">
+                <p>독자들이 추천하는 다양한 책을 만나보세요</p>
             </div>
-            <select id="book-genre" name="genre" aria-label="장르">
-                <option value="">전체 장르</option>
-                <option value="판타지">판타지</option>
-                <option value="SF">SF</option>
-                <option value="디스토피아">디스토피아</option>
-                <option value="추리">추리</option>
-                <option value="스릴러">스릴러</option>
-                <option value="인문">인문</option>
-                <option value="과학">과학</option>
-                <option value="자기계발">자기계발</option>
-                <option value="IT">IT</option>
-            </select>
-            <button class="button button-primary" type="submit">검색</button>
-        </form>
 
-        <!-- Figma 디자인에 추가된 장르 필터 칩 -->
-        <div class="book-category-tabs" role="group" aria-label="책 장르">
-            <button class="is-active" type="button" data-genre="">전체</button>
-            <button type="button" data-genre="판타지">판타지</button>
-            <button type="button" data-genre="SF">SF</button>
-            <button type="button" data-genre="추리">추리</button>
-            <button type="button" data-genre="인문">인문/사회</button>
-            <button type="button" data-genre="자기계발">자기계발</button>
-            <button type="button" data-genre="과학">과학</button>
-            <button type="button" data-genre="IT">IT</button>
+            <form id="book-search-form" class="book-tools" role="search">
+                <div class="book-keyword-field">
+                    <input id="book-keyword" name="keyword" type="search"
+                           aria-label="책 검색어" aria-autocomplete="list"
+                           aria-controls="search-suggestions"
+                           aria-expanded="false"
+                           placeholder="책 제목 또는 작가명" autocomplete="off">
+                    <div id="search-suggestions" role="listbox" hidden></div>
+                </div>
+                <button class="button button-primary" type="submit">검색</button>
+            </form>
         </div>
 
-        <p id="book-status" aria-live="polite">책 목록을 불러오는 중입니다.</p>
-        <!-- JavaScript가 Figma 형태의 책 카드를 렌더링하는 영역 -->
-        <div id="book-list" class="book-grid"></div>
+        <div class="book-result-context" aria-live="polite">
+            <div id="author-filter-heading" class="author-filter-heading" hidden>
+                <strong id="selected-author-name"></strong><span> 님의 작품입니다.</span>
+                <a href="/pages/book/list.html">전체 책 보기</a>
+            </div>
+            <div id="search-filter-heading" class="search-filter-heading" hidden>
+                <strong id="selected-search-keyword"></strong><span>에 대한 검색결과입니다.</span>
+            </div>
+        </div>
+
+        <div class="book-filter-bar">
+            <div class="book-category-tabs" role="group" aria-label="책 장르">
+                <button class="is-active" type="button" data-genre="">전체</button>
+                <button type="button" data-genre="판타지">판타지</button>
+                <button type="button" data-genre="SF">SF</button>
+                <button type="button" data-genre="추리">추리</button>
+                <button type="button" data-genre="인문">인문/사회</button>
+                <button type="button" data-genre="자기계발">자기계발</button>
+                <button type="button" data-genre="과학">과학</button>
+                <button type="button" data-genre="IT">IT</button>
+            </div>
+            <label class="book-sort-control" for="book-sort">
+                <select id="book-sort" name="sort">
+                    <option value="rating">평점 높은 순</option>
+                    <option value="title">제목순</option>
+                    <option value="newest">최신 출간순</option>
+                </select>
+            </label>
+        </div>
+
+        <div class="book-results-panel">
+            <p id="book-status" aria-live="polite">책 목록을 불러오는 중입니다.</p>
+            <div id="book-list" class="book-grid"></div>
+        </div>
     </section>
 </main>
 
 <script src="/js/components/navbar.js" defer></script>
-<script src="/js/pages/book-list.js" defer></script>
+<script src="/js/pages/book-list.js?v=20260828-4" defer></script>
 </body>
 </html>

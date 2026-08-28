@@ -58,7 +58,10 @@ function createLink(label, href, className) {
 function markCurrentPage(host, currentPath) {
   host.querySelectorAll("a[href]").forEach((link) => {
     const linkUrl = new URL(link.href, window.location.origin);
-    const samePath = normalizePath(linkUrl.pathname) === currentPath;
+    const linkPath = normalizePath(linkUrl.pathname);
+    const isBookSection = currentPath.startsWith("/pages/book/")
+      && linkPath === "/pages/book/list.html";
+    const samePath = linkPath === currentPath || isBookSection;
     const sameSection = window.location.hash
       ? linkUrl.hash === window.location.hash
       : !linkUrl.hash;

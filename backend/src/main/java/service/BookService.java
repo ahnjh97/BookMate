@@ -30,16 +30,23 @@ public class BookService {
         }
     }
 
-    public BookPageDTO findBooks(String keyword, String genre, int page, int pageSize) {
+    public BookPageDTO findBooks(String keyword, String genre, Long authorId, String sort, int page, int pageSize) {
         int safePage = Math.max(page, 1);
         int safePageSize = Math.max(12, Math.min(pageSize, 100));
         int offset = (safePage - 1) * safePageSize;
+        String normalizedSort = switch (sort == null ? "rating" : sort.trim().toLowerCase()) {
+            case "title" -> "title";
+            case "newest" -> "newest";
+            default -> "rating";
+        };
 
         try (Connection connection = DBUtil.getConnection()) {
             List<BookDTO> fetched = bookDAO.selectBooks(
                     connection,
                     keyword,
                     genre,
+                    authorId,
+                    normalizedSort,
                     offset,
                     safePageSize + 1
             );
