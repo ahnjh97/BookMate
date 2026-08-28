@@ -7,7 +7,7 @@
     <title>게시글 | BookMate</title>
 
     <link rel="stylesheet" href="/assets/css/style.css">
-    <link rel="stylesheet" href="/assets/css/post.css">
+    <link rel="stylesheet" href="/assets/css/post.css?v=20260828-5">
 </head>
 
 <body>
@@ -45,11 +45,14 @@
         </div>
 
         <div id="post-content" class="post-detail-content"></div>
+        <section id="post-tier-list" class="post-tier-list" aria-labelledby="post-tier-list-heading" hidden>
+            <h2 id="post-tier-list-heading">티어리스트 결과</h2>
+            <div id="post-tier-board" class="post-tier-board"></div>
+        </section>
 
         <div class="post-detail-actions">
             <div id="writer-actions" class="post-action-group" hidden>
                 <a id="post-edit-link" class="button" href="#">수정</a>
-                <button id="post-hide-button" class="button" type="button">숨김</button>
                 <button id="post-delete-button" class="button" type="button">삭제</button>
             </div>
 
@@ -67,7 +70,7 @@
     </p>
 </main>
 
-<script src="/js/components/navbar.js" defer></script>
-<script src="/js/pages/post-detail.js" defer></script>
+<script src="/js/components/navbar.js" charset="UTF-8" defer></script>
+<script src="/js/pages/post-detail.js?v=20260829-1" charset="UTF-8" defer></script>
 </body>
 </html>

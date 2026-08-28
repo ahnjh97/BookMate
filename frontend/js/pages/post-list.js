@@ -17,7 +17,7 @@ const categoryNames = {
     FREE: "자유",
     RECOMMEND: "추천",
     REVIEW: "리뷰",
-    TIER: "티어",
+    TIER: "티어리스트",
     AUTHOR: "작가"
 };
 

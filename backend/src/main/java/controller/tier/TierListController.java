@@ -26,6 +26,7 @@ public class TierListController extends HttpServlet {
     }
     @Override protected void doPost(HttpServletRequest request,HttpServletResponse response)throws IOException{
         response.setContentType("application/json");response.setCharacterEncoding("UTF-8");
+        request.setCharacterEncoding("UTF-8");
         HttpSession session=request.getSession(false);Object raw=session==null?null:session.getAttribute("loginMemberId");
         if(!(raw instanceof Number n)){send(response,401,"로그인이 필요한 기능입니다.");return;}
         try{
@@ -34,7 +35,7 @@ public class TierListController extends HttpServlet {
             List<TierService.Placement> placements=(body.placements==null?List.<PlacementRequest>of():body.placements).stream()
                     .map(p->new TierService.Placement(p.bookId,p.grade==null?null:p.grade.toUpperCase())).toList();
             long id=service.saveTierList(n.longValue(),body.templateId,body.title,body.description,body.isPublic,placements);
-            response.setStatus(201);gson.toJson(Map.of("success",true,"tierListId",id,"message","내 티어리스트를 저장했습니다."),response.getWriter());
+            response.setStatus(201);gson.toJson(Map.of("success",true,"tierListId",id,"message",body.isPublic?"티어리스트를 저장하고 커뮤니티에 게시했습니다.":"티어리스트를 비공개로 저장했습니다."),response.getWriter());
         }catch(IllegalArgumentException e){send(response,400,e.getMessage());}catch(RuntimeException e){e.printStackTrace();send(response,500,e.getMessage());}
     }
     private void send(HttpServletResponse r,int status,String message)throws IOException{r.setStatus(status);gson.toJson(Map.of("success",false,"message",message),r.getWriter());}

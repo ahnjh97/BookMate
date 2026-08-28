@@ -3,6 +3,7 @@ package service;
 import util.DBUtil;
 
 import java.sql.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class TierService {
@@ -166,8 +167,8 @@ public class TierService {
                 long tierListId = resultSet.getLong("tier_list_id");
                 Map<String, Object> tierList = new LinkedHashMap<>();
                 tierList.put("tierListId", tierListId);
-                tierList.put("title", resultSet.getString("title"));
-                tierList.put("description", resultSet.getString("description"));
+                tierList.put("title", repairLegacyUtf8(resultSet.getString("title")));
+                tierList.put("description", repairLegacyUtf8(resultSet.getString("description")));
                 tierList.put("isPublic", "Y".equals(resultSet.getString("is_public")));
                 tierList.put("createdAt", resultSet.getTimestamp("created_at"));
                 List<Map<String, Object>> placements = new ArrayList<>();
@@ -188,6 +189,54 @@ public class TierService {
             }
         } catch (SQLException e) {
             throw new RuntimeException("저장된 티어리스트를 불러오지 못했습니다.", e);
+        }
+    }
+
+    public Map<String, Object> findPublicTierList(long tierListId) {
+        if (tierListId <= 0) return null;
+        String headerSql = """
+                SELECT L.tier_list_id, L.template_id, L.title, L.description, M.nickname
+                  FROM TIER_LIST L JOIN MEMBER M ON M.member_id = L.member_id
+                 WHERE L.tier_list_id = ? AND L.is_public = 'Y'
+                """;
+        String itemSql = """
+                SELECT I.book_id, I.tier_grade, I.sort_order, B.title, B.image_url, A.author_name
+                  FROM TIER_ITEM I
+                  JOIN BOOK B ON B.book_id = I.book_id
+                  JOIN AUTHOR A ON A.author_id = B.author_id
+                 WHERE I.tier_list_id = ?
+                 ORDER BY CASE I.tier_grade WHEN 'S' THEN 1 WHEN 'A' THEN 2 WHEN 'B' THEN 3 WHEN 'C' THEN 4 ELSE 5 END,
+                          I.sort_order, I.tier_item_id
+                """;
+        try (Connection connection = DBUtil.getConnection();
+             PreparedStatement header = connection.prepareStatement(headerSql)) {
+            header.setLong(1, tierListId);
+            Map<String, Object> result = new LinkedHashMap<>();
+            try (ResultSet rs = header.executeQuery()) {
+                if (!rs.next()) return null;
+                result.put("tierListId", rs.getLong("tier_list_id"));
+                result.put("templateId", rs.getLong("template_id"));
+                result.put("title", rs.getString("title"));
+                result.put("description", rs.getString("description"));
+                result.put("memberNickname", rs.getString("nickname"));
+            }
+            List<Map<String, Object>> items = new ArrayList<>();
+            try (PreparedStatement statement = connection.prepareStatement(itemSql)) {
+                statement.setLong(1, tierListId);
+                try (ResultSet rs = statement.executeQuery()) {
+                    while (rs.next()) {
+                        Map<String, Object> item = new LinkedHashMap<>();
+                        item.put("bookId", rs.getLong("book_id")); item.put("grade", rs.getString("tier_grade"));
+                        item.put("sortOrder", rs.getInt("sort_order")); item.put("title", rs.getString("title"));
+                        item.put("imageUrl", rs.getString("image_url")); item.put("authorName", rs.getString("author_name"));
+                        items.add(item);
+                    }
+                }
+            }
+            result.put("items", items);
+            return result;
+        } catch (SQLException e) {
+            throw new RuntimeException("공개 티어리스트를 불러오지 못했습니다.", e);
         }
     }
 
@@ -245,6 +294,7 @@ public class TierService {
                         if (statement.executeUpdate() != 1) throw new IllegalArgumentException("템플릿에 없는 책이 포함되어 있습니다.");
                     }
                 }
+                syncTierPost(connection, memberId, listId, safeTitle, safeDescription, isPublic);
                 connection.commit(); return listId;
             } catch (Exception e) {
                 connection.rollback();
@@ -252,6 +302,39 @@ public class TierService {
                 throw e;
             }
         } catch (SQLException e) { throw new RuntimeException("티어리스트를 저장하지 못했습니다.", e); }
+    }
+
+    private void syncTierPost(Connection connection, long memberId, long tierListId, String title,
+                              String description, boolean isPublic) throws SQLException {
+        String content = description == null ? title + " 티어리스트를 완성했습니다." : description;
+        String status = isPublic ? "ACTIVE" : "PRIVATE";
+        String sql = """
+                MERGE INTO POST P
+                USING (SELECT ? tier_list_id FROM DUAL) S
+                   ON (P.tier_list_id = S.tier_list_id)
+                 WHEN MATCHED THEN UPDATE SET
+                      P.member_id = ?, P.category = 'TIER', P.title = ?, P.content = ?,
+                      P.genre = NULL, P.status = ?, P.updated_at = SYSDATE
+                 WHEN NOT MATCHED THEN INSERT (
+                      post_id, member_id, tier_list_id, category, title, content, genre,
+                      view_count, is_pinned, status, created_at
+                 ) VALUES (
+                      SEQ_POST.NEXTVAL, ?, ?, 'TIER', ?, ?, NULL, 0, 'N', ?, SYSDATE
+                 )
+                """;
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, tierListId);
+            statement.setLong(2, memberId);
+            statement.setString(3, title);
+            statement.setString(4, content);
+            statement.setString(5, status);
+            statement.setLong(6, memberId);
+            statement.setLong(7, tierListId);
+            statement.setString(8, title);
+            statement.setString(9, content);
+            statement.setString(10, status);
+            statement.executeUpdate();
+        }
     }
 
     public void reviewTemplate(long templateId, long adminId, boolean approved, String reason) {
@@ -336,5 +419,10 @@ public class TierService {
         return normalized;
     }
     private String normalize(String value) { return value == null || value.trim().isEmpty() ? null : value.trim(); }
+    private String repairLegacyUtf8(String value) {
+        if (value == null || !(value.contains("Ã") || value.contains("ì") || value.contains("ë") || value.contains("ê") || value.contains("í"))) return value;
+        String repaired = new String(value.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
+        return repaired.indexOf('\uFFFD') >= 0 ? value : repaired;
+    }
     public record Placement(long bookId, String grade) {}
 }

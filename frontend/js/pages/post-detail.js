@@ -7,11 +7,12 @@ const writerElement = document.querySelector("#post-writer");
 const viewCountElement = document.querySelector("#post-view-count");
 const createdAtElement = document.querySelector("#post-created-at");
 const contentElement = document.querySelector("#post-content");
+const tierListElement = document.querySelector("#post-tier-list");
+const tierBoardElement = document.querySelector("#post-tier-board");
 const likeCountElement = document.querySelector("#post-like-count");
 const writerActions = document.querySelector("#writer-actions");
 const memberActions = document.querySelector("#member-actions");
 const editLink = document.querySelector("#post-edit-link");
-const hideButton = document.querySelector("#post-hide-button");
 const deleteButton = document.querySelector("#post-delete-button");
 const likeButton = document.querySelector("#post-like-button");
 const reportButton = document.querySelector("#post-report-button");
@@ -21,7 +22,7 @@ const categoryNames = {
     FREE: "자유",
     RECOMMEND: "추천",
     REVIEW: "리뷰",
-    TIER: "티어",
+    TIER: "티어리스트",
     AUTHOR: "작가"
 };
 
@@ -60,7 +61,8 @@ async function loadPostDetail() {
         currentMember = sessionResult;
 
         renderPost(currentPost);
-        renderActions(currentPost, currentMember);
+        renderTierList(postResult.tierList);
+        renderActions(currentPost, currentMember, postResult.tierList);
     } catch (error) {
         console.error(error);
         showError(
@@ -68,6 +70,37 @@ async function loadPostDetail() {
             "게시글을 불러오지 못했습니다."
         );
     }
+}
+
+function renderTierList(tierList) {
+    tierBoardElement.replaceChildren();
+    tierListElement.hidden = !tierList;
+    detailElement.classList.toggle("has-tier-list", Boolean(tierList));
+    if (!tierList) return;
+    ["S", "A", "B", "C", "D"].forEach(grade => {
+        const row = document.createElement("div");
+        row.className = "post-tier-row";
+        const label = document.createElement("strong");
+        label.textContent = grade;
+        const books = document.createElement("div");
+        books.className = "post-tier-books";
+        (tierList.items || []).filter(item => item.grade === grade).forEach(item => {
+            const link = document.createElement("a");
+            link.className = "post-tier-book";
+            link.href = `/pages/book/detail.html?id=${encodeURIComponent(item.bookId)}`;
+            link.title = `${item.title} - ${item.authorName}`;
+            link.dataset.tooltip = `${item.title} - ${item.authorName}`;
+            const image = document.createElement("img");
+            image.src = item.imageUrl || "";
+            image.alt = `${item.title} 표지`;
+            const title = document.createElement("span");
+            title.textContent = item.title;
+            link.append(image, title);
+            books.append(link);
+        });
+        row.append(label, books);
+        tierBoardElement.append(row);
+    });
 }
 
 /* 2. 게시글 내용 출력 */
@@ -98,7 +131,7 @@ function renderPost(post) {
 }
 
 /* 3. 로그인 상태와 작성자에 따라 버튼 표시 */
-function renderActions(post, auth) {
+function renderActions(post, auth, tierList) {
     writerActions.hidden = true;
     memberActions.hidden = true;
 
@@ -115,7 +148,9 @@ function renderActions(post, auth) {
 
     if (loginMemberId === postWriterId) {
         writerActions.hidden = false;
-        editLink.href = `/pages/post/update.html?postId=${post.postId}`;
+        editLink.href = tierList?.templateId
+            ? `/pages/tier/maker.html?id=${encodeURIComponent(tierList.templateId)}`
+            : `/pages/post/update.html?postId=${post.postId}`;
         return;
     }
 
@@ -164,29 +199,24 @@ deleteButton.addEventListener("click", async () => {
     }
 });
 
-/* 5. 게시글 숨김 */
-hideButton.addEventListener("click", () => {
-    alert("게시글 숨김 기능은 백엔드 연결 후 사용할 수 있습니다.");
-});
-
-/* 6. 좋아요 */
+/* 5. 좋아요 */
 likeButton.addEventListener("click", () => {
     alert("좋아요 기능은 좋아요 테이블과 API 연결 후 사용할 수 있습니다.");
 });
 
-/* 7. 신고 */
+/* 6. 신고 */
 reportButton.addEventListener("click", () => {
     alert("신고 기능은 신고 테이블과 API 연결 후 사용할 수 있습니다.");
 });
 
-/* 8. 오류 출력 */
+/* 7. 오류 출력 */
 function showError(message) {
     detailElement.hidden = true;
     statusElement.hidden = false;
     statusElement.textContent = message;
 }
 
-/* 9. 날짜 출력 형식 */
+/* 8. 날짜 출력 형식 */
 function formatDateTime(value) {
     if (!value) {
         return "-";
@@ -195,7 +225,7 @@ function formatDateTime(value) {
     return String(value).substring(0, 19);
 }
 
-/* 10. time 태그 날짜 형식 */
+/* 9. time 태그 날짜 형식 */
 function toDateTimeAttribute(value) {
     if (!value) {
         return "";
@@ -206,5 +236,5 @@ function toDateTimeAttribute(value) {
         .replace(" ", "T");
 }
 
-/* 11. 게시글 상세 초기 실행 */
+/* 10. 게시글 상세 초기 실행 */
 loadPostDetail();

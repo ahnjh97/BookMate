@@ -184,7 +184,7 @@ VALUES (SEQ_MEMBER.NEXTVAL, 'bookmate_system', 'disabled', 'BookMate 큐레이�
 /*END*/
 
 INSERT INTO TIER_TEMPLATE (template_id, member_id, title, description, category, status, processed_at)
-SELECT SEQ_TIER_TEMPLATE.NEXTVAL, member_id, '해리 포터 시리즈', '호그와트에서 시작된 일곱 편의 모험을 내 취향대로 나눠보세요.', '작가', 'APPROVED', SYSDATE
+SELECT SEQ_TIER_TEMPLATE.NEXTVAL, member_id, '해리 포터 시리즈', '해리 포터 본편 일곱 권을 비교하는 템플릿', '작가', 'APPROVED', SYSDATE
 FROM MEMBER WHERE login_id = 'bookmate_system';
 /*END*/
 INSERT INTO TIER_TEMPLATE_ITEM (template_item_id, template_id, book_id, sort_order)
@@ -195,7 +195,7 @@ SELECT SEQ_TIER_TEMPLATE_ITEM.NEXTVAL, T.template_id, B.book_id,
 /*END*/
 
 INSERT INTO TIER_TEMPLATE (template_id, member_id, title, description, category, status, processed_at)
-SELECT SEQ_TIER_TEMPLATE.NEXTVAL, member_id, 'SF 입문 명작', '우주와 미래, 과학적 상상력을 담은 SF 책을 골라 티어를 완성해 보세요.', '장르', 'APPROVED', SYSDATE
+SELECT SEQ_TIER_TEMPLATE.NEXTVAL, member_id, 'SF 입문 명작', '처음 읽기 좋은 SF 소설 모음', '장르', 'APPROVED', SYSDATE
 FROM MEMBER WHERE login_id = 'bookmate_system';
 /*END*/
 INSERT INTO TIER_TEMPLATE_ITEM (template_item_id, template_id, book_id, sort_order)

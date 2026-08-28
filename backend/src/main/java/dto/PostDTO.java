@@ -13,6 +13,7 @@ public class PostDTO {
     /* 게시글 데이터를 담을 저장소 */
     private long postId;
     private long memberId;
+    private Long tierListId;
     private String memberNickname;
     private String category;
     private String title;

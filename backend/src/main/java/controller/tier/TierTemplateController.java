@@ -32,6 +32,7 @@ public class TierTemplateController extends HttpServlet {
     }
 
     @Override protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        request.setCharacterEncoding("UTF-8");
         json(response); Long memberId = memberId(request);
         if (memberId == null) { error(response, 401, "로그인이 필요한 기능입니다."); return; }
         try {

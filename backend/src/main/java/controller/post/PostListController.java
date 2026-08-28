@@ -78,9 +78,7 @@ public class PostListController extends HttpServlet {
     private void setJsonResponse(
             HttpServletResponse response
     ) {
-        response.setContentType(
-                "application/json"
-        );
+        response.setContentType("application/json;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
     }
 }

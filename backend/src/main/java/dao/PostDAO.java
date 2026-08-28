@@ -17,6 +17,7 @@ public class PostDAO {
                 SELECT
                     P.post_id,
                     P.member_id,
+                    P.tier_list_id,
                     M.nickname AS member_nickname,
                     P.category,
                     P.title,
@@ -53,6 +54,7 @@ public class PostDAO {
                 SELECT
                     P.post_id,
                     P.member_id,
+                    P.tier_list_id,
                     M.nickname AS member_nickname,
                     P.category,
                     P.title,
@@ -255,6 +257,8 @@ public class PostDAO {
         PostDTO post = new PostDTO();
         post.setPostId(rs.getLong("post_id"));
         post.setMemberId(rs.getLong("member_id"));
+        long tierListId = rs.getLong("tier_list_id");
+        post.setTierListId(rs.wasNull() ? null : tierListId);
         post.setMemberNickname(rs.getString("member_nickname"));
         post.setCategory(rs.getString("category"));
         post.setTitle(rs.getString("title"));

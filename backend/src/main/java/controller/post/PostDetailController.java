@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import service.PostService;
+import service.TierService;
 
 import java.io.IOException;
 import java.util.Map;
@@ -18,10 +19,12 @@ public class PostDetailController extends HttpServlet {
 
     private PostService postService;
     private Gson gson;
+    private TierService tierService;
 
     @Override
     public void init() throws ServletException {
         postService = new PostService();
+        tierService = new TierService();
 
         gson = new GsonBuilder()
                 .setDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -89,13 +92,11 @@ public class PostDetailController extends HttpServlet {
                     HttpServletResponse.SC_OK
             );
 
-            gson.toJson(
-                    Map.of(
-                            "success", true,
-                            "post", post
-                    ),
-                    response.getWriter()
-            );
+            Map<String, Object> result = new java.util.LinkedHashMap<>();
+            result.put("success", true);
+            result.put("post", post);
+            if (post.getTierListId() != null) result.put("tierList", tierService.findPublicTierList(post.getTierListId()));
+            gson.toJson(result, response.getWriter());
 
         } catch (IllegalArgumentException e) {
             sendError(
@@ -117,9 +118,7 @@ public class PostDetailController extends HttpServlet {
     private void setJsonResponse(
             HttpServletResponse response
     ) {
-        response.setContentType(
-                "application/json"
-        );
+        response.setContentType("application/json;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
     }
 

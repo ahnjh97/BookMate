@@ -55,6 +55,9 @@ public class PostService {
     /* 게시글 등록: 등록된 게시글 번호 반환 */
     public long createPost(PostDTO post) {
         validateCreatePost(post);
+        if ("TIER".equals(post.getCategory())) {
+            throw new IllegalArgumentException("티어 게시글은 티어리스트를 저장하면 자동으로 등록됩니다.");
+        }
         Connection conn = null;
 
         try {
