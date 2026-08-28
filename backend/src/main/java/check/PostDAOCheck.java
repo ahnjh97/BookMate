@@ -225,6 +225,74 @@ public class PostDAOCheck {
                     );
                 }
 
+                // ============================================
+// 9. ACTIVE 게시글의 IS_PINNED 조회 확인
+// 기대 결과 : Y 또는 N
+// ============================================
+                try {
+
+                    List<PostDTO> posts =
+                            postDAO.selectPostList(conn);
+
+                    if (posts.isEmpty()) {
+
+                        System.out.println(
+                                "9. 게시글 IS_PINNED 조회 : SKIP"
+                        );
+
+                        System.out.println(
+                                "   └ ACTIVE 게시글이 없습니다."
+                        );
+
+                    } else {
+
+                        PostDTO post =
+                                posts.get(0);
+
+                        String isPinned =
+                                post.getIsPinned();
+
+                        if ("Y".equals(isPinned)
+                                || "N".equals(isPinned)) {
+
+                            System.out.println(
+                                    "9. 게시글 IS_PINNED 조회 : PASS"
+                            );
+
+                            System.out.println(
+                                    "   POST_ID : "
+                                            + post.getPostId()
+                            );
+
+                            System.out.println(
+                                    "   IS_PINNED : "
+                                            + isPinned
+                            );
+
+                        } else {
+
+                            System.out.println(
+                                    "9. 게시글 IS_PINNED 조회 : FAIL"
+                            );
+
+                            System.out.println(
+                                    "   └ IS_PINNED 값 : "
+                                            + isPinned
+                            );
+                        }
+                    }
+
+                } catch (Exception e) {
+
+                    System.out.println(
+                            "9. 게시글 IS_PINNED 조회 : FAIL"
+                    );
+
+                    System.out.println(
+                            "   └ " + e.getMessage()
+                    );
+                }
+
 
             } finally {
 

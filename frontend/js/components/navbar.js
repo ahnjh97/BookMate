@@ -13,7 +13,7 @@
       markCurrentPage(host, currentPath);
     });
 
-    const authResponse = await fetch("/api/auth", { cache: "no-store" });
+    const authResponse = await fetch("/api/auth/session", { cache: "no-store" });
     const auth = authResponse.ok ? await authResponse.json() : { loggedIn: false };
     navbarHosts.forEach((host) => renderAuthMenu(host, auth));
     document.dispatchEvent(new CustomEvent("bookmate:navbar-ready", { detail: auth }));
@@ -27,13 +27,17 @@
 
 function renderAuthMenu(navbarHost, auth) {
   const menu = navbarHost.querySelector(".auth-menu");
+  if (!menu) { return; }
   menu.replaceChildren();
   if (!auth.loggedIn) {
     menu.append(createLink("로그인", "/pages/auth/login.html", "login-link"));
     menu.append(createLink("회원가입", "/pages/auth/signup.html", "button button-small button-primary"));
     return;
   }
-  menu.append(createLink("마이페이지", "/pages/member/mypage.html", "login-link"));
+  // 관리자 / 일반회원 메뉴 분리
+  if (auth.role === "ADMIN") {menu.append(createLink("관리자페이지", "/pages/admin/admin.html", "login-link admin-link"));
+  } else { menu.append(createLink("마이페이지", "/pages/member/mypage.html", "login-link"));
+  }
   menu.append(createLink("회원정보수정", "/pages/member/edit.html", "login-link account-edit-link"));
   const logout = document.createElement("button");
   logout.type = "button";
@@ -41,7 +45,7 @@ function renderAuthMenu(navbarHost, auth) {
   logout.textContent = "로그아웃";
   logout.addEventListener("click", async () => {
     logout.disabled = true;
-    await fetch("/api/auth", { method: "DELETE" });
+    await fetch("/api/auth/session", { method: "DELETE" });
     window.location.href = "/";
   });
   menu.append(logout);
