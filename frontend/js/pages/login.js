@@ -8,7 +8,7 @@ loginForm.addEventListener("submit", async (event) => {
   loginMessage.textContent = "";
   try {
     const data = Object.fromEntries(new FormData(loginForm));
-    const response = await fetch("/api/auth", {
+    const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)

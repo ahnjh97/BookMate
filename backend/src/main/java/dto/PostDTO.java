@@ -14,6 +14,7 @@ public class PostDTO {
     private String status;
     private Timestamp createdAt;
     private Timestamp updatedAt;
+    private String isPinned;
 
     public PostDTO() {
     }
@@ -26,6 +27,7 @@ public class PostDTO {
             String title,
             String content,
             int viewCount,
+            String isPinned,
             String status,
             Timestamp createdAt,
             Timestamp updatedAt
@@ -37,6 +39,7 @@ public class PostDTO {
         this.title = title;
         this.content = content;
         this.viewCount = viewCount;
+        this.isPinned = isPinned;
         this.status = status;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -120,5 +123,13 @@ public class PostDTO {
 
     public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getIsPinned() {
+        return isPinned;
+    }
+
+    public void setIsPinned(String isPinned) {
+        this.isPinned = isPinned;
     }
 }
