@@ -7,40 +7,84 @@
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="stylesheet" href="/assets/css/post.css">
 </head>
+
 <body>
 <header class="site-header" data-navbar></header>
 
-<main class="post-page-main">
-    <section class="post-page-content">
-        <!-- Figma 커뮤니티 제목·설명과 기존 글쓰기 기능을 묶은 헤더 -->
-        <div class="post-page-header">
+<main class="page-main" data-page="community">
+    <section class="page-content">
+        <div class="community-page-hero">
             <div>
-                <h1>커뮤니티 인기글</h1>
-                <p>독자들과 책에 대한 다양한 이야기를 나눠보세요.</p>
+                <h1>커뮤니티</h1>
+                <p>책에 대한 다양한 이야기를 나눠보세요.</p>
             </div>
+
             <a class="button button-primary" href="/pages/post/create.html">게시글 작성</a>
         </div>
 
-        <p id="post-status" class="post-status" aria-live="polite">
-            게시글을 불러오는 중입니다.
-        </p>
+        <!-- 1. 실시간 / 인기글 -->
+        <div class="community-view-tabs">
+            <button class="is-active" type="button" data-view="realtime">실시간</button>
+            <button type="button" data-view="popular">인기글</button>
+        </div>
 
-        <!-- 카테고리를 제목에 포함한 Figma 형태의 인기글 표 -->
-        <div class="post-table-wrapper">
+        <!-- 2. 일반 커뮤니티 필터 -->
+        <div id="community-filter">
+            <div class="post-filter-group">
+                <span class="post-filter-label">카테고리</span>
+
+                <div class="post-category-tabs">
+                    <button class="is-active" type="button" data-category="">전체</button>
+                    <button type="button" data-category="FREE">자유</button>
+                    <button type="button" data-category="RECOMMEND">추천</button>
+                    <button type="button" data-category="REVIEW">리뷰</button>
+                    <button type="button" data-category="TIER">티어</button>
+                    <button type="button" data-category="AUTHOR">작가</button>
+                </div>
+            </div>
+
+            <div class="post-filter-group">
+                <span class="post-filter-label">장르</span>
+
+                <div class="post-genre-tabs">
+                    <button class="is-active" type="button" data-genre="">전체</button>
+                    <button type="button" data-genre="판타지">판타지</button>
+                    <button type="button" data-genre="SF">SF</button>
+                    <button type="button" data-genre="추리">추리</button>
+                    <button type="button" data-genre="인문">인문/사회</button>
+                    <button type="button" data-genre="자기계발">자기계발</button>
+                    <button type="button" data-genre="과학">과학</button>
+                    <button type="button" data-genre="IT">IT</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 인기글 기간 -->
+        <div id="popular-period-filter" class="popular-period-filter" hidden>
+            <button class="is-active" type="button" data-period="today">오늘</button>
+            <button type="button" data-period="week">이번주</button>
+            <button type="button" data-period="month">이번달</button>
+        </div>
+
+        <!-- 4. 검색 -->
+        <form id="post-search-form" class="post-search-form" role="search">
+            <input id="post-keyword" type="search" placeholder="게시글 제목 또는 작성자 검색">
+            <button class="button button-primary" type="submit">검색</button>
+        </form>
+
+        <p id="post-result-message" class="post-result-message"></p>
+
+        <!-- 5. 게시글 목록 -->
+        <div class="post-table-wrap">
             <table class="post-table">
-                <thead>
-                <tr>
-                    <th class="post-number">순위</th>
-                    <th>제목</th>
-                    <th class="post-writer">작성자</th>
-                    <th class="post-date">작성일</th>
-                    <th class="post-views">조회수</th>
-                </tr>
-                </thead>
-                <!-- JavaScript가 API 게시글을 순위형 행으로 렌더링합니다. -->
+                <thead id="post-table-head"></thead>
                 <tbody id="post-list"></tbody>
             </table>
         </div>
+
+        <p id="post-status" aria-live="polite">게시글을 불러오는 중입니다.</p>
+
+        <div id="post-pagination"></div>
     </section>
 </main>
 

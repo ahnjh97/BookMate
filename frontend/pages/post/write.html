@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookMate 게시글 작성</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/post-write.css">
+</head>
+<body>
+<header class="site-header" data-navbar></header>
+
+<main class="post-write-page">
+    <section class="post-write-section">
+        <h1>게시글 작성</h1>
+
+        <form id="post-form" class="post-write-form">
+            <div class="form-group">
+                <label for="post-category">카테고리</label>
+                <select id="post-category" required>
+                    <option value="">카테고리를 선택해주세요.</option>
+                    <option value="FREE">자유</option>
+                    <option value="RECOMMEND">추천</option>
+                    <option value="REVIEW">리뷰</option>
+                    <option value="TIER">티어</option>
+                    <option value="AUTHOR">작가</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="post-genre">장르</label>
+                <select id="post-genre">
+                    <option value="">장르 선택 안 함</option>
+                    <option value="판타지">판타지</option>
+                    <option value="SF">SF</option>
+                    <option value="추리">추리</option>
+                    <option value="인문">인문/사회</option>
+                    <option value="자기계발">자기계발</option>
+                    <option value="과학">과학</option>
+                    <option value="IT">IT</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="post-title">제목</label>
+                <input
+                        id="post-title"
+                        type="text"
+                        maxlength="200"
+                        placeholder="제목을 입력해주세요."
+                        required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="post-content">내용</label>
+                <textarea
+                        id="post-content"
+                        maxlength="4000"
+                        placeholder="내용을 입력해주세요."
+                        required
+                ></textarea>
+            </div>
+
+            <p id="post-status"></p>
+
+            <div class="post-write-actions">
+                <a href="/pages/post/list.html">취소</a>
+                <button type="submit">등록</button>
+            </div>
+        </form>
+    </section>
+</main>
+
+<script src="/js/components/navbar.js"></script>
+<script src="/js/pages/write.js"></script>
+</body>
+</html>
