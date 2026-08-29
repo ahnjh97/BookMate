@@ -15,8 +15,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-@WebServlet("/api/posts/delete")
-public class PostDeleteController extends HttpServlet {
+@WebServlet("/api/posts/hide")
+public class PostHideController extends HttpServlet {
     private PostService postService;
     private Gson gson;
 
@@ -26,7 +26,7 @@ public class PostDeleteController extends HttpServlet {
         gson = new Gson();
     }
 
-    /* POST /api/posts/delete - 작성자 게시글 소프트 삭제 */
+    /* POST /api/posts/hide - 작성자 게시글 숨김 */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         setJsonResponse(response);
@@ -37,23 +37,23 @@ public class PostDeleteController extends HttpServlet {
             return;
         }
 
-        final DeletePostRequest deleteRequest;
+        final HidePostRequest hideRequest;
         try {
-            deleteRequest = readRequestBody(request);
+            hideRequest = readRequestBody(request);
         } catch (JsonSyntaxException e) {
             sendError(response, HttpServletResponse.SC_BAD_REQUEST, "요청 데이터 형식이 올바르지 않습니다.");
             return;
         }
 
-        if (deleteRequest == null || deleteRequest.getPostId() <= 0) {
+        if (hideRequest == null || hideRequest.getPostId() <= 0) {
             sendError(response, HttpServletResponse.SC_BAD_REQUEST, "올바른 게시글 번호가 필요합니다.");
             return;
         }
 
         try {
-            boolean deleted = postService.deletePostByWriter(deleteRequest.getPostId(), loginMemberId);
-            if (!deleted) {
-                sendError(response, HttpServletResponse.SC_NOT_FOUND, "존재하지 않거나 이미 삭제된 게시글입니다.");
+            boolean hidden = postService.hidePostByWriter(hideRequest.getPostId(), loginMemberId);
+            if (!hidden) {
+                sendError(response, HttpServletResponse.SC_NOT_FOUND, "존재하지 않거나 이미 숨김 처리된 게시글입니다.");
                 return;
             }
 
@@ -61,8 +61,8 @@ public class PostDeleteController extends HttpServlet {
             gson.toJson(
                     Map.of(
                             "success", true,
-                            "message", "게시글이 삭제되었습니다.",
-                            "postId", deleteRequest.getPostId()
+                            "message", "게시글이 숨김 처리되었습니다.",
+                            "postId", hideRequest.getPostId()
                     ),
                     response.getWriter()
             );
@@ -73,15 +73,15 @@ public class PostDeleteController extends HttpServlet {
         } catch (IllegalArgumentException e) {
             sendError(response, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         } catch (RuntimeException e) {
-            sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "게시글 삭제 중 오류가 발생했습니다.");
+            sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "게시글 숨김 처리 중 오류가 발생했습니다.");
         }
     }
 
-    /* 요청 본문의 JSON을 삭제 요청 객체로 변환 */
-    private DeletePostRequest readRequestBody(HttpServletRequest request) throws IOException {
+    /* 요청 본문의 JSON을 숨김 요청 객체로 변환 */
+    private HidePostRequest readRequestBody(HttpServletRequest request) throws IOException {
         request.setCharacterEncoding("UTF-8");
         try (BufferedReader reader = request.getReader()) {
-            return gson.fromJson(reader, DeletePostRequest.class);
+            return gson.fromJson(reader, HidePostRequest.class);
         }
     }
 
@@ -118,11 +118,11 @@ public class PostDeleteController extends HttpServlet {
         );
     }
 
-    /* 삭제 요청 JSON을 받는 내부 DTO */
-    private static class DeletePostRequest {
+    /* 숨김 요청 JSON을 받는 내부 DTO */
+    private static class HidePostRequest {
         private long postId;
 
-        public DeletePostRequest() {
+        public HidePostRequest() {
         }
 
         public long getPostId() {

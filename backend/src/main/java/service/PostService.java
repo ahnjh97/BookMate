@@ -139,6 +139,38 @@ public class PostService {
         }
     }
 
+    /* 작성자가 자신의 게시글 숨김 */
+    public boolean hidePostByWriter(long postId, long loginMemberId) {
+        validatePostId(postId);
+        validateMemberId(loginMemberId);
+        Connection conn = null;
+
+        try {
+            conn = DBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            checkWriterPermission(conn, postId, loginMemberId);
+
+            int result = postDAO.hidePostByWriter(conn, postId);
+
+            if (result == 0) {
+                rollback(conn);
+                return false;
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            rollback(conn);
+            throw new RuntimeException("게시글 숨김에 실패했습니다.", e);
+        } catch (RuntimeException e) {
+            rollback(conn);
+            throw e;
+        } finally {
+            close(conn);
+        }
+    }
+
     /* 관리자 게시글 삭제 */
     public boolean deletePostByAdmin(long postId, String loginMemberRole) {
         validatePostId(postId);
@@ -182,7 +214,7 @@ public class PostService {
         }
 
         if (writerId != loginMemberId) {
-            throw new SecurityException("게시글을 수정하거나 삭제할 권한이 없습니다.");
+            throw new SecurityException("게시글을 수정, 삭제 또는 숨김 처리할 권한이 없습니다.");
         }
     }
 

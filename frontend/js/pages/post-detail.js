@@ -13,6 +13,7 @@ const likeCountElement = document.querySelector("#post-like-count");
 const writerActions = document.querySelector("#writer-actions");
 const memberActions = document.querySelector("#member-actions");
 const editLink = document.querySelector("#post-edit-link");
+const hideButton = document.querySelector("#post-hide-button");
 const deleteButton = document.querySelector("#post-delete-button");
 const likeButton = document.querySelector("#post-like-button");
 const reportButton = document.querySelector("#post-report-button");
@@ -157,7 +158,46 @@ function renderActions(post, auth, tierList) {
     memberActions.hidden = false;
 }
 
-/* 4. 게시글 삭제 */
+/* 4. 게시글 숨김 */
+/* 4. 게시글 숨김 */
+hideButton.addEventListener("click", async () => {
+    if (!currentPost) {
+        return;
+    }
+
+    const confirmed = confirm(
+        "게시글을 숨기시겠습니까?\n숨긴 게시글은 커뮤니티 목록에서 표시되지 않습니다."
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/posts/hide", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json;charset=UTF-8"
+            },
+            body: JSON.stringify({
+                postId: currentPost.postId
+            })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            throw new Error(result.message || "게시글 숨김 처리에 실패했습니다.");
+        }
+
+        window.location.replace("/pages/post/list.html");
+    } catch (error) {
+        console.error(error);
+        alert(error.message || "게시글 숨김 처리 중 오류가 발생했습니다.");
+    }
+});
+
+/* 5. 게시글 삭제 */
 deleteButton.addEventListener("click", async () => {
     if (!currentPost) {
         return;
@@ -199,24 +239,24 @@ deleteButton.addEventListener("click", async () => {
     }
 });
 
-/* 5. 좋아요 */
+/* 6. 좋아요 */
 likeButton.addEventListener("click", () => {
     alert("좋아요 기능은 좋아요 테이블과 API 연결 후 사용할 수 있습니다.");
 });
 
-/* 6. 신고 */
+/* 7. 신고 */
 reportButton.addEventListener("click", () => {
     alert("신고 기능은 신고 테이블과 API 연결 후 사용할 수 있습니다.");
 });
 
-/* 7. 오류 출력 */
+/* 8. 오류 출력 */
 function showError(message) {
     detailElement.hidden = true;
     statusElement.hidden = false;
     statusElement.textContent = message;
 }
 
-/* 8. 날짜 출력 형식 */
+/* 9. 날짜 출력 형식 */
 function formatDateTime(value) {
     if (!value) {
         return "-";
@@ -225,7 +265,7 @@ function formatDateTime(value) {
     return String(value).substring(0, 19);
 }
 
-/* 9. time 태그 날짜 형식 */
+/* 10. time 태그 날짜 형식 */
 function toDateTimeAttribute(value) {
     if (!value) {
         return "";
@@ -236,5 +276,5 @@ function toDateTimeAttribute(value) {
         .replace(" ", "T");
 }
 
-/* 10. 게시글 상세 초기 실행 */
+/* 11. 게시글 상세 초기 실행 */
 loadPostDetail();
