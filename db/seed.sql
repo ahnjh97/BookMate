@@ -205,5 +205,17 @@ SELECT SEQ_TIER_TEMPLATE_ITEM.NEXTVAL, T.template_id, B.book_id,
  WHERE T.title = 'SF 입문 명작' AND B.genre = 'SF';
 /*END*/
 
+-- 바로 체험할 수 있는 월드컵 템플릿 예시
+INSERT INTO IDEAL_TEMPLATE (template_id, member_id, title, description)
+SELECT SEQ_IDEAL_TEMPLATE.NEXTVAL, member_id, 'BookMate 인생책 월드컵', '장르를 넘나드는 인기 도서 중 단 한 권의 인생책을 골라보세요.'
+FROM MEMBER WHERE login_id = 'bookmate_system';
+/*END*/
+INSERT INTO IDEAL_TEMPLATE_ITEM (template_item_id, template_id, book_id, sort_order)
+SELECT SEQ_IDEAL_TEMPLATE_ITEM.NEXTVAL, T.template_id, B.book_id, B.sort_order
+FROM IDEAL_TEMPLATE T
+JOIN (SELECT book_id, ROW_NUMBER() OVER (ORDER BY book_id) - 1 sort_order FROM BOOK WHERE status='APPROVED' FETCH FIRST 16 ROWS ONLY) B ON 1=1
+WHERE T.title = 'BookMate 인생책 월드컵';
+/*END*/
+
 COMMIT;
 /*END*/

@@ -1,36 +1,36 @@
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>회원가입 | BookMate</title>
-    <link rel="stylesheet" href="/assets/css/style.css">
-  </head>
-  <body>
-    <header class="site-header" data-navbar></header>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>회원가입 | BookMate</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+  <header class="site-header" data-navbar></header>
 
-    <main class="page-main">
-      <section class="page-content auth-card">
-        <h1>회원가입</h1>
-        <form class="auth-form" id="signup-form">
-          <label for="login-id">아이디</label>
-          <div class="field-with-button">
-            <input id="login-id" name="loginId" autocomplete="username" pattern="[A-Za-z0-9_]{4,50}" required>
-            <button class="button" id="check-id" type="button">중복 확인</button>
-          </div>
-          <small>영문, 숫자, 밑줄 4~50자</small>
-          <label for="password">비밀번호</label>
-          <input id="password" name="password" type="password" minlength="8" maxlength="100" autocomplete="new-password" required>
-          <label for="nickname">닉네임</label>
-          <input id="nickname" name="nickname" maxlength="30" required>
-          <label for="email">이메일</label>
-          <input id="email" name="email" type="email" maxlength="100" autocomplete="email" required>
-          <p class="form-message" id="form-message" aria-live="polite"></p>
-          <button class="button button-primary" type="submit">가입하기</button>
-        </form>
-      </section>
-    </main>
-    <script src="/js/components/navbar.js" defer></script>
-    <script src="/js/pages/signup.js" defer></script>
-  </body>
+  <main class="page-main">
+    <section class="page-content auth-card">
+      <h1>회원가입</h1>
+      <form class="auth-form" id="signup-form">
+        <label for="login-id">아이디</label>
+        <div class="field-with-button">
+          <input id="login-id" name="loginId" autocomplete="username" pattern="[A-Za-z0-9_]{4,50}" required>
+          <button class="button" id="check-id" type="button">중복 확인</button>
+        </div>
+        <small>영문, 숫자, 밑줄 4~50자</small>
+        <label for="password">비밀번호</label>
+        <input id="password" name="password" type="password" minlength="8" maxlength="100" autocomplete="new-password" required>
+        <label for="nickname">닉네임</label>
+        <input id="nickname" name="nickname" maxlength="30" required>
+        <label for="email">이메일</label>
+        <input id="email" name="email" type="email" maxlength="100" autocomplete="email" required>
+        <p class="form-message" id="form-message" aria-live="polite"></p>
+        <button class="button button-primary" type="submit">가입하기</button>
+      </form>
+    </section>
+  </main>
+  <script src="/js/components/navbar.js" defer></script>
+  <script src="/js/pages/signup.js" defer></script>
+</body>
 </html>

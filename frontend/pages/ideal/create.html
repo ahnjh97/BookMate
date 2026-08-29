@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>월드컵 템플릿 만들기 | BookMate</title>
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260828-5">
+  <link rel="stylesheet" href="/assets/css/ideal.css?v=1">
+  <script src="/js/components/auth-guard.js"></script>
+</head>
+<body>
+  <header class="site-header" data-navbar></header>
+  <main class="ideal-page">
+    <div class="ideal-container">
+      <header class="ideal-header">
+        <div>
+          <h1>월드컵 템플릿 만들기</h1>
+          <p>
+            8강과 16강을 모두 지원하도록 책을 16권 이상
+            골라주세요.
+          </p>
+        </div>
+      </header>
+      <form id="form" class="ideal-form">
+        <label>템플릿 이름<input
+            id="title"
+            maxlength="200"
+            required
+            placeholder="예: 내 인생 판타지 소설 월드컵"
+          ></label><label>소개<textarea
+            id="description"
+            maxlength="1000"
+            rows="3"
+            placeholder="어떤 책을 모은 월드컵인지 알려주세요."
+          ></textarea></label><label>책 검색<input
+            id="book-search"
+            type="search"
+            placeholder="제목 또는 작가"
+          ></label><div class="ideal-form-footer">
+          <strong id="count">0권 선택</strong><span>최소 16권 · 최대
+            64권</span>
+        </div>
+        <div id="picker" class="ideal-picker"></div>
+        <p id="message" class="ideal-status"></p>
+        <div class="ideal-form-footer">
+          <a class="button button-white" href="/pages/ideal/list.html"
+          >취소</a><button class="button button-teal">
+            템플릿 공개하기
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+  <script src="/js/components/navbar.js" defer></script>
+  <script src="/js/pages/ideal-create.js?v=1" defer></script>
+</body>
+</html>

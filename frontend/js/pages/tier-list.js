@@ -1,13 +1,97 @@
-const grid=document.getElementById("template-grid"),statusEl=document.getElementById("template-status"),searchForm=document.getElementById("template-search");
-const searchContext=document.getElementById("template-search-context");
-const participationButtons=document.querySelectorAll(".book-category-tabs [data-participation]");
-let templates=[],selectedParticipation="all";
-searchForm.addEventListener("submit",e=>{e.preventDefault();const keyword=document.getElementById("template-keyword").value.trim();if(keyword){searchContext.hidden=false;searchContext.querySelector("strong").textContent=`'${keyword}'`;}else searchContext.hidden=true;loadTemplates();});
-document.getElementById("template-keyword").addEventListener("input",event=>{if(event.currentTarget.value.trim())return;searchContext.hidden=true;loadTemplates();});
-document.getElementById("template-reset-button").addEventListener("click",()=>{document.getElementById("template-keyword").value="";searchContext.hidden=true;history.replaceState({},"",location.pathname);loadTemplates();});
-async function loadTemplates(){statusEl.textContent="템플릿을 불러오는 중입니다.";grid.replaceChildren();try{const keyword=document.getElementById("template-keyword").value.trim();const r=await fetch(`/api/tier-templates${keyword?`?keyword=${encodeURIComponent(keyword)}`:""}`);const d=await r.json();if(!r.ok)throw new Error(d.message);templates=d.templates||[];renderFilteredTemplates();}catch(e){statusEl.textContent=e.message||"템플릿을 불러오지 못했습니다.";}}
-function renderFilteredTemplates(){const filtered=templates.filter(t=>selectedParticipation==="all"||(selectedParticipation==="participated"?t.participated:!t.participated));renderTemplates(filtered);}
-function renderTemplates(items){grid.replaceChildren();statusEl.textContent=items.length?`${items.length}개의 승인된 템플릿`:selectedParticipation==="all"?"검색 결과가 없습니다. 새로운 템플릿을 신청해 보세요.":"선택한 참여 상태의 템플릿이 없습니다.";items.forEach(t=>{const a=document.createElement("a");a.className=`template-card${t.participated?" is-participated":""}`;a.href=`/pages/tier/maker.html?id=${t.templateId}`;const cover=t.coverImage?`<img src="${escapeHtml(t.coverImage)}" alt="">`:`<span>BOOKMATE</span>`;const badge=t.participated?'<strong class="participation-badge">참여 완료</strong>':"";const categoryClass=getCategoryClass(t.category);a.innerHTML=`<div class="template-cover">${cover}${badge}</div><div class="template-body"><div class="template-meta"><span class="category-chip ${categoryClass}">${escapeHtml(t.category)}</span><span class="template-count">${t.itemCount}권</span><span>${escapeHtml(t.creatorNickname)}</span></div><h3>${escapeHtml(t.title)}</h3><p>${escapeHtml(t.description||"등록된 설명이 없습니다.")}</p></div>`;grid.append(a);});}
-participationButtons.forEach(button=>button.addEventListener("click",()=>{selectedParticipation=button.dataset.participation;participationButtons.forEach(item=>{const active=item===button;item.classList.toggle("is-active",active);item.setAttribute("aria-pressed",String(active));});renderFilteredTemplates();}));
-function getCategoryClass(category){return {"장르":"category-genre","시리즈":"category-series","작가":"category-author","테마":"category-theme"}[category]||"category-default";}
-function escapeHtml(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}loadTemplates();
+const grid = document.getElementById("template-grid"),
+  statusEl = document.getElementById("template-status"),
+  searchForm = document.getElementById("template-search");
+const searchContext = document.getElementById("template-search-context");
+const participationButtons = document.querySelectorAll(".book-category-tabs [data-participation]");
+let templates = [], selectedParticipation = "all";
+searchForm.addEventListener("submit", e => {
+  e.preventDefault();
+  const keyword = document.getElementById("template-keyword").value.trim();
+  if (keyword) {
+    searchContext.hidden = false;
+    searchContext.querySelector("strong").textContent = `'${keyword}'`;
+  } else searchContext.hidden = true;
+  loadTemplates();
+});
+document.getElementById("template-keyword").addEventListener("input", event => {
+  if (event.currentTarget.value.trim()) return;
+  searchContext.hidden = true;
+  loadTemplates();
+});
+document.getElementById("template-reset-button").addEventListener("click", () => {
+  document.getElementById("template-keyword").value = "";
+  searchContext.hidden = true;
+  history.replaceState({}, "", location.pathname);
+  loadTemplates();
+});
+async function loadTemplates() {
+  statusEl.textContent = "템플릿을 불러오는 중입니다.";
+  grid.replaceChildren();
+  try {
+    const keyword = document.getElementById("template-keyword").value.trim();
+    const r = await fetch(`/api/tier-templates${keyword ? `?keyword=${encodeURIComponent(keyword)}` : ""}`);
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message);
+    templates = d.templates || [];
+    renderFilteredTemplates();
+  } catch (e) {
+    statusEl.textContent = e.message || "템플릿을 불러오지 못했습니다.";
+  }
+}
+function renderFilteredTemplates() {
+  const filtered = templates.filter(t =>
+    selectedParticipation === "all" || (selectedParticipation === "participated" ? t.participated : !t.participated)
+  );
+  renderTemplates(filtered);
+}
+function renderTemplates(items) {
+  grid.replaceChildren();
+  statusEl.textContent = items.length
+    ? `${items.length}개의 승인된 템플릿`
+    : selectedParticipation === "all"
+    ? "검색 결과가 없습니다. 새로운 템플릿을 신청해 보세요."
+    : "선택한 참여 상태의 템플릿이 없습니다.";
+  items.forEach(t => {
+    const a = document.createElement("a");
+    a.className = `template-card${t.participated ? " is-participated" : ""}`;
+    a.href = `/pages/tier/maker.html?id=${t.templateId}`;
+    const cover = t.coverImage ? `<img src="${escapeHtml(t.coverImage)}" alt="">` : `<span>BOOKMATE</span>`;
+    const badge = t.participated ? "<strong class=\"participation-badge\">참여 완료</strong>" : "";
+    const categoryClass = getCategoryClass(t.category);
+    a.innerHTML =
+      `<div class="template-cover">${cover}${badge}</div><div class="template-body"><div class="template-meta"><span class="category-chip ${categoryClass}">${
+        escapeHtml(t.category)
+      }</span><span class="template-count">${t.itemCount}권</span><span>${
+        escapeHtml(t.creatorNickname)
+      }</span></div><h3>${escapeHtml(t.title)}</h3><p>${
+        escapeHtml(t.description || "등록된 설명이 없습니다.")
+      }</p></div>`;
+    grid.append(a);
+  });
+}
+participationButtons.forEach(button =>
+  button.addEventListener("click", () => {
+    selectedParticipation = button.dataset.participation;
+    participationButtons.forEach(item => {
+      const active = item === button;
+      item.classList.toggle("is-active", active);
+      item.setAttribute("aria-pressed", String(active));
+    });
+    renderFilteredTemplates();
+  })
+);
+function getCategoryClass(category) {
+  return {
+    "장르": "category-genre",
+    "시리즈": "category-series",
+    "작가": "category-author",
+    "테마": "category-theme",
+  }[category] || "category-default";
+}
+function escapeHtml(v) {
+  return String(v ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll(
+    "\"",
+    "&quot;",
+  ).replaceAll("'", "&#039;");
+}
+loadTemplates();

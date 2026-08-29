@@ -1,129 +1,129 @@
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>책 상세 | BookMate</title>
-    <link rel="stylesheet" href="/assets/css/style.css">
-    <link rel="stylesheet" href="/assets/css/book-detail.css?v=20260828-11">
-  </head>
-  <body>
-    <header class="site-header" data-navbar></header>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>책 상세 | BookMate</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/book-detail.css?v=20260828-11">
+</head>
+<body>
+  <header class="site-header" data-navbar></header>
 
-    <main data-page="book-detail">
-      <section class="book-detail-shell" aria-labelledby="book-title">
-        <a class="back-link" href="/pages/book/list.html">← 책 목록으로</a>
-        <p id="book-detail-status" class="book-detail-status" role="status" aria-live="polite">
-          책 정보를 불러오는 중입니다.
-        </p>
-        <article id="book-detail" class="book-detail" hidden>
-          <div class="book-detail-visual">
-            <figure id="book-cover" class="book-detail-cover"></figure>
-            <div id="rating-book-context" class="rating-book-context" hidden>
-              <h1 id="rating-book-title"></h1>
-              <p id="rating-book-author" class="book-detail-author"></p>
-              <section aria-labelledby="rating-book-description-heading">
-                <h2 id="rating-book-description-heading">책 소개</h2>
-                <p id="rating-book-description"></p>
-              </section>
+  <main data-page="book-detail">
+    <section class="book-detail-shell" aria-labelledby="book-title">
+      <a class="back-link" href="/pages/book/list.html">← 책 목록으로</a>
+      <p id="book-detail-status" class="book-detail-status" role="status" aria-live="polite">
+        책 정보를 불러오는 중입니다.
+      </p>
+      <article id="book-detail" class="book-detail" hidden>
+        <div class="book-detail-visual">
+          <figure id="book-cover" class="book-detail-cover"></figure>
+          <div id="rating-book-context" class="rating-book-context" hidden>
+            <h1 id="rating-book-title"></h1>
+            <p id="rating-book-author" class="book-detail-author"></p>
+            <section aria-labelledby="rating-book-description-heading">
+              <h2 id="rating-book-description-heading">책 소개</h2>
+              <p id="rating-book-description"></p>
+            </section>
+          </div>
+        </div>
+
+        <div class="book-detail-content">
+          <p id="book-genre" class="book-detail-genre"></p>
+          <h1 id="book-title"></h1>
+          <p id="book-author" class="book-detail-author"></p>
+          <dl class="book-detail-meta">
+            <div>
+              <dt>출판사</dt>
+              <dd id="book-publisher"></dd>
             </div>
-          </div>
-
-          <div class="book-detail-content">
-            <p id="book-genre" class="book-detail-genre"></p>
-            <h1 id="book-title"></h1>
-            <p id="book-author" class="book-detail-author"></p>
-            <dl class="book-detail-meta">
-              <div>
-                <dt>출판사</dt>
-                <dd id="book-publisher"></dd>
-              </div>
-              <div>
-                <dt>출간일</dt>
-                <dd id="book-published-date"></dd>
-              </div>
-            </dl>
-            <section class="book-detail-rating" aria-labelledby="book-rating-heading">
-              <h2 id="book-rating-heading">독자 평점</h2>
-              <div class="book-rating-summary">
-                <strong id="book-average-rating"></strong>
-                <span id="book-rating-count"></span>
-              </div>
-              <div class="book-rating-actions">
-                <p id="my-rating-summary" class="my-rating-summary" hidden></p>
-                <button id="open-rating-form" class="button button-primary" type="button">
-                  평점 등록하기
-                </button>
-              </div>
-              <p id="rating-toast" class="rating-toast" role="status" aria-live="polite"></p>
-            </section>
-            <section class="book-detail-description" aria-labelledby="book-description-heading">
-              <h2 id="book-description-heading">책 소개</h2>
-              <p id="book-description"></p>
-            </section>
-          </div>
-
-          <div id="book-community" class="book-community">
-            <section class="book-tier-templates" aria-labelledby="book-tier-templates-heading">
-              <h2 id="book-tier-templates-heading">이 책이 포함된 티어리스트</h2>
-              <p id="book-tier-templates-status">템플릿을 불러오는 중입니다.</p>
-              <div id="book-tier-templates-list" class="book-tier-templates-list"></div>
-            </section>
-
-            <section id="reader-ratings" class="reader-ratings" aria-labelledby="reader-ratings-heading">
-              <div class="reader-ratings-heading">
-                <div>
-                  <h2 id="reader-ratings-heading">독자 평가</h2>
-                  <p id="reader-ratings-summary">평가를 불러오는 중입니다.</p>
-                </div>
-              </div>
-              <p id="reader-ratings-status" class="reader-ratings-status" role="status" aria-live="polite"></p>
-              <div id="reader-ratings-list" class="reader-ratings-list"></div>
-              <nav id="reader-ratings-pagination" class="reader-ratings-pagination" aria-label="독자 평가 페이지"></nav>
-            </section>
-          </div>
-
-          <section id="rating-editor" class="rating-editor" aria-labelledby="rating-form-heading" hidden>
-            <div class="rating-editor-heading">
-              <div>
-                <p>나의 독서 기록</p>
-                <h2 id="rating-form-heading" tabindex="-1">이 책은 어떠셨나요?</h2>
-              </div>
-              <button id="close-rating-form" class="back-link rating-back-button" type="button">← 책 정보로 돌아가기</button>
+            <div>
+              <dt>출간일</dt>
+              <dd id="book-published-date"></dd>
             </div>
-
-            <form id="rating-form" class="rating-form">
-              <fieldset>
-                <legend>별점을 선택해 주세요</legend>
-                <div class="rating-score-options" aria-label="별점 선택">
-                  <label><input type="radio" name="score" value="1" required><span aria-hidden="true">★</span><span class="visually-hidden">1점</span></label>
-                  <label><input type="radio" name="score" value="2"><span aria-hidden="true">★</span><span class="visually-hidden">2점</span></label>
-                  <label><input type="radio" name="score" value="3"><span aria-hidden="true">★</span><span class="visually-hidden">3점</span></label>
-                  <label><input type="radio" name="score" value="4"><span aria-hidden="true">★</span><span class="visually-hidden">4점</span></label>
-                  <label><input type="radio" name="score" value="5"><span aria-hidden="true">★</span><span class="visually-hidden">5점</span></label>
-                </div>
-              </fieldset>
-
-              <label for="rating-comment">한줄평 <span>(선택)</span></label>
-              <textarea
-                id="rating-comment"
-                name="commentText"
-                rows="7"
-                maxlength="500"
-                placeholder="기억하고 싶은 감상이나 다른 독자에게 전하고 싶은 이야기를 남겨주세요."
-              ></textarea>
-
-              <div class="rating-form-actions">
-                <span id="rating-comment-count">0 / 500</span>
-                <button id="rating-submit" class="button button-primary" type="submit">평점 기록 완료</button>
-              </div>
-              <p id="rating-message" class="rating-message" role="status" aria-live="polite"></p>
-            </form>
+          </dl>
+          <section class="book-detail-rating" aria-labelledby="book-rating-heading">
+            <h2 id="book-rating-heading">독자 평점</h2>
+            <div class="book-rating-summary">
+              <strong id="book-average-rating"></strong>
+              <span id="book-rating-count"></span>
+            </div>
+            <div class="book-rating-actions">
+              <p id="my-rating-summary" class="my-rating-summary" hidden></p>
+              <button id="open-rating-form" class="button button-primary" type="button">
+                평점 등록하기
+              </button>
+            </div>
+            <p id="rating-toast" class="rating-toast" role="status" aria-live="polite"></p>
           </section>
-        </article>
-      </section>
-    </main>
-    <script src="/js/components/navbar.js" defer></script>
-    <script src="/js/pages/book-detail.js?v=20260828-8" defer></script>
-  </body>
+          <section class="book-detail-description" aria-labelledby="book-description-heading">
+            <h2 id="book-description-heading">책 소개</h2>
+            <p id="book-description"></p>
+          </section>
+        </div>
+
+        <div id="book-community" class="book-community">
+          <section class="book-tier-templates" aria-labelledby="book-tier-templates-heading">
+            <h2 id="book-tier-templates-heading">이 책이 포함된 티어리스트</h2>
+            <p id="book-tier-templates-status">템플릿을 불러오는 중입니다.</p>
+            <div id="book-tier-templates-list" class="book-tier-templates-list"></div>
+          </section>
+
+          <section id="reader-ratings" class="reader-ratings" aria-labelledby="reader-ratings-heading">
+            <div class="reader-ratings-heading">
+              <div>
+                <h2 id="reader-ratings-heading">독자 평가</h2>
+                <p id="reader-ratings-summary">평가를 불러오는 중입니다.</p>
+              </div>
+            </div>
+            <p id="reader-ratings-status" class="reader-ratings-status" role="status" aria-live="polite"></p>
+            <div id="reader-ratings-list" class="reader-ratings-list"></div>
+            <nav id="reader-ratings-pagination" class="reader-ratings-pagination" aria-label="독자 평가 페이지"></nav>
+          </section>
+        </div>
+
+        <section id="rating-editor" class="rating-editor" aria-labelledby="rating-form-heading" hidden>
+          <div class="rating-editor-heading">
+            <div>
+              <p>나의 독서 기록</p>
+              <h2 id="rating-form-heading" tabindex="-1">이 책은 어떠셨나요?</h2>
+            </div>
+            <button id="close-rating-form" class="back-link rating-back-button" type="button">← 책 정보로 돌아가기</button>
+          </div>
+
+          <form id="rating-form" class="rating-form">
+            <fieldset>
+              <legend>별점을 선택해 주세요</legend>
+              <div class="rating-score-options" aria-label="별점 선택">
+                <label><input type="radio" name="score" value="1" required><span aria-hidden="true">★</span><span class="visually-hidden">1점</span></label>
+                <label><input type="radio" name="score" value="2"><span aria-hidden="true">★</span><span class="visually-hidden">2점</span></label>
+                <label><input type="radio" name="score" value="3"><span aria-hidden="true">★</span><span class="visually-hidden">3점</span></label>
+                <label><input type="radio" name="score" value="4"><span aria-hidden="true">★</span><span class="visually-hidden">4점</span></label>
+                <label><input type="radio" name="score" value="5"><span aria-hidden="true">★</span><span class="visually-hidden">5점</span></label>
+              </div>
+            </fieldset>
+
+            <label for="rating-comment">한줄평 <span>(선택)</span></label>
+            <textarea
+              id="rating-comment"
+              name="commentText"
+              rows="7"
+              maxlength="500"
+              placeholder="기억하고 싶은 감상이나 다른 독자에게 전하고 싶은 이야기를 남겨주세요."
+            ></textarea>
+
+            <div class="rating-form-actions">
+              <span id="rating-comment-count">0 / 500</span>
+              <button id="rating-submit" class="button button-primary" type="submit">평점 기록 완료</button>
+            </div>
+            <p id="rating-message" class="rating-message" role="status" aria-live="polite"></p>
+          </form>
+        </section>
+      </article>
+    </section>
+  </main>
+  <script src="/js/components/navbar.js" defer></script>
+  <script src="/js/pages/book-detail.js?v=20260828-8" defer></script>
+</body>
 </html>
