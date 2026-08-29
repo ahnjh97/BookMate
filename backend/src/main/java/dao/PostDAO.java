@@ -180,6 +180,23 @@ public class PostDAO {
         }
     }
 
+    /* 작성자에 의한 게시글 숨김 */
+    public int hidePostByWriter(Connection conn, long postId) throws SQLException {
+        String sql = """
+            UPDATE POST
+            SET
+                status = 'HIDDEN_BY_WRITER',
+                updated_at = SYSDATE
+            WHERE post_id = ?
+              AND status = 'ACTIVE'
+            """;
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setLong(1, postId);
+            return pstmt.executeUpdate();
+        }
+    }
+
     /* 관리자에 의한 게시글 소프트 삭제 */
     public int deletePostByAdmin(Connection conn, long postId) throws SQLException {
         String sql = """
