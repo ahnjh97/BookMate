@@ -14,14 +14,31 @@ public class TierService {
       String keyword, boolean includePending, Long memberId, Long bookId) {
     String sql =
         """
+        WITH RATING_COUNT AS (
+          SELECT book_id, COUNT(*) rating_count FROM RATING GROUP BY book_id
+        ), COVER_BOOK AS (
+          SELECT I.template_id, B.image_url,
+                 ROW_NUMBER() OVER (
+                   PARTITION BY I.template_id
+                   ORDER BY NVL(R.rating_count, 0) DESC, I.sort_order, B.book_id
+                 ) cover_rank
+            FROM TIER_TEMPLATE_ITEM I
+            JOIN BOOK B ON B.book_id = I.book_id
+            LEFT JOIN RATING_COUNT R ON R.book_id = B.book_id
+        ), COVER_SUMMARY AS (
+          SELECT template_id,
+                 MAX(CASE WHEN cover_rank = 1 THEN image_url END) cover_image_1,
+                 MAX(CASE WHEN cover_rank = 2 THEN image_url END) cover_image_2
+            FROM COVER_BOOK WHERE cover_rank <= 2 GROUP BY template_id
+        )
         SELECT T.template_id, T.title, T.description, T.category, T.status,
                T.requested_at, M.nickname, COUNT(DISTINCT I.template_item_id) item_count,
-               MIN(B.image_url) KEEP (DENSE_RANK FIRST ORDER BY I.sort_order) cover_image,
+               MAX(C.cover_image_1) cover_image_1, MAX(C.cover_image_2) cover_image_2,
                CASE WHEN COUNT(DISTINCT L.tier_list_id) > 0 THEN 'Y' ELSE 'N' END participated
           FROM TIER_TEMPLATE T
           JOIN MEMBER M ON M.member_id = T.member_id
           LEFT JOIN TIER_TEMPLATE_ITEM I ON I.template_id = T.template_id
-          LEFT JOIN BOOK B ON B.book_id = I.book_id
+          LEFT JOIN COVER_SUMMARY C ON C.template_id = T.template_id
           LEFT JOIN TIER_LIST L ON L.template_id = T.template_id AND L.member_id = ?
          WHERE (? = 'Y' OR T.status = 'APPROVED')
            AND (? IS NULL OR LOWER(T.title) LIKE ?)
@@ -512,7 +529,12 @@ public class TierService {
     item.put("status", rs.getString("status"));
     item.put("creatorNickname", rs.getString("nickname"));
     item.put("itemCount", rs.getInt("item_count"));
-    item.put("coverImage", rs.getString("cover_image"));
+    List<String> coverImages = new ArrayList<>();
+    for (int index = 1; index <= 2; index++) {
+      String imageUrl = rs.getString("cover_image_" + index);
+      if (imageUrl != null && !imageUrl.isBlank()) coverImages.add(imageUrl);
+    }
+    item.put("coverImages", coverImages);
     item.put("participated", "Y".equals(rs.getString("participated")));
     item.put("requestedAt", rs.getTimestamp("requested_at"));
     return item;

@@ -1,4 +1,24 @@
 /* Figma 커뮤니티 페이지: 본문 폭, 배경, 여백을 맞춥니다. */
+.page-main[data-page="community"] {
+  min-height: calc(100vh - var(--navbar-height));
+  place-items: start center;
+  padding: 32px 20px 90px;
+  text-align: left;
+}
+
+.page-main[data-page="community"] .page-content {
+  width: min(1152px, 100%);
+  margin: 0 auto;
+}
+
+.community-page-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
 .post-page-main {
   min-height: calc(100vh - var(--navbar-height));
   padding: 40px 24px 80px;
@@ -240,46 +260,20 @@
   font-weight: 700;
 }
 
-.post-category-tabs,
-.post-genre-tabs,
-.popular-period-filter {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.post-category-tabs button,
-.post-genre-tabs button,
-.popular-period-filter button {
-  padding: 7px 13px;
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  color: var(--color-muted);
-  background: var(--color-background);
-  font: inherit;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.post-category-tabs button.is-active,
-.post-genre-tabs button.is-active,
-.popular-period-filter button.is-active {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-  background: var(--color-primary-soft);
-}
-
-/* 인기글 기간 필터 */
-.popular-period-filter {
-  margin-bottom: 24px;
-}
-
 /* 게시글 검색 */
+.post-list-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
 .post-search-form {
   display: flex;
   gap: 10px;
   width: min(520px, 100%);
-  margin: 0 0 20px auto;
+  margin: 0;
 }
 
 .post-search-form input {
@@ -501,6 +495,15 @@
 }
 
 @media (max-width: 700px) {
+  .post-list-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .post-list-toolbar > .button {
+    align-self: flex-end;
+  }
+
   .post-page-main {
     padding: 32px 16px 56px;
   }

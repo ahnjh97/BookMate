@@ -17,6 +17,7 @@ public class BookDTO {
     private Date publishedDate;
     private String description;
     private String imageUrl;
+    private String detailImageUrl;
     private String status;
     private double averageRating;
     private int ratingCount;

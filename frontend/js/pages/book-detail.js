@@ -71,7 +71,7 @@ function renderCover(book) {
   }
 
   const image = document.createElement("img");
-  image.src = book.imageUrl;
+  image.src = book.detailImageUrl || book.imageUrl;
   image.alt = `${book.title} 표지`;
   image.decoding = "async";
   image.addEventListener("error", () => {
@@ -88,7 +88,7 @@ function renderBook(book) {
   genreElement.textContent = book.genre;
   publisherElement.textContent = book.publisher || "출판사 미정";
   publishedDateElement.textContent = formatPublishedDate(book.publishedDate);
-  averageRatingElement.textContent = `★ ${Number(book.averageRating).toFixed(1)}`;
+  averageRatingElement.textContent = `★ ${Number(book.averageRating).toFixed(2)}`;
   ratingCountElement.textContent = `${book.ratingCount}명 참여`;
   descriptionElement.textContent = book.description || "등록된 책 소개가 없습니다.";
   ratingBookTitleElement.textContent = book.title;

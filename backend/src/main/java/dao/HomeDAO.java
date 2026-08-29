@@ -12,7 +12,7 @@ public class HomeDAO {
         String sql = """
                 SELECT (SELECT COUNT(*) FROM BOOK WHERE status = 'APPROVED') AS book_count,
                        (SELECT COUNT(*) FROM RATING) AS rating_count,
-                       (SELECT COUNT(*) FROM TIER_LIST WHERE is_public = 'Y') AS tier_list_count
+                       (SELECT COUNT(*) FROM TIER_LIST) AS tier_list_count
                   FROM DUAL
                 """;
 

@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.*;
 import service.IdealService;
 
-@WebServlet(urlPatterns = {"/api/ideal/templates", "/api/ideal/runs", "/api/ideal/stats"})
+@WebServlet(urlPatterns = {"/api/worldcup/templates", "/api/worldcup/runs", "/api/worldcup/stats"})
 public class IdealController extends HttpServlet {
   private final Gson gson = new Gson();
   private final IdealService service = new IdealService();
@@ -23,7 +23,7 @@ public class IdealController extends HttpServlet {
             id == null ? "templates" : "template",
             id == null
                 ? service.findTemplates(q.getParameter("keyword"), member(q))
-                : service.findTemplate(Long.parseLong(id)));
+                : service.findTemplate(Long.parseLong(id), member(q)));
       } else if (path.endsWith("runs"))
         ok(r, "result", service.result(Long.parseLong(q.getParameter("id"))));
       else ok(r, "stats", service.stats(Long.parseLong(q.getParameter("templateId"))));
@@ -50,7 +50,7 @@ public class IdealController extends HttpServlet {
     try {
       Body b = gson.fromJson(q.getReader(), Body.class);
       if (q.getServletPath().endsWith("templates")) {
-        long id = service.createTemplate(member, b.title, b.description, b.bookIds);
+        long id = service.createTemplate(member, b.title, b.description, b.category, b.bookIds);
         r.setStatus(201);
         ok(r, "templateId", id);
       } else {
@@ -103,7 +103,7 @@ public class IdealController extends HttpServlet {
   }
 
   static class Body {
-    String title, description;
+    String title, description, category;
     List<Long> bookIds;
     long templateId;
     int bracketSize;

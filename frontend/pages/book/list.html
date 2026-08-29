@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>책 | BookMate</title>
     <link rel="stylesheet" href="/assets/css/style.css?v=20260828-3">
-    <link rel="stylesheet" href="/assets/css/book-list.css">
+    <link rel="stylesheet" href="/assets/css/book-list.css?v=20260830-3">
 </head>
 <body>
 <header class="site-header" data-navbar></header>
@@ -14,7 +14,7 @@
     <section>
         <div class="book-page-hero">
             <div class="book-page-heading">
-                <button id="book-reset-button" class="page-gradient-title page-title-button" type="button">독자들이 추천하는 다양한 책을 만나보세요</button>
+                <button id="book-reset-button" class="page-gradient-title page-title-button" type="button"><span class="page-title-icon page-title-icon-bookshelf" aria-hidden="true"></span>책 목록</button>
             </div>
 
             <form id="book-search-form" class="book-tools" role="search">
@@ -42,7 +42,7 @@
         </div>
 
         <div class="book-filter-bar">
-            <div class="book-category-tabs" role="group" aria-label="책 장르">
+            <div class="book-category-tabs choice-tabs" role="group" aria-label="책 장르">
                 <button class="is-active" type="button" data-genre="">전체</button>
                 <button type="button" data-genre="판타지">판타지</button>
                 <button type="button" data-genre="SF">SF</button>
@@ -52,23 +52,30 @@
                 <button type="button" data-genre="과학">과학</button>
                 <button type="button" data-genre="IT">IT</button>
             </div>
-            <label class="book-sort-control" for="book-sort">
-                <select id="book-sort" name="sort">
-                    <option value="rating">평점 높은 순</option>
-                    <option value="title">제목순</option>
-                    <option value="newest">최신 출간순</option>
-                </select>
-            </label>
+            <div class="book-filter-actions">
+                <span id="book-total-count" class="book-total-count"></span>
+                <label class="book-sort-control" for="book-sort">
+                    <select id="book-sort" name="sort">
+                        <option value="rating">평점 높은 순</option>
+                        <option value="title">제목순</option>
+                        <option value="newest">최신 출간순</option>
+                    </select>
+                </label>
+            </div>
         </div>
 
         <div class="book-results-panel">
-            <p id="book-status" aria-live="polite">책 목록을 불러오는 중입니다.</p>
             <div id="book-list" class="book-grid"></div>
+            <nav id="book-pagination" class="book-pagination" aria-label="책 목록 페이지">
+                <button id="book-prev-page" class="button button-outline" type="button">이전</button>
+                <div id="book-page-numbers" class="book-page-numbers" aria-live="polite"></div>
+                <button id="book-next-page" class="button button-outline" type="button">다음</button>
+            </nav>
         </div>
     </section>
 </main>
 
 <script src="/js/components/navbar.js" defer></script>
-<script src="/js/pages/book-list.js?v=20260828-7" defer></script>
+<script src="/js/pages/book-list.js?v=20260830-4" defer></script>
 </body>
 </html>

@@ -66,7 +66,7 @@ function renderRankings(books) {
     author.textContent = book.authorName;
     const metrics = document.createElement("p");
     metrics.className = "ranking-metrics";
-    metrics.textContent = `★ ${Number(book.averageRating).toFixed(1)} · ${book.ratingCount}명 참여`;
+    metrics.textContent = `★ ${Number(book.averageRating).toFixed(2)} · ${book.ratingCount}명 참여`;
     content.append(title, author, metrics);
     item.append(rank, cover, content);
     listElement.append(item);

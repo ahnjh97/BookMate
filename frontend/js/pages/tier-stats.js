@@ -56,8 +56,9 @@ function statBook(item, grade, listCount) {
     leaders = maxCount ? grades.filter(value => (counts[value] || 0) === maxCount) : [],
     leaderLabel = leaders.length > 1 ? `${leaders.join("·")} 공동 1위` : grade,
     summary = listCount ? `${leaderLabel} ${count}명 · ${percentage}%` : "미집계",
-    book = document.createElement("div");
+    book = document.createElement("a");
   book.className = "tier-book stats-tier-book";
+  book.href = `/pages/book/detail.html?id=${item.bookId}`;
   book.draggable = false;
   book.addEventListener("dragstart", event => event.preventDefault());
   const rows = grades.map(value => {
@@ -66,7 +67,7 @@ function statBook(item, grade, listCount) {
   }).join("");
   book.innerHTML = `<img src="${escapeHtml(item.imageUrl || "")}" alt="${
     escapeHtml(item.title)
-  }" draggable="false"><span>${escapeHtml(item.title)}</span><small class="stats-summary">${
+  }" loading="lazy" decoding="async" draggable="false"><span>${escapeHtml(item.title)}</span><small class="stats-summary">${
     escapeHtml(summary)
   }</small><div class="stats-breakdown" role="tooltip"><strong>${escapeHtml(item.title)}</strong><p>${
     escapeHtml(item.authorName)

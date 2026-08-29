@@ -2,7 +2,6 @@
 const searchForm = document.querySelector("#book-search-form");
 const keywordInput = document.querySelector("#book-keyword");
 const sortSelect = document.querySelector("#book-sort");
-const statusElement = document.querySelector("#book-status");
 const listElement = document.querySelector("#book-list");
 const suggestionsElement = document.querySelector("#search-suggestions");
 const categoryButtons = document.querySelectorAll(".book-category-tabs [data-genre]");
@@ -10,6 +9,10 @@ const authorFilterHeading = document.querySelector("#author-filter-heading");
 const selectedAuthorNameElement = document.querySelector("#selected-author-name");
 const searchFilterHeading = document.querySelector("#search-filter-heading");
 const selectedSearchKeywordElement = document.querySelector("#selected-search-keyword");
+const previousPageButton = document.querySelector("#book-prev-page");
+const nextPageButton = document.querySelector("#book-next-page");
+const pageNumbersElement = document.querySelector("#book-page-numbers");
+const totalCountElement = document.querySelector("#book-total-count");
 const pageParams = new URLSearchParams(window.location.search);
 let selectedAuthorId = pageParams.get("authorId");
 let selectedAuthorName = pageParams.get("authorName");
@@ -17,6 +20,9 @@ const suggestionCache = new Map();
 let suggestionTimer;
 let suggestionRequest;
 let selectedGenre = "";
+let currentPage = 1;
+let hasMorePages = false;
+let totalPages = 0;
 
 keywordInput.addEventListener("input", () => {
     clearTimeout(suggestionTimer);
@@ -26,6 +32,7 @@ keywordInput.addEventListener("input", () => {
     if (!keyword) {
         closeSuggestions();
         searchFilterHeading.hidden = true;
+        currentPage = 1;
         loadBooks();
         return;
     }
@@ -134,10 +141,9 @@ async function loadBooks() {
     if (selectedGenre) params.set("genre", selectedGenre);
     if (selectedAuthorId) params.set("authorId", selectedAuthorId);
     params.set("sort", sortSelect.value);
-    params.set("page", 1);
-    params.set("size", 100);
+    params.set("page", currentPage);
+    params.set("size", 21);
 
-    statusElement.textContent = "책 목록을 불러오는 중입니다.";
     listElement.replaceChildren();
 
     try {
@@ -148,16 +154,23 @@ async function loadBooks() {
         const books = selectedAuthorId
             ? result.data.books.filter((book) => String(book.authorId) === String(selectedAuthorId))
             : result.data.books;
+        hasMorePages = Boolean(result.data.hasMore);
+        totalPages = Number(result.data.totalPages || 0);
+        totalCountElement.textContent = `총 ${Number(result.data.totalCount || 0).toLocaleString("ko-KR")}권`;
         renderBooks(books);
+        updatePagination();
     } catch (error) {
-        statusElement.textContent = "책 목록을 불러오지 못했습니다. DB와 Tomcat 실행 상태를 확인해 주세요.";
+        console.error(error);
+        hasMorePages = false;
+        totalPages = 0;
+        totalCountElement.textContent = "";
+        updatePagination();
     }
 }
 
 // API 응답을 Figma의 표지 중심 카드(순위·장르·별점)로 구성합니다.
 function renderBooks(books) {
     if (!Array.isArray(books) || books.length === 0) {
-        statusElement.textContent = "검색 조건에 맞는 책이 없습니다.";
         return;
     }
 
@@ -219,7 +232,7 @@ function renderBooks(books) {
 
         const score = document.createElement("span");
         score.className = "book-rating-score";
-        score.textContent = Number(book.averageRating || 0).toFixed(1);
+        score.textContent = Number(book.averageRating || 0).toFixed(2);
 
         const count = document.createElement("span");
         count.className = "book-rating-count";
@@ -232,12 +245,39 @@ function renderBooks(books) {
         listElement.append(card);
     });
 
-    statusElement.textContent = `현재 ${listElement.childElementCount}권을 표시하고 있습니다.`;
+}
+
+function updatePagination() {
+    previousPageButton.disabled = currentPage <= 1;
+    nextPageButton.disabled = !hasMorePages || currentPage >= totalPages;
+    pageNumbersElement.replaceChildren();
+
+    const groupStart = Math.floor((currentPage - 1) / 10) * 10 + 1;
+    const groupEnd = Math.min(groupStart + 9, totalPages);
+    for (let page = groupStart; page <= groupEnd; page += 1) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = String(page);
+        button.classList.toggle("is-active", page === currentPage);
+        button.setAttribute("aria-current", page === currentPage ? "page" : "false");
+        button.addEventListener("click", () => {
+            if (page === currentPage) return;
+            currentPage = page;
+            loadBooks();
+            scrollToBookResults();
+        });
+        pageNumbersElement.append(button);
+    }
+}
+
+function scrollToBookResults() {
+    document.querySelector(".book-results-panel").scrollIntoView({behavior: "smooth", block: "start"});
 }
 
 categoryButtons.forEach((button) => {
     button.addEventListener("click", () => {
         selectedGenre = button.dataset.genre;
+        currentPage = 1;
         updateActiveCategory();
         loadBooks();
     });
@@ -249,17 +289,34 @@ searchForm.addEventListener("submit", (event) => {
     const keyword = keywordInput.value.trim();
     if (keyword) showSearchResults(keyword);
     else searchFilterHeading.hidden = true;
+    currentPage = 1;
     loadBooks();
 });
 
 sortSelect.addEventListener("change", () => {
+    currentPage = 1;
     loadBooks();
+});
+
+previousPageButton.addEventListener("click", () => {
+    if (currentPage <= 1) return;
+    currentPage -= 1;
+    loadBooks();
+    scrollToBookResults();
+});
+
+nextPageButton.addEventListener("click", () => {
+    if (!hasMorePages) return;
+    currentPage += 1;
+    loadBooks();
+    scrollToBookResults();
 });
 
 document.querySelector("#book-reset-button")?.addEventListener("click", () => {
     selectedAuthorId = null;
     selectedAuthorName = null;
     selectedGenre = "";
+    currentPage = 1;
     keywordInput.value = "";
     sortSelect.value = "rating";
     authorFilterHeading.hidden = true;

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>커뮤니티 | BookMate</title>
     <link rel="stylesheet" href="/assets/css/style.css">
-    <link rel="stylesheet" href="/assets/css/post.css">
+    <link rel="stylesheet" href="/assets/css/post.css?v=20260830-3">
 </head>
 
 <body>
@@ -14,26 +14,16 @@
 <main class="page-main" data-page="community">
     <section class="page-content">
         <div class="community-page-hero">
-            <div>
-                <h1>커뮤니티</h1>
-                <p>책에 대한 다양한 이야기를 나눠보세요.</p>
-            </div>
-
-            <a class="button button-primary" href="/pages/post/create.html">게시글 작성</a>
+            <button id="community-reset-button" class="page-gradient-title page-title-button" type="button">
+                <span class="page-title-icon page-title-icon-community" aria-hidden="true"></span>커뮤니티
+            </button>
         </div>
 
-        <!-- 1. 실시간 / 인기글 -->
-        <div class="community-view-tabs">
-            <button class="is-active" type="button" data-view="realtime">실시간</button>
-            <button type="button" data-view="popular">인기글</button>
-        </div>
-
-        <!-- 2. 일반 커뮤니티 필터 -->
         <div id="community-filter">
             <div class="post-filter-group">
                 <span class="post-filter-label">카테고리</span>
 
-                <div class="post-category-tabs">
+                <div class="post-category-tabs choice-tabs">
                     <button class="is-active" type="button" data-category="">전체</button>
                     <button type="button" data-category="FREE">자유</button>
                     <button type="button" data-category="RECOMMEND">추천</button>
@@ -46,7 +36,7 @@
             <div class="post-filter-group">
                 <span class="post-filter-label">장르</span>
 
-                <div class="post-genre-tabs">
+                <div class="post-genre-tabs choice-tabs">
                     <button class="is-active" type="button" data-genre="">전체</button>
                     <button type="button" data-genre="판타지">판타지</button>
                     <button type="button" data-genre="SF">SF</button>
@@ -59,22 +49,18 @@
             </div>
         </div>
 
-        <!-- 3. 인기글 기간 -->
-        <div id="popular-period-filter" class="popular-period-filter" hidden>
-            <button class="is-active" type="button" data-period="today">오늘</button>
-            <button type="button" data-period="week">이번주</button>
-            <button type="button" data-period="month">이번달</button>
+        <!-- 검색 및 게시글 작성 -->
+        <div class="post-list-toolbar">
+            <form id="post-search-form" class="post-search-form" role="search">
+                <input id="post-keyword" type="search" placeholder="게시글 제목 또는 작성자 검색">
+                <button class="button button-primary" type="submit">검색</button>
+            </form>
+            <a class="button button-primary" href="/pages/post/create.html">게시글 작성</a>
         </div>
-
-        <!-- 4. 검색 -->
-        <form id="post-search-form" class="post-search-form" role="search">
-            <input id="post-keyword" type="search" placeholder="게시글 제목 또는 작성자 검색">
-            <button class="button button-primary" type="submit">검색</button>
-        </form>
 
         <p id="post-result-message" class="post-result-message"></p>
 
-        <!-- 5. 게시글 목록 -->
+        <!-- 게시글 목록 -->
         <div class="post-table-wrap">
             <table class="post-table">
                 <thead id="post-table-head"></thead>
@@ -89,6 +75,6 @@
 </main>
 
 <script src="/js/components/navbar.js" charset="UTF-8" defer></script>
-<script src="/js/pages/post-list.js?v=20260828-2" charset="UTF-8" defer></script>
+<script src="/js/pages/post-list.js?v=20260830-1" charset="UTF-8" defer></script>
 </body>
 </html>

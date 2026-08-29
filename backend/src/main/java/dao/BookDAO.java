@@ -101,12 +101,12 @@ public class BookDAO {
         String orderBy = switch (sort) {
             case "title" -> "B.title ASC, B.book_id DESC";
             case "newest" -> "B.published_date DESC NULLS LAST, B.book_id DESC";
-            default -> "NVL(ROUND(AVG(R.score), 1), 0) DESC, COUNT(R.rating_id) DESC, B.title ASC";
+            default -> "NVL(ROUND(AVG(R.score), 2), 0) DESC, COUNT(R.rating_id) DESC, B.title ASC";
         };
         String sql = """
                 SELECT B.book_id, B.author_id, A.author_name, B.title, B.genre,
                        B.publisher, B.published_date, B.description, B.image_url, B.status,
-                       NVL(ROUND(AVG(R.score), 1), 0) AS average_rating,
+                       NVL(ROUND(AVG(R.score), 2), 0) AS average_rating,
                        COUNT(R.rating_id) AS rating_count
                   FROM BOOK B
                   JOIN AUTHOR A ON A.author_id = B.author_id
@@ -149,11 +149,46 @@ public class BookDAO {
         return books;
     }
 
+    public int countBooks(Connection connection, String keyword, String genre, Long authorId)
+            throws SQLException {
+        String sql = """
+                SELECT COUNT(*)
+                  FROM BOOK B
+                  JOIN AUTHOR A ON A.author_id = B.author_id
+                 WHERE B.status = 'APPROVED'
+                   AND (? IS NULL OR LOWER(B.title) LIKE ? OR LOWER(A.author_name) LIKE ?)
+                   AND (? IS NULL OR B.genre = ?)
+                   AND (? IS NULL OR B.author_id = ?)
+                """;
+        String normalizedKeyword = normalize(keyword);
+        String keywordPattern = normalizedKeyword == null ? null : "%" + normalizedKeyword.toLowerCase() + "%";
+        String normalizedGenre = normalize(genre);
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, normalizedKeyword);
+            statement.setString(2, keywordPattern);
+            statement.setString(3, keywordPattern);
+            statement.setString(4, normalizedGenre);
+            statement.setString(5, normalizedGenre);
+            if (authorId == null) {
+                statement.setNull(6, java.sql.Types.NUMERIC);
+                statement.setNull(7, java.sql.Types.NUMERIC);
+            } else {
+                statement.setLong(6, authorId);
+                statement.setLong(7, authorId);
+            }
+            try (ResultSet resultSet = statement.executeQuery()) {
+                resultSet.next();
+                return resultSet.getInt(1);
+            }
+        }
+    }
+
     public BookDTO selectBookById(Connection connection, long bookId) throws SQLException {
         String sql = """
                 SELECT B.book_id, B.author_id, A.author_name, B.title, B.genre,
                        B.publisher, B.published_date, B.description, B.image_url, B.status,
-                       NVL(ROUND(AVG(R.score), 1), 0) AS average_rating,
+                       NVL(ROUND(AVG(R.score), 2), 0) AS average_rating,
                        COUNT(R.rating_id) AS rating_count
                   FROM BOOK B
                   JOIN AUTHOR A ON A.author_id = B.author_id
@@ -178,7 +213,7 @@ public class BookDAO {
             int minimumRatings,
             int limit
     ) throws SQLException {
-        String averageExpression = "NVL(ROUND(AVG(R.score), 1), 0)";
+        String averageExpression = "NVL(ROUND(AVG(R.score), 2), 0)";
         String countExpression = "COUNT(R.rating_id)";
         String orderBy = "count".equals(sort)
                 ? countExpression + " DESC, " + averageExpression + " DESC, B.title ASC"
@@ -186,7 +221,7 @@ public class BookDAO {
         String sql = """
                 SELECT B.book_id, B.author_id, A.author_name, B.title, B.genre,
                        B.publisher, B.published_date, B.description, B.image_url, B.status,
-                       NVL(ROUND(AVG(R.score), 1), 0) AS average_rating,
+                       NVL(ROUND(AVG(R.score), 2), 0) AS average_rating,
                        COUNT(R.rating_id) AS rating_count
                   FROM BOOK B
                   JOIN AUTHOR A ON A.author_id = B.author_id
@@ -225,7 +260,9 @@ public class BookDAO {
         book.setPublisher(resultSet.getString("publisher"));
         book.setPublishedDate(resultSet.getDate("published_date"));
         book.setDescription(resultSet.getString("description"));
-        book.setImageUrl(normalizeImageUrl(resultSet.getString("image_url")));
+        String imageUrl = normalizeImageUrl(resultSet.getString("image_url"));
+        book.setImageUrl(imageUrl);
+        book.setDetailImageUrl(toDetailImageUrl(imageUrl));
         book.setStatus(resultSet.getString("status"));
         book.setAverageRating(resultSet.getDouble("average_rating"));
         book.setRatingCount(resultSet.getInt("rating_count"));
@@ -244,5 +281,12 @@ public class BookDAO {
             return imageUrl.substring("/bookmate".length());
         }
         return imageUrl;
+    }
+
+    private String toDetailImageUrl(String imageUrl) {
+        if (imageUrl == null) {
+            return null;
+        }
+        return imageUrl.replace("-240.webp", "-520.webp");
     }
 }

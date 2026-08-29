@@ -50,11 +50,19 @@ public class BookService {
                     offset,
                     safePageSize + 1
             );
+            int totalCount = bookDAO.countBooks(connection, keyword, genre, authorId);
+            int totalPages = (int) Math.ceil((double) totalCount / safePageSize);
             boolean hasMore = fetched.size() > safePageSize;
             List<BookDTO> books = hasMore
                     ? List.copyOf(fetched.subList(0, safePageSize))
                     : List.copyOf(fetched);
-            return new BookPageDTO(books, hasMore, hasMore ? safePage + 1 : safePage);
+            return new BookPageDTO(
+                    books,
+                    hasMore,
+                    hasMore ? safePage + 1 : safePage,
+                    totalCount,
+                    totalPages
+            );
         } catch (SQLException exception) {
             throw new RuntimeException("책 목록을 조회하는 중 오류가 발생했습니다.", exception);
         }

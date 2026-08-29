@@ -5,10 +5,6 @@ const postStatusElement = document.querySelector("#post-status");
 const postResultMessageElement = document.querySelector("#post-result-message");
 const postSearchForm = document.querySelector("#post-search-form");
 const postKeywordInput = document.querySelector("#post-keyword");
-const communityFilter = document.querySelector("#community-filter");
-const viewButtons = document.querySelectorAll("[data-view]");
-const periodFilter = document.querySelector("#popular-period-filter");
-const periodButtons = document.querySelectorAll("[data-period]");
 const categoryButtons = document.querySelectorAll("[data-category]");
 const genreButtons = document.querySelectorAll("[data-genre]");
 
@@ -23,8 +19,6 @@ const categoryNames = {
 
 /* 2. 현재 필터 상태 */
 const filterState = {
-    view: "realtime",
-    period: "today",
     category: "",
     genre: "",
     keyword: ""
@@ -58,14 +52,12 @@ async function loadPosts() {
 function applyFilters() {
     let posts = [...allPosts];
 
-    if (filterState.view === "realtime") {
-        if (filterState.category) {
-            posts = posts.filter(post => post.category === filterState.category);
-        }
+    if (filterState.category) {
+        posts = posts.filter(post => post.category === filterState.category);
+    }
 
-        if (filterState.genre) {
-            posts = posts.filter(post => post.genre === filterState.genre);
-        }
+    if (filterState.genre) {
+        posts = posts.filter(post => post.genre === filterState.genre);
     }
 
     if (filterState.keyword) {
@@ -79,27 +71,7 @@ function applyFilters() {
         });
     }
 
-    if (filterState.view === "popular") {
-        posts = filterPostsByPeriod(posts, filterState.period);
-
-        posts.sort((a, b) => {
-            const likeDifference = (b.likeCount ?? 0) - (a.likeCount ?? 0);
-
-            if (likeDifference !== 0) {
-                return likeDifference;
-            }
-
-            const viewDifference = (b.viewCount ?? 0) - (a.viewCount ?? 0);
-
-            if (viewDifference !== 0) {
-                return viewDifference;
-            }
-
-            return getTime(b.createdAt) - getTime(a.createdAt);
-        });
-    } else {
-        posts.sort((a, b) => getTime(b.createdAt) - getTime(a.createdAt));
-    }
+    posts.sort((a, b) => getTime(b.createdAt) - getTime(a.createdAt));
 
     renderTableHeader();
     renderPosts(posts);
@@ -108,22 +80,6 @@ function applyFilters() {
 
 /* 5. 표 제목 변경 */
 function renderTableHeader() {
-    if (filterState.view === "popular") {
-        postTableHead.innerHTML = `
-            <tr>
-                <th>순위</th>
-                <th>장르</th>
-                <th>제목</th>
-                <th>작성자</th>
-                <th>작성일</th>
-                <th>조회수</th>
-                <th>좋아요</th>
-            </tr>
-        `;
-
-        return;
-    }
-
     postTableHead.innerHTML = `
         <tr>
             <th>순위</th>
@@ -151,11 +107,7 @@ function renderPosts(posts) {
     posts.forEach((post, index) => {
         const row = document.createElement("tr");
 
-        if (filterState.view === "popular") {
-            renderPopularRow(row, post, index);
-        } else {
-            renderRealtimeRow(row, post, index);
-        }
+        renderRealtimeRow(row, post, index);
 
         fragment.append(row);
     });
@@ -189,27 +141,6 @@ function renderRealtimeRow(row, post, index) {
     );
 }
 
-/* 8. 인기글 행 */
-function renderPopularRow(row, post, index) {
-    const numberCell = createCell("post-number", index + 1);
-    const genreCell = createCell("post-genre", post.genre || "-");
-    const titleCell = createTitleCell(post);
-    const writerCell = createCell("post-writer", post.memberNickname || "알 수 없음");
-    const dateCell = createCell("post-date", formatDate(post.createdAt));
-    const viewCell = createCell("post-views", post.viewCount ?? 0);
-    const likeCell = createCell("post-likes", post.likeCount ?? 0);
-
-    row.append(
-        numberCell,
-        genreCell,
-        titleCell,
-        writerCell,
-        dateCell,
-        viewCell,
-        likeCell
-    );
-}
-
 /* 9. 일반 셀 생성 */
 function createCell(className, value) {
     const cell = document.createElement("td");
@@ -235,110 +166,28 @@ function createTitleCell(post) {
     return cell;
 }
 
-/* 11. 인기글 기간 필터 */
-function filterPostsByPeriod(posts, period) {
-    const now = new Date();
-
-    return posts.filter(post => {
-        if (!post.createdAt) {
-            return false;
-        }
-
-        const createdAt = new Date(post.createdAt);
-
-        if (Number.isNaN(createdAt.getTime())) {
-            return false;
-        }
-
-        if (period === "today") {
-            return createdAt.getFullYear() === now.getFullYear()
-                && createdAt.getMonth() === now.getMonth()
-                && createdAt.getDate() === now.getDate();
-        }
-
-        if (period === "week") {
-            return createdAt >= getStartOfWeek(now);
-        }
-
-        if (period === "month") {
-            return createdAt.getFullYear() === now.getFullYear()
-                && createdAt.getMonth() === now.getMonth();
-        }
-
-        return true;
-    });
-}
-
-/* 12. 이번주의 시작일 계산 */
-function getStartOfWeek(date) {
-    const result = new Date(date);
-
-    result.setHours(0, 0, 0, 0);
-
-    const day = result.getDay();
-    const diff = day === 0 ? -6 : 1 - day;
-
-    result.setDate(result.getDate() + diff);
-
-    return result;
-}
-
 /* 13. 검색 및 필터 결과 안내 */
 function updateResultMessage(posts) {
     const messages = [];
 
-    if (filterState.view === "popular") {
-        const periodNames = {
-            today: "오늘",
-            week: "이번주",
-            month: "이번달"
-        };
+    if (filterState.category) {
+        messages.push(categoryNames[filterState.category] || filterState.category);
+    }
 
-        messages.push(`${periodNames[filterState.period]} 인기글`);
-    } else {
-        messages.push("실시간 게시글");
-
-        if (filterState.category) {
-            messages.push(categoryNames[filterState.category] || filterState.category);
-        }
-
-        if (filterState.genre) {
-            messages.push(filterState.genre);
-        }
+    if (filterState.genre) {
+        messages.push(filterState.genre);
     }
 
     if (filterState.keyword) {
         messages.push(`"${filterState.keyword}" 검색`);
     }
 
+    if (messages.length === 0) {
+        messages.push("전체 게시글");
+    }
+
     postResultMessageElement.textContent = `${messages.join(" · ")} — ${posts.length}개`;
 }
-
-/* 14. 실시간 및 인기글 전환 */
-viewButtons.forEach(button => {
-    button.addEventListener("click", () => {
-        filterState.view = button.dataset.view;
-
-        setActiveButton(viewButtons, button);
-
-        const isPopular = filterState.view === "popular";
-
-        communityFilter.hidden = isPopular;
-        periodFilter.hidden = !isPopular;
-
-        applyFilters();
-    });
-});
-
-/* 15. 인기글 기간 변경 */
-periodButtons.forEach(button => {
-    button.addEventListener("click", () => {
-        filterState.period = button.dataset.period;
-
-        setActiveButton(periodButtons, button);
-        applyFilters();
-    });
-});
 
 /* 16. 게시글 카테고리 변경 */
 categoryButtons.forEach(button => {
@@ -378,6 +227,10 @@ postKeywordInput.addEventListener("input", () => {
     filterState.keyword = "";
 
     applyFilters();
+});
+
+document.querySelector("#community-reset-button").addEventListener("click", () => {
+    window.location.assign("/pages/post/list.html");
 });
 
 /* 20. 선택 버튼 활성화 */

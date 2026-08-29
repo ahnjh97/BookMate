@@ -40,7 +40,7 @@ DB_PASSWORD=book
 
 ### DB 초기화
 
-DB 초기화는 기존 BookMate 테이블과 데이터를 삭제한 뒤 `db/schema.sql`, `db/seed.sql`을 다시 실행합니다. 필요한 데이터가 있으면 먼저 백업하세요.
+DB 초기화는 기존 BookMate 테이블과 데이터를 삭제한 뒤 `db/schema.sql`로 스키마를 만들고 `db` 폴더의 CSV를 다시 적재합니다. 필요한 데이터가 있으면 먼저 백업하세요.
 
 IntelliJ에서는 `util.DBInit`을 실행합니다. 프로젝트 루트와 `backend` 작업 디렉터리를 모두 지원합니다.
 
@@ -52,6 +52,30 @@ scripts\db-init.bat
 
 ```bash
 bash scripts/db-init.sh
+```
+
+초기화가 완료되면 다음 개발 데이터가 준비됩니다.
+
+- 승인 도서 1,000권
+- 테스트 회원 `user1`~`user100` 100명
+- 테스트 회원 공통 비밀번호: `qwerasdf`
+
+### 책 표지 이미지
+
+- 목록·통계용: `frontend/assets/images/books/{bookId}-240.webp`
+- 상세·월드컵 선택용: `frontend/assets/images/books/{bookId}-520.webp`
+- 티어·월드컵 템플릿 콜라주: `frontend/assets/images/templates/`
+- 전체 표지와 콜라주 재생성: `python scripts/build-book-images.py`
+- 표지를 내려받거나 이미지로 검증하지 못한 책이 하나라도 있으면 생성 작업이 실패합니다.
+- 승인된 티어리스트 템플릿 8개와 회원별 참여 결과
+- 이상형 월드컵 템플릿 8개와 회원별 최신 참여 결과
+- 회원별 약 100개의 평점
+
+초기화 데이터는 모두 `db` 폴더의 CSV에서 관리합니다. 도서·회원·평점과 후기뿐 아니라 티어리스트 및 이상형 월드컵의 템플릿, 항목, 참여 결과도 각각의 CSV로 분리되어 있습니다. `schema.sql`에는 테이블·시퀀스·인덱스 정의만 둡니다.
+도서 CSV를 다시 생성하려면 PowerShell에서 다음 명령을 실행합니다.
+
+```powershell
+./scripts/generate-book-seed.ps1
 ```
 
 ## 애플리케이션 실행

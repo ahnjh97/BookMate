@@ -11,14 +11,32 @@ public class IdealService {
   public List<Map<String, Object>> findTemplates(String keyword, Long memberId) {
     String sql =
         """
-        SELECT T.template_id,T.title,T.description,M.nickname,COUNT(I.book_id) item_count,
-               MIN(B.image_url) KEEP (DENSE_RANK FIRST ORDER BY I.sort_order) cover_image,
+        WITH RATING_COUNT AS (
+          SELECT book_id, COUNT(*) rating_count FROM RATING GROUP BY book_id
+        ), COVER_BOOK AS (
+          SELECT I.template_id, B.image_url,
+                 ROW_NUMBER() OVER (
+                   PARTITION BY I.template_id
+                   ORDER BY NVL(R.rating_count, 0) DESC, I.sort_order, B.book_id
+                 ) cover_rank
+            FROM IDEAL_TEMPLATE_ITEM I
+            JOIN BOOK B ON B.book_id = I.book_id
+            LEFT JOIN RATING_COUNT R ON R.book_id = B.book_id
+        ), COVER_SUMMARY AS (
+          SELECT template_id,
+                 MAX(CASE WHEN cover_rank = 1 THEN image_url END) cover_image_1,
+                 MAX(CASE WHEN cover_rank = 2 THEN image_url END) cover_image_2
+            FROM COVER_BOOK WHERE cover_rank <= 2 GROUP BY template_id
+        )
+        SELECT T.template_id,T.title,T.description,T.category,M.nickname,COUNT(DISTINCT I.book_id) item_count,
+               MAX(C.cover_image_1) cover_image_1, MAX(C.cover_image_2) cover_image_2,
                CASE WHEN COUNT(R.run_id)>0 THEN 'Y' ELSE 'N' END participated
           FROM IDEAL_TEMPLATE T JOIN MEMBER M ON M.member_id=T.member_id
-          JOIN IDEAL_TEMPLATE_ITEM I ON I.template_id=T.template_id JOIN BOOK B ON B.book_id=I.book_id
+          JOIN IDEAL_TEMPLATE_ITEM I ON I.template_id=T.template_id
+          LEFT JOIN COVER_SUMMARY C ON C.template_id=T.template_id
           LEFT JOIN IDEAL_RUN R ON R.template_id=T.template_id AND R.member_id=?
          WHERE (? IS NULL OR LOWER(T.title) LIKE '%'||LOWER(?)||'%' OR LOWER(T.description) LIKE '%'||LOWER(?)||'%')
-         GROUP BY T.template_id,T.title,T.description,M.nickname,T.created_at ORDER BY T.created_at DESC
+         GROUP BY T.template_id,T.title,T.description,T.category,M.nickname,T.created_at ORDER BY T.created_at DESC
         """;
     List<Map<String, Object>> out = new ArrayList<>();
     try (Connection c = DBUtil.getConnection();
@@ -28,23 +46,23 @@ public class IdealService {
       String q = keyword == null || keyword.isBlank() ? null : keyword.trim();
       for (int i = 2; i <= 4; i++) ps.setString(i, q);
       try (ResultSet rs = ps.executeQuery()) {
-        while (rs.next())
-          out.add(
-              Map.of(
-                  "templateId",
-                  rs.getLong(1),
-                  "title",
-                  rs.getString(2),
-                  "description",
-                  Objects.toString(rs.getString(3), ""),
-                  "creatorNickname",
-                  rs.getString(4),
-                  "itemCount",
-                  rs.getInt(5),
-                  "coverImage",
-                  Objects.toString(rs.getString(6), ""),
-                  "participated",
-                  "Y".equals(rs.getString(7))));
+        while (rs.next()) {
+          Map<String, Object> template = new LinkedHashMap<>();
+          template.put("templateId", rs.getLong("template_id"));
+          template.put("title", rs.getString("title"));
+          template.put("description", Objects.toString(rs.getString("description"), ""));
+          template.put("category", rs.getString("category"));
+          template.put("creatorNickname", rs.getString("nickname"));
+          template.put("itemCount", rs.getInt("item_count"));
+          List<String> coverImages = new ArrayList<>();
+          for (int index = 1; index <= 2; index++) {
+            String imageUrl = rs.getString("cover_image_" + index);
+            if (imageUrl != null && !imageUrl.isBlank()) coverImages.add(imageUrl);
+          }
+          template.put("coverImages", coverImages);
+          template.put("participated", "Y".equals(rs.getString("participated")));
+          out.add(template);
+        }
       }
       return out;
     } catch (SQLException e) {
@@ -55,7 +73,7 @@ public class IdealService {
   public Map<String, Object> findTemplate(long id) {
     if (id <= 0) throw new IllegalArgumentException("올바른 템플릿 번호가 필요합니다.");
     String head =
-        "SELECT T.title,T.description,M.nickname FROM IDEAL_TEMPLATE T JOIN MEMBER M ON"
+        "SELECT T.title,T.description,T.category,M.nickname FROM IDEAL_TEMPLATE T JOIN MEMBER M ON"
             + " M.member_id=T.member_id WHERE T.template_id=?";
     String items =
         "SELECT B.book_id,B.title,A.author_name,B.image_url FROM IDEAL_TEMPLATE_ITEM I JOIN BOOK B"
@@ -71,7 +89,8 @@ public class IdealService {
         result.put("templateId", id);
         result.put("title", rs.getString(1));
         result.put("description", Objects.toString(rs.getString(2), ""));
-        result.put("creatorNickname", rs.getString(3));
+        result.put("category", rs.getString(3));
+        result.put("creatorNickname", rs.getString(4));
       }
       p.setLong(1, id);
       List<Map<String, Object>> books = new ArrayList<>();
@@ -92,8 +111,35 @@ public class IdealService {
     }
   }
 
-  public long createTemplate(long memberId, String title, String description, List<Long> ids) {
+  public Map<String, Object> findTemplate(long id, Long memberId) {
+    Map<String, Object> template = findTemplate(id);
+    Long runId = memberId == null ? null : findRunId(memberId, id);
+    template.put("participated", runId != null);
+    template.put("runId", runId);
+    return template;
+  }
+
+  private Long findRunId(long memberId, long templateId) {
+    String sql = "SELECT run_id FROM IDEAL_RUN WHERE member_id=? AND template_id=?";
+    try (Connection connection = DBUtil.getConnection();
+        PreparedStatement statement = connection.prepareStatement(sql)) {
+      statement.setLong(1, memberId);
+      statement.setLong(2, templateId);
+      try (ResultSet resultSet = statement.executeQuery()) {
+        return resultSet.next() ? resultSet.getLong("run_id") : null;
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException("월드컵 참여 여부를 확인하지 못했습니다.", e);
+    }
+  }
+
+  public long createTemplate(
+      long memberId, String title, String description, String category, List<Long> ids) {
     String safe = required(title, "템플릿 이름", 200);
+    String safeCategory = required(category, "카테고리", 20);
+    if (!Set.of("자유", "장르").contains(safeCategory)) {
+      throw new IllegalArgumentException("카테고리는 자유 또는 장르만 선택할 수 있습니다.");
+    }
     LinkedHashSet<Long> unique = new LinkedHashSet<>(ids == null ? List.of() : ids);
     if (unique.size() < 16) throw new IllegalArgumentException("16강 진행을 위해 책을 16권 이상 선택해 주세요.");
     if (unique.size() > 64) throw new IllegalArgumentException("책은 최대 64권까지 담을 수 있습니다.");
@@ -101,12 +147,13 @@ public class IdealService {
       c.setAutoCommit(false);
       try (PreparedStatement h =
           c.prepareStatement(
-              "INSERT INTO IDEAL_TEMPLATE(template_id,member_id,title,description)"
-                  + " VALUES(SEQ_IDEAL_TEMPLATE.NEXTVAL,?,?,?)",
+              "INSERT INTO IDEAL_TEMPLATE(template_id,member_id,title,description,category)"
+                  + " VALUES(SEQ_IDEAL_TEMPLATE.NEXTVAL,?,?,?,?)",
               new String[] {"template_id"})) {
         h.setLong(1, memberId);
         h.setString(2, safe);
         h.setString(3, optional(description, 1000));
+        h.setString(4, safeCategory);
         h.executeUpdate();
         long id;
         try (ResultSet k = h.getGeneratedKeys()) {
@@ -164,21 +211,53 @@ public class IdealService {
     long winner = rounds.get(2).get(0).winnerBookId();
     try (Connection c = DBUtil.getConnection()) {
       c.setAutoCommit(false);
-      try (PreparedStatement h =
-          c.prepareStatement(
-              "INSERT INTO IDEAL_RUN(run_id,template_id,member_id,bracket_size,winner_book_id)"
-                  + " VALUES(SEQ_IDEAL_RUN.NEXTVAL,?,?,?,?)",
-              new String[] {"run_id"})) {
-        h.setLong(1, templateId);
-        h.setLong(2, memberId);
-        h.setInt(3, size);
-        h.setLong(4, winner);
-        h.executeUpdate();
-        long run;
-        try (ResultSet k = h.getGeneratedKeys()) {
-          k.next();
-          run = k.getLong(1);
+      try {
+        Long existingRun = null;
+        try (PreparedStatement find =
+            c.prepareStatement(
+                "SELECT run_id FROM IDEAL_RUN WHERE member_id=? AND template_id=? FOR UPDATE")) {
+          find.setLong(1, memberId);
+          find.setLong(2, templateId);
+          try (ResultSet resultSet = find.executeQuery()) {
+            if (resultSet.next()) existingRun = resultSet.getLong("run_id");
+          }
         }
+
+        long run;
+        if (existingRun == null) {
+          try (PreparedStatement insert =
+              c.prepareStatement(
+                  "INSERT INTO IDEAL_RUN(run_id,template_id,member_id,bracket_size,winner_book_id)"
+                      + " VALUES(SEQ_IDEAL_RUN.NEXTVAL,?,?,?,?)",
+                  new String[] {"run_id"})) {
+            insert.setLong(1, templateId);
+            insert.setLong(2, memberId);
+            insert.setInt(3, size);
+            insert.setLong(4, winner);
+            insert.executeUpdate();
+            try (ResultSet keys = insert.getGeneratedKeys()) {
+              keys.next();
+              run = keys.getLong(1);
+            }
+          }
+        } else {
+          run = existingRun;
+          try (PreparedStatement update =
+              c.prepareStatement(
+                  "UPDATE IDEAL_RUN SET bracket_size=?, winner_book_id=?, created_at=SYSDATE"
+                      + " WHERE run_id=?")) {
+            update.setInt(1, size);
+            update.setLong(2, winner);
+            update.setLong(3, run);
+            update.executeUpdate();
+          }
+          try (PreparedStatement delete =
+              c.prepareStatement("DELETE FROM IDEAL_MATCH WHERE run_id=?")) {
+            delete.setLong(1, run);
+            delete.executeUpdate();
+          }
+        }
+
         try (PreparedStatement p =
             c.prepareStatement(
                 "INSERT INTO"

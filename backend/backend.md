@@ -32,7 +32,7 @@ DB_USER=bookmate
 DB_PASSWORD=book
 ```
 
-`util.DBInit`은 `db/schema.sql`과 `db/seed.sql`을 실행합니다. 기존 테이블과 데이터가 삭제되므로 명시적으로 실행할 때만 사용합니다.
+`util.DBInit`은 `db/schema.sql`로 스키마를 다시 만든 뒤 `db` 폴더의 CSV 초기화 데이터를 배치 적재합니다. 기존 테이블과 데이터가 삭제되므로 명시적으로 실행할 때만 사용합니다.
 
 ## 디렉터리
 
