@@ -61,9 +61,12 @@ async function loadPostDetail() {
         currentPost = postResult.post;
         currentMember = sessionResult;
 
-        renderPost(currentPost);
+        currentPost = postResult.post;
+        currentMember = sessionResult;
+
+        renderPost(currentPost, postResult.likeCount);
         renderTierList(postResult.tierList);
-        renderActions(currentPost, currentMember, postResult.tierList);
+        renderActions(currentPost, currentMember, postResult.tierList, postResult.liked);
     } catch (error) {
         console.error(error);
         showError(
@@ -105,7 +108,7 @@ function renderTierList(tierList) {
 }
 
 /* 2. 게시글 내용 출력 */
-function renderPost(post) {
+function renderPost(post, likeCount) {
     document.title = `${post.title} | BookMate`;
 
     titleElement.textContent = post.title;
@@ -132,7 +135,7 @@ function renderPost(post) {
 }
 
 /* 3. 로그인 상태와 작성자에 따라 버튼 표시 */
-function renderActions(post, auth, tierList) {
+function renderActions(post, auth, tierList, liked) {
     writerActions.hidden = true;
     memberActions.hidden = true;
 
@@ -156,9 +159,9 @@ function renderActions(post, auth, tierList) {
     }
 
     memberActions.hidden = false;
+    likeButton.textContent = liked ? "좋아요 취소" : "좋아요";
 }
 
-/* 4. 게시글 숨김 */
 /* 4. 게시글 숨김 */
 hideButton.addEventListener("click", async () => {
     if (!currentPost) {
@@ -239,9 +242,35 @@ deleteButton.addEventListener("click", async () => {
     }
 });
 
-/* 6. 좋아요 */
-likeButton.addEventListener("click", () => {
-    alert("좋아요 기능은 좋아요 테이블과 API 연결 후 사용할 수 있습니다.");
+/* 6. 게시글 좋아요 */
+likeButton.addEventListener("click", async () => {
+    if (!currentPost) {
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/posts/like", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json;charset=UTF-8"
+            },
+            body: JSON.stringify({
+                postId: currentPost.postId
+            })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            throw new Error(result.message || "좋아요 처리에 실패했습니다.");
+        }
+
+        likeCountElement.textContent = result.likeCount;
+        likeButton.textContent = result.liked ? "좋아요 취소" : "좋아요";
+    } catch (error) {
+        console.error(error);
+        alert(error.message || "좋아요 처리 중 오류가 발생했습니다.");
+    }
 });
 
 /* 7. 신고 */
