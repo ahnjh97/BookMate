@@ -77,7 +77,12 @@ public class PostDetailController extends HttpServlet {
             result.put("liked", liked);
 
             if (post.getTierListId() != null) {
-                result.put("tierList", tierService.findPublicTierList(post.getTierListId()));
+                Map<String, Object> tierList = tierService.findTierList(post.getTierListId());
+                if (tierList != null) {
+                    tierList.remove("memberId");
+                    tierList.remove("publishedToCommunity");
+                }
+                result.put("tierList", tierList);
             }
 
             gson.toJson(result, response.getWriter());
