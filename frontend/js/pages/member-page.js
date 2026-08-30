@@ -1,8 +1,14 @@
+// ============================================
+// 목적: 회원전용 페이지 접근 제어 + 닉네임 표시 + 유사회원 로드
+// ============================================
+
+import { authApi } from "/js/api/authApi.js";
+
 (async function protectMemberPage() {
   try {
-    const response = await fetch("/api/auth", { cache: "no-store" });
-    const auth = await response.json();
-    if (!response.ok || !auth.loggedIn) {
+    const auth = await authApi.checkSession();
+
+    if (!auth.loggedIn) {
       window.location.replace("/pages/auth/login.html");
       return;
     }

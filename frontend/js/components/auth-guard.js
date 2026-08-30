@@ -1,14 +1,16 @@
+// ============================================
+// 파일: js/components/auth-guard.js
+// 목적: 비로그인 시 페이지 접근 차단, 로그인 페이지로 리다이렉트
+// ============================================
+import { authApi } from "/js/api/authApi.js";
+
 document.documentElement.style.visibility = "hidden";
 
 (async function requireLogin() {
   try {
-    const response = await fetch("/api/auth/session", {
-      cache: "no-store",
-      credentials: "same-origin"
-    });
-    const auth = response.ok ? await response.json() : { loggedIn: false };
+    const result = await authApi.checkSession();
 
-    if (auth.loggedIn) {
+    if (result.loggedIn) {
       document.documentElement.style.visibility = "";
       return;
     }

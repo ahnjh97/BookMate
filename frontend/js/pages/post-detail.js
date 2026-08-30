@@ -41,15 +41,12 @@ async function loadPostDetail() {
     }
 
     try {
-        const [postResponse, sessionResponse] = await Promise.all([
+        const [postResponse, sessionResult] = await Promise.all([
             fetch(`/api/posts/detail?postId=${encodeURIComponent(postId)}`),
-            fetch("/api/auth/session", { cache: "no-store" })
+            authApi.checkSession().catch(() => ({ loggedIn: false }))
         ]);
 
         const postResult = await postResponse.json();
-        const sessionResult = sessionResponse.ok
-            ? await sessionResponse.json()
-            : { loggedIn: false };
 
         if (!postResponse.ok || !postResult.success) {
             throw new Error(

@@ -57,13 +57,32 @@ backend/
 └── src/main/
     ├── java/
     │   ├── controller/        # HTTP 요청·응답, 세션 처리
+    │   │   ├── admin/             # 관리자 기능
+    │   │   ├── auth/              # 로그인·로그아웃·세션확인
+    │   │   │	├── LoginController.java       # POST /api/auth/login (기존 로직 재사용)
+    │   │   │	├── LogoutController.java      # POST /api/auth/logout (또는 DELETE)
+    │   │   │	└── SessionController.java     # GET /api/auth/session
+    │   │   ├── book/              # 도서
+    │   │   ├── dev/               # 개발용 임시 컨트롤러
+    │   │   ├── home/              # 메인 화면
+    │   │   ├── ideal/             # 이상형 월드컵
+    │   │   ├── member/            # 회원가입·정보수정·마이페이지
+	│	│	│	└── SignupController.java      # POST /api/members (또는 팀원 경로 유지: /api/auth/signup)
+    │   │   ├── post/              # 게시판
+    │   │   ├── rating/            # 평점
+    │   │   └── tier/              # 티어리스트
     │   ├── service/           # 비즈니스 로직 전담(권한검증, 베이지안 계산, 취향매칭 등)
+    │   │   ├── AuthService.java   # 재사용(팀원 구현) — login/signup/isLoginIdAvailable 검증 로직 검증됨
+    │   │   └── PreferenceService.java  # 재사용(팀원 구현) — 취향매칭, 그대로 둠
     │   ├── dao/               # JDBC SQL 처리
+    │   │   └── AuthDAO.java       # 재사용(팀원 구현) — MEMBER 매핑, is_locked 조건 포함
     │   ├── dto/               # 계층 간 데이터 전달 객체(DB 행 표현)
+    │   │   └── MemberDTO.java     # 재사용(팀원 구현, Lombok) — 본인이 만든 MemberDto 폐기하고 이걸 표준 채택
     │   ├── exception/         # 커스텀 예외 (GlobalExceptionFilter가 HTTP 상태코드로 변환)
     │   ├── filter/            # 세션 검증·요청 속도 제한·예외 처리
     │   ├── check/             # 서버 기동 시 자동 검증
     │   └── util/              # DB 연결·초기화, 프로젝트 경로, 응답 포맷
+    │       └── PasswordUtil.java  # 재사용(팀원 구현) — 해시/검증
     │					       # DBUtil(HikariCP), JsonUtil, ValidationUtil, DB_init(DB 스키마 초기화)
     ├── resources/   # 백엔드 설정 파일 등
     └── webapp/WEB-INF/web.xml # Servlet 스펙 고정 위치, Main.java가 웹 루트로 등록

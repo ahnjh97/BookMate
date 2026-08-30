@@ -12,14 +12,16 @@ frontend/
 │   ├── header.html
 │   ├── navbar.html
 │   ├── footer.html
+│   ├── loginModal.html    # 로그인 폼 자체(오버레이 포함)
 │   └── loader.html
 │
 ├── js/
 │   ├── api/    # 서버 통신 전담(fetch 래퍼 + 도메인별 API 함수) - UI로직 금지
 │   │   ├── http.js        # 공통 fetch 래퍼, 통신방식(에러처리, 헤더, 세션만료) 담당
-│   │   ├── authApi.js     # 통신대상(회원 관련 엔드포인트만) — http.js 가져다 쓰기만 함
-│   │   ├── bookApi.js
-│   │   └── postApi.js
+│   │   ├── authApi.js       # 신원 증명/해제(로그인, 로그아웃, 세션확인)
+│   │   ├── memberApi.js   # 회원가입, 회원정보수정, 마이페이지
+│   │   ├── bookApi.js     #
+│   │   └── postApi.js     #
 │   │
 │   ├── components/ # "UI구현 재사용 JS 로직". components/*.html과 세트로 동작
 │   │   ├── genreFilter.js

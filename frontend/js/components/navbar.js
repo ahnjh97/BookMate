@@ -1,3 +1,5 @@
+import { authApi } from "/js/api/authApi.js";
+
 (async function loadNavbar() {
   const navbarHosts = document.querySelectorAll("[data-navbar]");
   if (navbarHosts.length === 0) return;
@@ -13,8 +15,12 @@
       markCurrentPage(host, currentPath);
     });
 
-    const authResponse = await fetch("/api/auth/session", { cache: "no-store" });
-    const auth = authResponse.ok ? await authResponse.json() : { loggedIn: false };
+    let auth;
+    try {
+        auth = await authApi.checkSession();
+    } catch {
+        auth = { loggedIn: false };
+    }
     navbarHosts.forEach((host) => renderAuthMenu(host, auth));
     document.dispatchEvent(new CustomEvent("bookmate:navbar-ready", { detail: auth }));
   } catch (error) {
@@ -45,7 +51,7 @@ function renderAuthMenu(navbarHost, auth) {
   logout.textContent = "로그아웃";
   logout.addEventListener("click", async () => {
     logout.disabled = true;
-    await fetch("/api/auth/session", { method: "DELETE" });
+    await authApi.logout();
     window.location.href = "/";
   });
   menu.append(logout);

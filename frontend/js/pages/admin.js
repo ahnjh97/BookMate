@@ -4,6 +4,8 @@
  * =========================================
  */
 
+import { authApi } from "/js/api/authApi.js";
+
 let loginAdminMemberId = null;
 const memberMap = new Map();
 
@@ -98,18 +100,13 @@ async function reviewTierTemplate(templateId, approved) {
  */
 async function checkAdminAccess() {
   try {
-    const response = await fetch("/api/auth/session", {
-      method: "GET",
-      cache: "no-store",
-      credentials: "include",
-    });
+    // 수정: authApi.checkSession()이 credentials/헤더 등을 대신 처리
+    const auth = await authApi.checkSession().catch(() => null);
 
-    if (!response.ok) {
+    if (!auth) {
       window.location.href = "/pages/auth/login.html";
       return false;
     }
-
-    const auth = await response.json();
 
     if (!auth.loggedIn) {
       alert("로그인이 필요합니다.");
