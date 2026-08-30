@@ -43,7 +43,7 @@ public class SeedCsvExporter {
                     ORDER BY template_id,sort_order
                     """, false);
             export(connection, "tier-results.csv", """
-                    SELECT L.tier_list_id,M.login_id,L.template_id,L.title,L.description,L.is_public
+                    SELECT L.tier_list_id,M.login_id,L.template_id,L.title,L.description
                     FROM TIER_LIST L JOIN MEMBER M ON M.member_id=L.member_id ORDER BY L.tier_list_id
                     """, false);
             export(connection, "tier-result-items.csv", """

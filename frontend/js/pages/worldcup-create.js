@@ -1,72 +1,143 @@
-const picker = document.querySelector("#picker"),
-  search = document.querySelector("#book-search"),
-  count = document.querySelector("#count"),
-  message = document.querySelector("#message"),
-  selected = new Set();
+const picker = document.querySelector("#worldcup-book-picker");
+const searchInput = document.querySelector("#worldcup-book-search");
+const message = document.querySelector("#worldcup-form-message");
+const category = document.querySelector("#worldcup-template-category");
+const filter = document.querySelector("#worldcup-template-filter");
+const filterLabel = document.querySelector("#worldcup-filter-label");
+const selectionCount = document.querySelector("#worldcup-selection-count");
+const selected = new Set();
 let books = [];
-async function load() {
+let activeKeyword = "";
+
+async function loadBooks() {
   try {
-    const r = await fetch("/api/books?size=100&sort=title"), d = await r.json();
-    books = d.data?.books || [];
-    render();
-  } catch {
+    const response = await fetch("/api/books?size=100&sort=title");
+    const data = await response.json();
+    if (!response.ok || !data.success) throw new Error(data.message);
+    books = data.data?.books || [];
+    updateTypeFilter();
+  } catch (error) {
+    console.error(error);
     message.textContent = "책 목록을 불러오지 못했습니다.";
   }
 }
-function render() {
-  const q = search.value.trim().toLowerCase();
-  picker.replaceChildren();
-  books.filter(b => !q || b.title.toLowerCase().includes(q) || (b.authorName || "").toLowerCase().includes(q)).forEach(
-    b => {
-      const l = document.createElement("label");
-      l.className = "worldcup-book-option";
-      l.innerHTML = `${
-        b.imageUrl ? `<img src="${esc(b.imageUrl)}" alt="" loading="lazy" decoding="async">` : "<i class=\"cover-placeholder\"></i>"
-      }<span><strong>${esc(b.title)}</strong><small>${esc(b.authorName)}</small></span><input type="checkbox" ${
-        selected.has(b.bookId) ? "checked" : ""
-      }>`;
-      l.querySelector("input").onchange = e => {
-        e.target.checked ? selected.add(b.bookId) : selected.delete(b.bookId);
-        count.textContent = `${selected.size}권 선택`;
-      };
-      picker.append(l);
-    },
-  );
+
+function updateTypeFilter() {
+  filter.replaceChildren();
+  filterLabel.hidden = category.value !== "장르";
+  if (category.value === "장르") {
+    [...new Set(books.map(book => book.genre).filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b, "ko"))
+      .forEach(genre => filter.add(new Option(genre, genre)));
+  }
+  renderBooks();
 }
-search.oninput = render;
-document.querySelector("#form").onsubmit = async e => {
-  e.preventDefault();
+
+function filteredBooks() {
+  const keyword = activeKeyword.toLocaleLowerCase("ko");
+  return books.filter(book => {
+    const categoryMatch = category.value === "자유" || book.genre === filter.value;
+    const keywordMatch = !keyword
+      || book.title.toLocaleLowerCase("ko").includes(keyword)
+      || String(book.authorName || "").toLocaleLowerCase("ko").includes(keyword);
+    return categoryMatch && keywordMatch;
+  });
+}
+
+function renderBooks() {
+  picker.replaceChildren();
+  filteredBooks().forEach(book => {
+    const label = document.createElement("label");
+    label.className = "book-option";
+    label.innerHTML = `${
+      book.imageUrl
+        ? `<img src="${escapeHtml(book.imageUrl)}" alt="" loading="lazy" decoding="async">`
+        : "<span></span>"
+    }<span><strong>${escapeHtml(book.title)}</strong><small>${
+      escapeHtml(book.authorName)
+    }</small></span><input type="checkbox" value="${book.bookId}" ${
+      selected.has(book.bookId) ? "checked" : ""
+    }>`;
+    label.querySelector("input").addEventListener("change", event => {
+      if (event.target.checked && selected.size >= 64) {
+        event.target.checked = false;
+        message.textContent = "책은 최대 64권까지 선택할 수 있습니다.";
+        return;
+      }
+      event.target.checked ? selected.add(book.bookId) : selected.delete(book.bookId);
+      message.textContent = "";
+      updateCount();
+    });
+    picker.append(label);
+  });
+}
+
+function applySearch() {
+  activeKeyword = searchInput.value.trim();
+  renderBooks();
+}
+
+function updateCount() {
+  selectionCount.textContent = `선택된 책 수 : ${selected.size}권`;
+}
+
+category.addEventListener("change", updateTypeFilter);
+filter.addEventListener("change", renderBooks);
+searchInput.addEventListener("keydown", event => {
+  if (event.key !== "Enter") return;
+  event.preventDefault();
+  applySearch();
+});
+searchInput.addEventListener("input", () => {
+  if (searchInput.value.trim()) return;
+  activeKeyword = "";
+  renderBooks();
+});
+document.querySelector("#worldcup-book-search-button").addEventListener("click", applySearch);
+document.querySelector("#worldcup-selection-reset-button").addEventListener("click", () => {
+  selected.clear();
+  message.textContent = "";
+  updateCount();
+  renderBooks();
+});
+
+document.querySelector("#worldcup-template-form").addEventListener("submit", async event => {
+  event.preventDefault();
   if (selected.size < 16) {
     message.textContent = "책을 16권 이상 선택해 주세요.";
     return;
   }
-  const button = e.currentTarget.querySelector("button");
+  const button = event.currentTarget.querySelector("button[type=submit]");
   button.disabled = true;
   try {
-    const r = await fetch("/api/worldcup/templates", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          title: document.querySelector("#title").value,
-          description: document.querySelector("#description").value,
-          category: document.querySelector("#category").value,
-          bookIds: [...selected],
-        }),
+    const response = await fetch("/api/worldcup/templates", {
+      method: "POST",
+      headers: {"Content-Type": "application/json;charset=UTF-8"},
+      credentials: "include",
+      body: JSON.stringify({
+        title: document.querySelector("#worldcup-template-title").value,
+        description: document.querySelector("#worldcup-template-description").value,
+        category: category.value,
+        bookIds: [...selected],
       }),
-      d = await r.json();
-    if (!r.ok) throw new Error(d.message);
-    location.href = `/pages/worldcup/play.html?id=${d.templateId}`;
-  } catch (x) {
-    message.textContent = x.message || "템플릿을 만들지 못했습니다.";
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message);
+    location.href = `/pages/worldcup/play.html?id=${data.templateId}`;
+  } catch (error) {
+    message.textContent = error.message || "템플릿을 만들지 못했습니다.";
   } finally {
     button.disabled = false;
   }
-};
-function esc(v) {
-  return String(v ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll(
-    "\"",
-    "&quot;",
-  );
+});
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll("\"", "&quot;")
+    .replaceAll("'", "&#039;");
 }
-load();
+
+loadBooks();

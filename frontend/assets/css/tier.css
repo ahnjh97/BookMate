@@ -343,6 +343,14 @@
   border-radius: 5px;
   background: #e7ebee;
 }
+
+.readonly-tier-page .tier-book {
+  cursor: pointer;
+}
+
+.readonly-tier-page .tier-dropzone {
+  cursor: default;
+}
 .tier-book span {
   display: block;
   overflow: hidden;
@@ -375,8 +383,30 @@
 }
 .check-line {
   display: flex !important;
-  grid-template-columns: auto 1fr !important;
   align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  width: fit-content;
+  margin-left: auto;
+  padding: 9px 13px;
+  border: 1px solid rgb(15 163 193 / 22%);
+  border-radius: 9px;
+  color: var(--color-primary-dark);
+  background: var(--color-primary-soft);
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+.check-line input {
+  width: 17px;
+  height: 17px;
+  min-height: 17px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
 }
 .dialog-actions {
   display: flex;
@@ -765,6 +795,9 @@
 }
 .tier-book img {
   height: 62px;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 .tier-book span {
   min-height: 30px;
@@ -1001,9 +1034,9 @@
 }
 .tier-create-page .template-form {
   gap: 18px;
-  border-color: #bfe4eb;
-  background: linear-gradient(145deg, #fbfeff 0%, #f2fbfd 48%, #eaf8fb 100%);
-  box-shadow: 0 12px 34px rgb(15 163 193/9%);
+  border-color: var(--color-border);
+  background: #fff;
+  box-shadow: none;
 }
 .tier-create-page .template-form > label, .tier-create-page .form-row > label {
   gap: 9px;

@@ -17,6 +17,38 @@ public class TierListController extends HttpServlet {
       throws IOException {
     response.setContentType("application/json");
     response.setCharacterEncoding("UTF-8");
+    String tierListValue = request.getParameter("tierListId");
+    if (tierListValue != null && !tierListValue.isBlank()) {
+      try {
+        long tierListId = Long.parseLong(tierListValue);
+        Map<String, Object> tierList = service.findTierList(tierListId);
+        if (tierList == null) {
+          send(response, 404, "티어리스트를 찾을 수 없습니다.");
+          return;
+        }
+        HttpSession session = request.getSession(false);
+        Object loginMemberId = session == null ? null : session.getAttribute("loginMemberId");
+        Object accessValue = session == null ? null : session.getAttribute("bookshelfTierListAccess");
+        boolean isOwner = loginMemberId instanceof Number memberId
+            && memberId.longValue() == ((Number) tierList.get("memberId")).longValue();
+        boolean visitedBookshelf = accessValue instanceof Set<?> access
+            && access.contains(tierListId);
+        boolean publishedToCommunity = Boolean.TRUE.equals(tierList.get("publishedToCommunity"));
+        if (!isOwner && !visitedBookshelf && !publishedToCommunity) {
+          send(response, 403, "회원 책장을 통해 접근해 주세요.");
+          return;
+        }
+        tierList.remove("memberId");
+        tierList.remove("publishedToCommunity");
+        gson.toJson(Map.of("success", true, "tierList", tierList), response.getWriter());
+      } catch (NumberFormatException e) {
+        send(response, 400, "올바른 티어리스트 번호가 필요합니다.");
+      } catch (RuntimeException e) {
+        e.printStackTrace();
+        send(response, 500, e.getMessage());
+      }
+      return;
+    }
     HttpSession session = request.getSession(false);
     Object raw = session == null ? null : session.getAttribute("loginMemberId");
     if (!(raw instanceof Number n)) {
@@ -66,9 +98,8 @@ public class TierListController extends HttpServlet {
           service.saveTierList(
               n.longValue(),
               body.templateId,
-              body.title,
               body.description,
-              body.isPublic,
+              body.publishToCommunity,
               placements);
       response.setStatus(201);
       gson.toJson(
@@ -78,7 +109,9 @@ public class TierListController extends HttpServlet {
               "tierListId",
               id,
               "message",
-              body.isPublic ? "티어리스트를 저장하고 커뮤니티에 게시했습니다." : "티어리스트를 비공개로 저장했습니다."),
+              body.publishToCommunity
+                  ? "티어리스트를 저장하고 커뮤니티에 게시했습니다."
+                  : "티어리스트를 저장했습니다."),
           response.getWriter());
     } catch (IllegalArgumentException e) {
       send(response, 400, e.getMessage());
@@ -95,9 +128,8 @@ public class TierListController extends HttpServlet {
 
   private static class SaveRequest {
     long templateId;
-    String title;
     String description;
-    boolean isPublic;
+    boolean publishToCommunity;
     List<PlacementRequest> placements;
   }
 

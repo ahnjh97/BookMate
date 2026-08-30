@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>커뮤니티 | BookMate</title>
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260830-4">
     <link rel="stylesheet" href="/assets/css/post.css?v=20260830-3">
 </head>
 
@@ -70,11 +70,16 @@
 
         <p id="post-status" aria-live="polite">게시글을 불러오는 중입니다.</p>
 
-        <div id="post-pagination"></div>
+        <nav id="post-pagination" class="list-pagination" aria-label="커뮤니티 목록 페이지">
+            <button class="button button-outline" type="button" data-pagination-prev>이전</button>
+            <div class="list-page-numbers" data-pagination-numbers aria-live="polite"></div>
+            <button class="button button-outline" type="button" data-pagination-next>다음</button>
+        </nav>
     </section>
 </main>
 
 <script src="/js/components/navbar.js" charset="UTF-8" defer></script>
-<script src="/js/pages/post-list.js?v=20260830-1" charset="UTF-8" defer></script>
+<script src="/js/components/list-pagination.js?v=20260830-1" defer></script>
+<script src="/js/pages/post-list.js?v=20260830-2" charset="UTF-8" defer></script>
 </body>
 </html>

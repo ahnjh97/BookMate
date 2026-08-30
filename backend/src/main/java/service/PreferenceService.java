@@ -17,6 +17,36 @@ public class PreferenceService {
     private static final double TIER_WEIGHT = 0.25;
     private static final double IDEAL_WEIGHT = 0.25;
 
+    public Map<String, Object> findMemberSimilarity(long memberId, long targetMemberId) {
+        if (memberId <= 0 || targetMemberId <= 0 || memberId == targetMemberId) {
+            throw new IllegalArgumentException("비교할 회원 정보가 올바르지 않습니다.");
+        }
+
+        try (Connection connection = DBUtil.getConnection()) {
+            String nickname = loadCandidateNickname(connection, memberId, targetMemberId);
+            if (nickname == null) return null;
+            Map<Long, Map<String, Double>> ratings = loadPairRatings(connection, memberId, targetMemberId);
+            Map<Long, Map<String, Double>> tiers = loadPairTiers(connection, memberId, targetMemberId);
+            Map<Long, Map<String, WinStat>> ideals = loadPairIdeals(connection, memberId, targetMemberId);
+            Similarity similarity = new Similarity(
+                    targetMemberId,
+                    nickname,
+                    ratingSimilarity(
+                            ratings.getOrDefault(memberId, Map.of()),
+                            ratings.getOrDefault(targetMemberId, Map.of())),
+                    distanceSimilarity(
+                            tiers.getOrDefault(memberId, Map.of()),
+                            tiers.getOrDefault(targetMemberId, Map.of()),
+                            3),
+                    idealSimilarity(
+                            ideals.getOrDefault(memberId, Map.of()),
+                            ideals.getOrDefault(targetMemberId, Map.of())));
+            return similarity.activeWeight() == 0 ? null : toMap(similarity);
+        } catch (SQLException exception) {
+            throw new RuntimeException("회원 취향 일치율을 계산하지 못했습니다.", exception);
+        }
+    }
+
     public List<Map<String, Object>> findSimilarMembers(long memberId, int limit) {
         if (memberId <= 0) throw new IllegalArgumentException("로그인 정보가 올바르지 않습니다.");
         int safeLimit = Math.max(1, Math.min(limit, 10));
@@ -65,6 +95,88 @@ public class PreferenceService {
             }
         }
         return candidates;
+    }
+
+    private String loadCandidateNickname(Connection connection, long memberId, long targetMemberId)
+            throws SQLException {
+        String sql = "SELECT nickname FROM MEMBER WHERE member_id=? AND member_id<>? AND role='USER'"
+                + " AND login_id<>'bookmate_system'";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, targetMemberId);
+            statement.setLong(2, memberId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next() ? resultSet.getString("nickname") : null;
+            }
+        }
+    }
+
+    private Map<Long, Map<String, Double>> loadPairRatings(
+            Connection connection, long memberId, long targetMemberId) throws SQLException {
+        String sql = """
+                SELECT member_id,book_id,score FROM RATING
+                 WHERE member_id IN (?,?)
+                """;
+        Map<Long, Map<String, Double>> values = new HashMap<>();
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, memberId);
+            statement.setLong(2, targetMemberId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    values.computeIfAbsent(resultSet.getLong(1), ignored -> new HashMap<>())
+                            .put(Long.toString(resultSet.getLong(2)), resultSet.getDouble(3));
+                }
+            }
+        }
+        return values;
+    }
+
+    private Map<Long, Map<String, Double>> loadPairTiers(
+            Connection connection, long memberId, long targetMemberId) throws SQLException {
+        String sql = """
+                SELECT L.member_id,L.template_id,I.book_id,I.tier_grade
+                  FROM TIER_LIST L JOIN TIER_ITEM I ON I.tier_list_id=L.tier_list_id
+                 WHERE L.member_id IN (?,?)
+                """;
+        Map<Long, Map<String, Double>> values = new HashMap<>();
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, memberId);
+            statement.setLong(2, targetMemberId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    String key = resultSet.getLong(2) + ":" + resultSet.getLong(3);
+                    values.computeIfAbsent(resultSet.getLong(1), ignored -> new HashMap<>())
+                            .put(key, tierValue(resultSet.getString(4)));
+                }
+            }
+        }
+        return values;
+    }
+
+    private Map<Long, Map<String, WinStat>> loadPairIdeals(
+            Connection connection, long memberId, long targetMemberId) throws SQLException {
+        String sql = """
+                SELECT R.member_id,R.template_id,M.left_book_id,M.right_book_id,M.winner_book_id
+                  FROM IDEAL_RUN R JOIN IDEAL_MATCH M ON M.run_id=R.run_id
+                 WHERE R.member_id IN (?,?)
+                """;
+        Map<Long, Map<String, WinStat>> values = new HashMap<>();
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, memberId);
+            statement.setLong(2, targetMemberId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    long userId = resultSet.getLong(1);
+                    long templateId = resultSet.getLong(2);
+                    long left = resultSet.getLong(3);
+                    long right = resultSet.getLong(4);
+                    long winner = resultSet.getLong(5);
+                    Map<String, WinStat> user = values.computeIfAbsent(userId, ignored -> new HashMap<>());
+                    recordMatch(user, templateId, left, left == winner);
+                    recordMatch(user, templateId, right, right == winner);
+                }
+            }
+        }
+        return values;
     }
 
     private Map<Long, Map<String, Double>> loadRatings(Connection connection, long memberId)

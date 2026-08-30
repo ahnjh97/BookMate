@@ -144,10 +144,12 @@ public class RatingDAO {
         }
     }
 
-    public int countRatingsByBook(Connection connection, long bookId) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM RATING WHERE book_id = ?";
+    public int countRatingsByBook(Connection connection, long bookId, Integer score) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM RATING WHERE book_id = ?"
+                + (score == null ? "" : " AND score = ?");
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, bookId);
+            if (score != null) statement.setInt(2, score);
             try (ResultSet resultSet = statement.executeQuery()) {
                 resultSet.next();
                 return resultSet.getInt(1);
@@ -158,6 +160,7 @@ public class RatingDAO {
     public List<RatingDTO> selectRatingsByBook(
             Connection connection,
             long bookId,
+            Integer score,
             int offset,
             int pageSize
     ) throws SQLException {
@@ -166,15 +169,17 @@ public class RatingDAO {
                        R.score, R.comment_text
                   FROM RATING R
                   JOIN MEMBER M ON M.member_id = R.member_id
-                 WHERE R.book_id = ?
+                 WHERE R.book_id = ?%s
                  ORDER BY R.rating_id DESC
                  OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
-                """;
+                """.formatted(score == null ? "" : " AND R.score = ?");
         List<RatingDTO> ratings = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, bookId);
-            statement.setInt(2, offset);
-            statement.setInt(3, pageSize);
+            int parameterIndex = 2;
+            if (score != null) statement.setInt(parameterIndex++, score);
+            statement.setInt(parameterIndex++, offset);
+            statement.setInt(parameterIndex, pageSize);
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
                     RatingDTO rating = mapRating(resultSet);

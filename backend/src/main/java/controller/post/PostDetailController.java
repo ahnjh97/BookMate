@@ -95,7 +95,14 @@ public class PostDetailController extends HttpServlet {
             Map<String, Object> result = new java.util.LinkedHashMap<>();
             result.put("success", true);
             result.put("post", post);
-            if (post.getTierListId() != null) result.put("tierList", tierService.findPublicTierList(post.getTierListId()));
+            if (post.getTierListId() != null) {
+                Map<String, Object> tierList = tierService.findTierList(post.getTierListId());
+                if (tierList != null) {
+                    tierList.remove("memberId");
+                    tierList.remove("publishedToCommunity");
+                }
+                result.put("tierList", tierList);
+            }
             gson.toJson(result, response.getWriter());
 
         } catch (IllegalArgumentException e) {

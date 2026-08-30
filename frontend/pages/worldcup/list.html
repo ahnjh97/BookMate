@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>책 이상형 월드컵 | BookMate</title>
-  <link rel="stylesheet" href="/assets/css/style.css?v=20260830-3">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260830-4">
   <link rel="stylesheet" href="/assets/css/book-list.css?v=20260830-3">
-  <link rel="stylesheet" href="/assets/css/worldcup.css?v=11">
+  <link rel="stylesheet" href="/assets/css/worldcup.css?v=12">
 </head>
 <body>
   <header class="site-header" data-navbar></header>
@@ -26,9 +26,15 @@
         <a class="button button-teal" href="/pages/worldcup/create.html">새 템플릿 만들기</a>
       </div>
       <div id="grid" class="worldcup-grid"></div>
+      <nav id="worldcup-pagination" class="list-pagination" aria-label="이상형월드컵 목록 페이지">
+        <button class="button button-outline" type="button" data-pagination-prev>이전</button>
+        <div class="list-page-numbers" data-pagination-numbers aria-live="polite"></div>
+        <button class="button button-outline" type="button" data-pagination-next>다음</button>
+      </nav>
     </div>
   </main>
   <script src="/js/components/navbar.js" defer></script>
-  <script src="/js/pages/worldcup-list.js?v=5" defer></script>
+  <script src="/js/components/list-pagination.js?v=20260830-1" defer></script>
+  <script src="/js/pages/worldcup-list.js?v=8" defer></script>
 </body>
 </html>

@@ -236,15 +236,16 @@ public class DBInit {
             statement.setInt(3, requiredInt(row, "sort_order"));
         });
         batchImport(conn, "tier-results.csv", """
-                INSERT INTO TIER_LIST(tier_list_id,member_id,template_id,title,description,is_public,created_at)
-                VALUES(SEQ_TIER_LIST.NEXTVAL,?,?,?,?,?,SYSDATE)
+                INSERT INTO TIER_LIST(tier_list_id,member_id,template_id,title,description,created_at)
+                VALUES(SEQ_TIER_LIST.NEXTVAL,?,?,
+                       (SELECT title FROM TIER_TEMPLATE WHERE template_id=?),?,SYSDATE)
                 """, (statement, row, index) -> {
             requireOrderedId(row, "tier_list_id", index + 1);
             statement.setLong(1, requiredMemberId(memberIds, row));
-            statement.setLong(2, requiredLong(row, "template_id"));
-            statement.setString(3, required(row, "title"));
+            long templateId = requiredLong(row, "template_id");
+            statement.setLong(2, templateId);
+            statement.setLong(3, templateId);
             statement.setString(4, emptyToNull(row.get("description")));
-            statement.setString(5, required(row, "is_public"));
         });
         batchImport(conn, "tier-result-items.csv", """
                 INSERT INTO TIER_ITEM(tier_item_id,tier_list_id,book_id,tier_grade,sort_order)

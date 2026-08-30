@@ -4,31 +4,20 @@ const params = new URLSearchParams(location.search),
   pool = document.getElementById("book-pool"),
   message = document.getElementById("maker-message"),
   grades = ["S", "A", "B", "C", "D"];
-let template = null, dragged = null, placeholder = null, defaultListTitle = "", legacyDefaultTitles = new Set();
+let template = null, dragged = null, placeholder = null;
 async function init() {
   if (!templateId) {
     message.textContent = "템플릿 번호가 필요합니다.";
     return;
   }
   try {
-    const [templateResponse, authResponse] = await Promise.all([
-        fetch(`/api/tier-templates?id=${templateId}`),
-        fetch("/api/auth", { cache: "no-store" }),
-      ]),
-      data = await templateResponse.json(),
-      auth = authResponse.ok ? await authResponse.json() : { loggedIn: false };
+    const templateResponse = await fetch(`/api/tier-templates?id=${templateId}`),
+      data = await templateResponse.json();
     if (!templateResponse.ok) throw new Error(data.message);
     template = data.template;
     document.getElementById("maker-title").textContent = template.title;
     document.getElementById("maker-description").textContent = template.description
       || `${template.creatorNickname}님이 만든 템플릿`;
-    defaultListTitle = template.title;
-    legacyDefaultTitles = new Set(
-      [`나의 ${template.title}`, auth.loggedIn && auth.nickname ? `${auth.nickname}의 ${template.title}` : null].filter(
-        Boolean,
-      ),
-    );
-    document.getElementById("list-title").value = defaultListTitle;
     document.getElementById("stats-button").href = `/pages/tier/stats.html?id=${templateId}`;
     buildBoard();
     resetBooks();
@@ -51,11 +40,8 @@ async function restoreSavedTierList() {
   if (!response.ok) throw new Error(data.message);
   const saved = data.tierList;
   if (!saved) return;
-  document.getElementById("list-title").value = !saved.title || legacyDefaultTitles.has(saved.title)
-    ? defaultListTitle
-    : saved.title;
   document.getElementById("list-description").value = saved.description || "";
-  document.getElementById("list-public").checked = Boolean(saved.isPublic);
+  document.getElementById("list-community").checked = Boolean(saved.publishToCommunity);
   const booksById = new Map([...pool.querySelectorAll(".tier-book")].map(book => [Number(book.dataset.bookId), book]));
   (saved.placements || []).forEach(placement => {
     const book = booksById.get(Number(placement.bookId)),
@@ -91,7 +77,7 @@ function bookNode(item) {
   el.draggable = true;
   el.dataset.bookId = item.bookId;
   el.dataset.tooltip = `${item.title} - ${item.authorName}`;
-  el.innerHTML = `<img src="${item.imageUrl || ""}" alt="${escapeHtml(item.title)}"><span>${
+  el.innerHTML = `<img src="${item.imageUrl || ""}" alt="${escapeHtml(item.title)}" draggable="false"><span>${
     escapeHtml(item.title)
   }</span>`;
   el.addEventListener("dragstart", event => {
@@ -124,6 +110,17 @@ function bookNode(item) {
   });
   return el;
 }
+
+document.addEventListener("dragover", event => {
+  if (!dragged) return;
+  event.preventDefault();
+  if (!event.target.closest(".tier-dropzone")) event.dataTransfer.dropEffect = "none";
+}, { capture: true });
+
+document.addEventListener("drop", event => {
+  if (dragged && !event.target.closest(".tier-dropzone")) event.preventDefault();
+}, { capture: true });
+
 function wireZone(zone) {
   zone.addEventListener("dragover", event => {
     event.preventDefault();
@@ -180,9 +177,8 @@ document.getElementById("save-form").addEventListener("submit", async event => {
         credentials: "include",
         body: JSON.stringify({
           templateId,
-          title: document.getElementById("list-title").value,
           description: document.getElementById("list-description").value,
-          isPublic: document.getElementById("list-public").checked,
+          publishToCommunity: document.getElementById("list-community").checked,
           placements,
         }),
       }),

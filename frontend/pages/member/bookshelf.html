@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>책장 | BookMate</title>
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260830-5">
+  <link rel="stylesheet" href="/assets/css/bookshelf.css?v=20260830-23">
+  <link rel="stylesheet" href="/assets/css/mypage.css?v=20260830-4">
+</head>
+<body>
+  <header class="site-header" data-navbar></header>
+  <main class="bookshelf-page">
+    <div class="bookshelf-shell">
+      <a class="back-navigation bookshelf-back" href="/pages/member/bookshelf.html" hidden>← 내 책장으로</a>
+      <p id="bookshelf-status" class="bookshelf-status">책장을 불러오는 중입니다.</p>
+      <div id="bookshelf-content" hidden>
+        <header class="bookshelf-hero">
+          <div class="bookshelf-title-row">
+            <h1 class="page-gradient-title">
+              <span class="page-title-icon page-title-icon-bookcase" aria-hidden="true"></span>책장
+            </h1>
+          </div>
+          <div class="bookshelf-summary-row">
+            <div class="bookshelf-member-identity">
+              <span class="page-title-icon page-title-icon-member" aria-hidden="true"></span>
+              <strong id="bookshelf-nickname" class="bookshelf-member-id"></strong>
+            </div>
+            <section class="bookshelf-counts bookshelf-hero-counts" data-bookshelf-counts aria-label="책장 활동 요약"></section>
+          </div>
+        </header>
+
+        <div class="bookshelf-review-row">
+          <section class="bookshelf-section bookshelf-review-section">
+            <div class="bookshelf-section-heading">
+              <h2>후기 남긴 책</h2>
+              <div class="bookshelf-rating-tools">
+                <span class="bookshelf-rating-count" data-rating-count></span>
+                <div class="choice-tabs bookshelf-rating-tabs" role="group" aria-label="후기 별점 필터">
+                  <button class="is-active" type="button" data-rating-filter="all" aria-pressed="true">전체</button>
+                  <button type="button" data-rating-filter="5" aria-pressed="false">5점</button>
+                  <button type="button" data-rating-filter="4" aria-pressed="false">4점</button>
+                  <button type="button" data-rating-filter="3" aria-pressed="false">3점</button>
+                  <button type="button" data-rating-filter="2" aria-pressed="false">2점</button>
+                  <button type="button" data-rating-filter="1" aria-pressed="false">1점</button>
+                </div>
+              </div>
+            </div>
+            <div class="bookshelf-books" data-bookshelf-books></div>
+          </section>
+
+        </div>
+
+        <div class="bookshelf-activity-grid">
+          <section class="bookshelf-section">
+            <div class="bookshelf-section-heading">
+              <h2>참여한 티어리스트</h2>
+            </div>
+            <div class="bookshelf-result-list" data-bookshelf-tiers></div>
+          </section>
+
+          <section class="bookshelf-section">
+            <div class="bookshelf-section-heading">
+              <h2>참여한 이상형월드컵</h2>
+            </div>
+            <div class="bookshelf-result-list" data-bookshelf-worldcups></div>
+          </section>
+
+          <section id="bookshelf-similarity" class="bookshelf-section bookshelf-similarity" hidden>
+            <div class="bookshelf-section-heading">
+              <h2>나와의 취향 일치율</h2>
+            </div>
+            <div id="bookshelf-similarity-content"></div>
+          </section>
+
+          <section id="similar-members" class="similar-members" aria-labelledby="similar-members-title" hidden>
+            <div class="similar-members-heading">
+              <div>
+                <h2 id="similar-members-title">취향이 비슷한 사용자 Top 3</h2>
+                <p class="similar-members-helper">카드에 마우스를 올리면 상세 분석을 볼 수 있습니다.</p>
+              </div>
+            </div>
+            <p id="similar-members-status" class="similar-members-status">취향을 분석하는 중입니다.</p>
+            <div id="similar-members-list" class="similar-members-list"></div>
+          </section>
+        </div>
+
+      </div>
+    </div>
+  </main>
+  <script src="/js/components/navbar.js" defer></script>
+  <script src="/js/components/list-pagination.js?v=20260830-1" defer></script>
+  <script src="/js/pages/member-page.js?v=20260830-6" defer></script>
+  <script src="/js/pages/bookshelf.js?v=20260830-15" defer></script>
+</body>
+</html>

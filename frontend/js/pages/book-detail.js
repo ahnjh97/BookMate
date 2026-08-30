@@ -31,12 +31,19 @@ const readerRatingsSummaryElement = document.querySelector("#reader-ratings-summ
 const readerRatingsStatusElement = document.querySelector("#reader-ratings-status");
 const readerRatingsListElement = document.querySelector("#reader-ratings-list");
 const readerRatingsPaginationElement = document.querySelector("#reader-ratings-pagination");
+const readerRatingFilterButtons = document.querySelectorAll("[data-reader-score]");
 const bookCommunityElement = document.querySelector("#book-community");
 const bookTierTemplatesStatusElement = document.querySelector("#book-tier-templates-status");
 const bookTierTemplatesListElement = document.querySelector("#book-tier-templates-list");
+const bookTierTemplatesPagination = window.BookMateListPagination.create({
+  root: document.querySelector("#book-tier-templates-pagination"),
+  pageSize: 4,
+  onRender: renderBookTierTemplatePage,
+});
 let currentRating = null;
 let isLoggedIn = false;
 let currentRatingsPage = 1;
+let currentReaderScore = null;
 let ratingToastTimer = null;
 let ratingToastClearTimer = null;
 
@@ -139,19 +146,33 @@ async function loadBookTierTemplates(bookId) {
     const result = await response.json();
     if (!response.ok || !result.success) throw new Error(result.message || "티어리스트를 불러오지 못했습니다.");
     const templates = result.templates || [];
-    bookTierTemplatesListElement.replaceChildren();
-    bookTierTemplatesStatusElement.textContent = templates.length ? `${templates.length}개의 템플릿에 포함되어 있습니다.` : "이 책이 포함된 승인된 템플릿이 없습니다.";
-    templates.forEach((template) => {
+    bookTierTemplatesStatusElement.textContent = `총 ${templates.length}개`;
+    bookTierTemplatesPagination.setItems(templates);
+  } catch (error) {
+    bookTierTemplatesPagination.setItems([]);
+    bookTierTemplatesStatusElement.textContent = error.message || "티어리스트를 불러오지 못했습니다.";
+  }
+}
+
+function renderBookTierTemplatePage(templates) {
+  bookTierTemplatesListElement.replaceChildren();
+  templates.forEach((template) => {
       const link = document.createElement("a");
       link.className = "book-tier-template-link";
       link.href = `/pages/tier/maker.html?id=${template.templateId}`;
-      link.innerHTML = `<strong>${escapeHtml(template.title)}</strong><span class="category-chip">${escapeHtml(template.category)}</span>`;
+      const categoryClass = getTierCategoryClass(template.category);
+      link.innerHTML = `<strong>${escapeHtml(template.title)}</strong><span class="category-chip ${categoryClass}">${escapeHtml(template.category)}</span>`;
       bookTierTemplatesListElement.append(link);
-    });
-  } catch (error) {
-    bookTierTemplatesListElement.replaceChildren();
-    bookTierTemplatesStatusElement.textContent = error.message || "티어리스트를 불러오지 못했습니다.";
-  }
+  });
+}
+
+function getTierCategoryClass(category) {
+  return {
+    "장르": "category-genre",
+    "시리즈": "category-series",
+    "작가": "category-author",
+    "테마": "category-theme",
+  }[category] || "category-default";
 }
 
 function escapeHtml(value) {
@@ -161,7 +182,9 @@ function escapeHtml(value) {
 async function loadPublicRatings(bookId, page = 1) {
   readerRatingsStatusElement.textContent = "평가를 불러오는 중입니다.";
   try {
-    const response = await fetch(`/api/ratings/public?bookId=${bookId}&page=${page}`);
+    const query = new URLSearchParams({ bookId: String(bookId), page: String(page) });
+    if (currentReaderScore != null) query.set("score", String(currentReaderScore));
+    const response = await fetch(`/api/ratings/public?${query}`);
     const result = await response.json();
     if (!response.ok || !result.success) throw new Error(result.message || "독자 평가를 불러오지 못했습니다.");
     currentRatingsPage = result.data.page;
@@ -175,7 +198,9 @@ async function loadPublicRatings(bookId, page = 1) {
 }
 
 function renderPublicRatings(data) {
-  readerRatingsSummaryElement.textContent = `총 ${data.totalCount}개의 평가`;
+  readerRatingsSummaryElement.textContent = currentReaderScore == null
+    ? `총 ${data.totalCount}개의 평가`
+    : `${currentReaderScore}점 평가 ${data.totalCount}개`;
   readerRatingsStatusElement.textContent = "";
   delete readerRatingsStatusElement.dataset.state;
   readerRatingsListElement.replaceChildren();
@@ -187,6 +212,22 @@ function renderPublicRatings(data) {
   }
   renderRatingsPagination(data.page, data.totalPages);
 }
+
+readerRatingFilterButtons.forEach(button => {
+  button.addEventListener("click", async () => {
+    currentReaderScore = button.dataset.readerScore === "all"
+      ? null
+      : Number(button.dataset.readerScore);
+    currentRatingsPage = 1;
+    readerRatingFilterButtons.forEach(item => {
+      const active = item === button;
+      item.classList.toggle("is-active", active);
+      item.setAttribute("aria-pressed", String(active));
+    });
+    const bookId = getBookId();
+    if (bookId) await loadPublicRatings(bookId, 1);
+  });
+});
 
 function createRatingCard(rating) {
   const article = document.createElement("article");

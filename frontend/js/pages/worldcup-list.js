@@ -2,6 +2,12 @@ const grid = document.querySelector("#grid");
 const participationButtons = document.querySelectorAll("[data-participation]");
 let templates = [];
 let selectedParticipation = "all";
+const pagination = window.BookMateListPagination.create({
+  root: document.querySelector("#worldcup-pagination"),
+  pageSize: 8,
+  scrollTarget: grid,
+  onRender: renderTemplatePage,
+});
 
 document.querySelector("#worldcup-reset-button").addEventListener("click", () => {
   selectedParticipation = "all";
@@ -43,6 +49,10 @@ function renderTemplates() {
     selectedParticipation === "all"
       || (selectedParticipation === "participated" ? template.participated : !template.participated)
   );
+  pagination.setItems(filtered);
+}
+
+function renderTemplatePage(filtered) {
   grid.replaceChildren();
   filtered.forEach(template => {
     const link = document.createElement("a");
@@ -51,9 +61,10 @@ function renderTemplates() {
     const badge = template.participated
       ? '<strong class="participation-badge">참여 완료</strong>'
       : "";
+    const categoryClass = template.category === "장르" ? "category-genre" : "category-default";
     link.innerHTML = `<div class="worldcup-cover">${createCoverCollage(template.coverImages)}</div>`
       + `<div class="worldcup-card-body"><div class="worldcup-meta">`
-      + `<span class="worldcup-category-badge">${escapeHtml(template.category)}</span>`
+      + `<span class="worldcup-category-badge ${categoryClass}">${escapeHtml(template.category)}</span>`
       + `<span class="worldcup-count">${template.itemCount}권</span><span>${escapeHtml(template.creatorNickname)}</span>${badge}</div>`
       + `<h3>${escapeHtml(template.title || "이름 없는 템플릿")}</h3><p>${escapeHtml(
         template.description || "책 취향의 최종 우승자를 골라보세요."

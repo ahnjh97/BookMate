@@ -1,60 +1,85 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>월드컵 템플릿 만들기 | BookMate</title>
-  <link rel="stylesheet" href="/assets/css/style.css?v=20260828-5">
-  <link rel="stylesheet" href="/assets/css/worldcup.css?v=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>이상형 월드컵 템플릿 만들기 | BookMate</title>
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260830-3">
+  <link rel="stylesheet" href="/assets/css/tier.css?v=20260830-7">
+  <link rel="stylesheet" href="/assets/css/worldcup.css?v=12">
   <script src="/js/components/auth-guard.js"></script>
 </head>
 <body>
   <header class="site-header" data-navbar></header>
-  <main class="worldcup-page">
-    <div class="worldcup-container">
-      <header class="worldcup-header">
-        <div>
-          <h1>월드컵 템플릿 만들기</h1>
-          <p>
-            8강과 16강을 모두 지원하도록 책을 16권 이상
-            골라주세요.
-          </p>
-        </div>
+
+  <main class="tier-page tier-create-page worldcup-create-page">
+    <div class="tier-container">
+      <header class="page-heading">
+        <h1 class="page-gradient-title">이상형 월드컵 템플릿 만들기</h1>
       </header>
-      <form id="form" class="worldcup-form">
-        <label>카테고리<select id="category" required>
-            <option value="자유">자유</option>
-            <option value="장르">장르</option>
-          </select></label><label>템플릿 이름<input
-            id="title"
-            maxlength="200"
-            required
-            placeholder="예: 내 인생 판타지 소설 월드컵"
-          ></label><label>소개<textarea
-            id="description"
+
+      <form id="worldcup-template-form" class="template-form">
+        <label>
+          템플릿 이름
+          <input id="worldcup-template-title" maxlength="200" required placeholder="예: 내 인생 판타지 소설 월드컵">
+        </label>
+
+        <div class="form-row">
+          <label>
+            템플릿 유형
+            <select id="worldcup-template-category" required>
+              <option value="자유" selected>자유</option>
+              <option value="장르">장르</option>
+            </select>
+          </label>
+
+          <label id="worldcup-filter-label" hidden>
+            장르 선택
+            <select id="worldcup-template-filter"></select>
+          </label>
+        </div>
+
+        <label>
+          소개
+          <textarea
+            id="worldcup-template-description"
             maxlength="1000"
             rows="3"
             placeholder="어떤 책을 모은 월드컵인지 알려주세요."
-          ></textarea></label><label>책 검색<input
-            id="book-search"
-            type="search"
-            placeholder="제목 또는 작가"
-          ></label><div class="worldcup-form-footer">
-          <strong id="count">0권 선택</strong><span>최소 16권 · 최대
-            64권</span>
+          ></textarea>
+        </label>
+
+        <div class="tier-book-search">
+          <div class="tier-search-field">
+            <input
+              id="worldcup-book-search"
+              type="search"
+              aria-label="책 제목 또는 작가 검색어"
+              placeholder="책 제목 또는 작가명"
+              autocomplete="off"
+            >
+          </div>
+          <button id="worldcup-book-search-button" class="button button-teal" type="button">검색</button>
         </div>
-        <div id="picker" class="worldcup-picker"></div>
-        <p id="message" class="worldcup-status"></p>
-        <div class="worldcup-form-footer">
-          <a class="button button-white" href="/pages/worldcup/list.html"
-          >취소</a><button class="button button-teal">
-            템플릿 공개하기
-          </button>
+
+        <section class="book-selection-panel">
+          <div class="selection-heading">
+            <strong>책 선택</strong>
+            <span id="worldcup-selection-count">선택된 책 수 : 0권</span>
+          </div>
+          <div id="worldcup-book-picker" class="book-picker"></div>
+        </section>
+
+        <p id="worldcup-form-message" class="tier-status" aria-live="polite"></p>
+        <div class="template-form-actions">
+          <button id="worldcup-selection-reset-button" class="button button-white" type="button">선택 초기화</button>
+          <button class="button button-teal template-submit-button" type="submit">템플릿 만들기</button>
         </div>
       </form>
     </div>
   </main>
+
   <script src="/js/components/navbar.js" defer></script>
-  <script src="/js/pages/worldcup-create.js?v=1" defer></script>
+  <script src="/js/pages/worldcup-create.js?v=2" defer></script>
 </body>
 </html>

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>티어리스트 만들기 | BookMate</title>
   <link rel="stylesheet" href="/assets/css/style.css?v=20260830-3">
-  <link rel="stylesheet" href="/assets/css/tier.css?v=20260830-2">
+  <link rel="stylesheet" href="/assets/css/tier.css?v=20260830-4">
   <script src="/js/components/auth-guard.js"></script>
 </head>
 <body>
@@ -44,15 +44,12 @@
         <form id="save-form">
           <h2>내 티어리스트 저장</h2>
           <label>
-            제목
-            <input id="list-title" maxlength="200" required>
-          </label>
-          <label>
-            한 줄 설명
-            <textarea id="list-description" maxlength="1000" rows="3"></textarea>
+            설명
+            <textarea id="list-description" maxlength="1000" rows="5"
+                      placeholder="티어리스트를 어떻게 구성했는지 자유롭게 설명해 주세요."></textarea>
           </label>
           <label class="check-line">
-            <input id="list-public" type="checkbox" checked>
+            <input id="list-community" type="checkbox" checked>
             게시판에 등록
           </label>
           <div class="dialog-actions">
@@ -65,6 +62,6 @@
   </main>
 
   <script src="/js/components/navbar.js" defer></script>
-  <script src="/js/pages/tier-maker.js?v=20260828-8" defer></script>
+  <script src="/js/pages/tier-maker.js?v=20260830-3" defer></script>
 </body>
 </html>
