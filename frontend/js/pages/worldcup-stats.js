@@ -6,7 +6,7 @@ async function load() {
     const r = await fetch(`/api/worldcup/stats?templateId=${id}`), d = await r.json();
     if (!r.ok) throw new Error(d.message);
     const x = d.stats;
-    document.querySelector("#title").textContent = `${x.title} 전체 통계`;
+    document.querySelector("#title").innerHTML = `<span class="page-title-icon page-title-icon-trophy" aria-hidden="true"></span>${esc(x.title)} 전체 통계`;
     document.querySelector("#summary").textContent = `총 ${x.totalRuns}회 완료된 월드컵의 선택을 합산했습니다.`;
     document.querySelector("#play").href = `/pages/worldcup/play.html?id=${id}`;
     table.innerHTML =

@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>티어리스트 만들기 | BookMate</title>
-  <link rel="stylesheet" href="/assets/css/style.css?v=20260830-3">
-  <link rel="stylesheet" href="/assets/css/tier.css?v=20260830-4">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260831-2">
+  <link rel="stylesheet" href="/assets/css/tier.css?v=20260831-1">
   <script src="/js/components/auth-guard.js"></script>
 </head>
 <body>
@@ -15,11 +15,11 @@
     <div class="tier-container">
       <header class="maker-heading">
         <div>
-          <h1 id="maker-title" class="page-gradient-title">티어리스트 만들기</h1>
+          <h1 id="maker-title" class="page-gradient-title"><span class="page-title-icon page-title-icon-tier" aria-hidden="true"></span>티어리스트 만들기</h1>
           <p id="maker-description"></p>
         </div>
         <div class="maker-actions">
-          <a id="stats-button" class="button button-sky maker-stats-spacing" href="#">통계 보기</a>
+          <a id="stats-button" class="button button-sky maker-stats-spacing" href="#">전체 통계 보기</a>
           <button id="reset-button" class="button button-white" type="button">초기화</button>
           <button id="save-open-button" class="button button-teal" type="button">저장하기</button>
         </div>
@@ -49,8 +49,12 @@
                       placeholder="티어리스트를 어떻게 구성했는지 자유롭게 설명해 주세요."></textarea>
           </label>
           <label class="check-line">
+            <span class="community-share-copy">
+              <strong>커뮤니티에 공유</strong>
+              <small>저장한 티어리스트를 게시글로 함께 등록합니다.</small>
+            </span>
             <input id="list-community" type="checkbox" checked>
-            게시판에 등록
+            <span class="community-share-switch" aria-hidden="true"></span>
           </label>
           <div class="dialog-actions">
             <button id="save-cancel" class="button" type="button">취소</button>
@@ -62,6 +66,6 @@
   </main>
 
   <script src="/js/components/navbar.js" defer></script>
-  <script src="/js/pages/tier-maker.js?v=20260830-3" defer></script>
+  <script src="/js/pages/tier-maker.js?v=20260831-1" defer></script>
 </body>
 </html>

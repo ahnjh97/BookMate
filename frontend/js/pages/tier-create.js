@@ -173,6 +173,7 @@ document.addEventListener("click", event => {
 });
 document.getElementById("template-form").addEventListener("submit", async event => {
   event.preventDefault();
+  const form = event.currentTarget;
   if (!validateAuthor()) {
     authorFilter.focus();
     renderAuthorOptions();
@@ -182,7 +183,7 @@ document.getElementById("template-form").addEventListener("submit", async event 
     message.textContent = "책을 3권 이상 선택해 주세요.";
     return;
   }
-  const button = event.currentTarget.querySelector("button[type=submit]");
+  const button = form.querySelector("button[type=submit]");
   button.disabled = true;
   try {
     const response = await fetch("/api/tier-templates", {
@@ -203,12 +204,11 @@ document.getElementById("template-form").addEventListener("submit", async event 
       return;
     }
     if (!response.ok) throw new Error(data.message);
-    message.textContent = data.message;
-    event.currentTarget.reset();
-    selected.clear();
-    activeKeyword = "";
-    updateCount();
-    updateTypeFilter();
+    sessionStorage.setItem("bookmate:flash-toast", JSON.stringify({
+      state: "success",
+      message: "새 티어리스트 신청이 완료되었습니다. 관리자 승인 후 등록됩니다.",
+    }));
+    location.href = "/pages/tier/list.html";
   } catch (error) {
     message.textContent = error.message || "신청하지 못했습니다.";
   } finally {

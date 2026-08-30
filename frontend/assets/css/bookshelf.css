@@ -343,7 +343,7 @@
   padding: 18px 20px;
   border: 1px solid var(--color-border);
   border-radius: 12px;
-  background: linear-gradient(145deg, #fff, rgb(224 245 250 / 48%));
+  background: #fff;
 }
 
 .bookshelf-similarity-total {
@@ -373,9 +373,10 @@
 .bookshelf-similarity-components div {
   display: grid;
   gap: 3px;
-  padding: 10px 12px;
+  padding: 11px 12px;
+  border: 1px solid #e5e9ed;
   border-radius: 9px;
-  background: #fff;
+  background: #f3f5f7;
 }
 
 .bookshelf-similarity-components dt,

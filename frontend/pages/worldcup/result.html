@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>월드컵 결과 | BookMate</title>
   <link rel="stylesheet" href="/assets/css/style.css?v=20260828-5">
-  <link rel="stylesheet" href="/assets/css/worldcup.css?v=1">
+  <link rel="stylesheet" href="/assets/css/worldcup.css?v=20260831-13">
 </head>
 <body>
   <header class="site-header" data-navbar></header>
@@ -13,14 +13,13 @@
     <div class="worldcup-container">
       <header class="worldcup-header">
         <div>
-          <h1 id="title">월드컵 결과</h1>
+          <h1 id="title" class="page-gradient-title"><span class="page-title-icon page-title-icon-trophy" aria-hidden="true"></span>이상형월드컵 결과</h1>
           <p>라운드별 승리 흐름을 한눈에 확인하세요.</p>
         </div>
         <div class="worldcup-actions">
-          <a id="replay" class="button button-teal">다시 하기</a><a
-            id="stats-link"
-            class="button button-white"
-          >전체 통계</a>
+          <a id="stats-link"
+            class="button button-sky worldcup-stats-spacing"
+          >전체 통계 보기</a><button id="community-share" class="button button-teal" type="button" hidden>커뮤니티에 공유</button>
         </div>
       </header>
       <p id="status" class="worldcup-status">
@@ -32,9 +31,24 @@
           <div id="bracket" class="bracket"></div>
         </div>
       </section>
+      <dialog id="community-share-dialog" class="worldcup-share-dialog">
+        <form id="community-share-form">
+          <h2>커뮤니티에 공유</h2>
+          <p>월드컵 결과와 함께 게시할 내용을 작성해 주세요.</p>
+          <label>
+            게시글 내용
+            <textarea id="community-share-content" maxlength="1000" rows="6" required
+                      placeholder="이 월드컵에 참여한 소감이나 우승 도서를 선택한 이유를 작성해 주세요."></textarea>
+          </label>
+          <div class="worldcup-share-dialog-actions">
+            <button id="community-share-cancel" class="button button-white" type="button">취소</button>
+            <button class="button button-teal" type="submit">게시글 등록</button>
+          </div>
+        </form>
+      </dialog>
     </div>
   </main>
   <script src="/js/components/navbar.js" defer></script>
-  <script src="/js/pages/worldcup-result.js?v=1" defer></script>
+  <script src="/js/pages/worldcup-result.js?v=20260831-7" defer></script>
 </body>
 </html>

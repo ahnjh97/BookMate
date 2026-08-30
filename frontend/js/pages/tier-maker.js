@@ -15,7 +15,7 @@ async function init() {
       data = await templateResponse.json();
     if (!templateResponse.ok) throw new Error(data.message);
     template = data.template;
-    document.getElementById("maker-title").textContent = template.title;
+    document.getElementById("maker-title").innerHTML = `<span class="page-title-icon page-title-icon-tier" aria-hidden="true"></span>${escapeHtml(template.title)}`;
     document.getElementById("maker-description").textContent = template.description
       || `${template.creatorNickname}님이 만든 템플릿`;
     document.getElementById("stats-button").href = `/pages/tier/stats.html?id=${templateId}`;

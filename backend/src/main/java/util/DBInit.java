@@ -50,7 +50,7 @@ public class DBInit {
                 System.out.println("스키마 초기화됨");
                 importUsers(conn, PROJECT_ROOT.resolve("db/users.csv"));
                 System.out.printf("유저 %,d명 적재됨%n", queryCount(conn,
-                        "SELECT COUNT(*) FROM MEMBER WHERE login_id <> 'bookmate_system'"));
+                        "SELECT COUNT(*) FROM MEMBER WHERE role='USER' AND login_id <> 'bookmate_system'"));
                 importBooks(conn, PROJECT_ROOT.resolve("db/books.csv"));
                 useLocalBookImages(conn);
                 System.out.printf("책 %,d권 적재됨%n", queryCount(conn, "SELECT COUNT(*) FROM BOOK"));
@@ -218,14 +218,15 @@ public class DBInit {
             statement.setInt(3, requiredInt(row, "sort_order"));
         });
         batchImport(conn, "ideal-templates.csv", """
-                INSERT INTO IDEAL_TEMPLATE(template_id,member_id,title,description,category)
-                VALUES(SEQ_IDEAL_TEMPLATE.NEXTVAL,?,?,?,?)
+                INSERT INTO IDEAL_TEMPLATE(template_id,member_id,title,description,category,status,processed_at)
+                VALUES(SEQ_IDEAL_TEMPLATE.NEXTVAL,?,?,?,?,?,SYSDATE)
                 """, (statement, row, index) -> {
             requireOrderedId(row, "template_id", index + 1);
             statement.setLong(1, requiredMemberId(memberIds, row));
             statement.setString(2, required(row, "title"));
             statement.setString(3, emptyToNull(row.get("description")));
             statement.setString(4, required(row, "category"));
+            statement.setString(5, required(row, "status"));
         });
         batchImport(conn, "ideal-template-items.csv", """
                 INSERT INTO IDEAL_TEMPLATE_ITEM(template_item_id,template_id,book_id,sort_order)
@@ -415,7 +416,7 @@ public class DBInit {
 
     private static void verifySeedCounts(Connection conn) throws Exception {
         assertCount(conn, "BOOK", 1000);
-        assertCount(conn, "MEMBER", 101);
+        assertCount(conn, "MEMBER", 102);
         assertCount(conn, "TIER_TEMPLATE", 8);
         assertCount(conn, "TIER_TEMPLATE_ITEM", 171);
         assertCount(conn, "IDEAL_TEMPLATE", 8);

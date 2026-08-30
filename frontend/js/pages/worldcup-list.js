@@ -5,7 +5,6 @@ let selectedParticipation = "all";
 const pagination = window.BookMateListPagination.create({
   root: document.querySelector("#worldcup-pagination"),
   pageSize: 8,
-  scrollTarget: grid,
   onRender: renderTemplatePage,
 });
 

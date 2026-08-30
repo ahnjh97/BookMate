@@ -103,11 +103,12 @@ document.querySelector("#worldcup-selection-reset-button").addEventListener("cli
 
 document.querySelector("#worldcup-template-form").addEventListener("submit", async event => {
   event.preventDefault();
+  const form = event.currentTarget;
   if (selected.size < 16) {
     message.textContent = "책을 16권 이상 선택해 주세요.";
     return;
   }
-  const button = event.currentTarget.querySelector("button[type=submit]");
+  const button = form.querySelector("button[type=submit]");
   button.disabled = true;
   try {
     const response = await fetch("/api/worldcup/templates", {
@@ -123,7 +124,11 @@ document.querySelector("#worldcup-template-form").addEventListener("submit", asy
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.message);
-    location.href = `/pages/worldcup/play.html?id=${data.templateId}`;
+    sessionStorage.setItem("bookmate:flash-toast", JSON.stringify({
+      state: "success",
+      message: "새 이상형월드컵 신청이 완료되었습니다. 관리자 승인 후 등록됩니다.",
+    }));
+    location.href = "/pages/worldcup/list.html";
   } catch (error) {
     message.textContent = error.message || "템플릿을 만들지 못했습니다.";
   } finally {

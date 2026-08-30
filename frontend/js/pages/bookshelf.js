@@ -90,8 +90,8 @@ function similarityMarkup(user) {
         `).join("")}
       </dl>
       <p>
-        공통 평점 ${Number(user.commonRatingCount || 0)}권 ·
-        티어 도서 ${Number(user.commonTierBookCount || 0)}권 ·
+        공통 평점 ${Number(user.commonRatingCount || 0)}권 |
+        티어 도서 ${Number(user.commonTierBookCount || 0)}권 |
         월드컵 도서 ${Number(user.commonWorldcupBookCount || 0)}권
       </p>
     </div>`;

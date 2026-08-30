@@ -43,7 +43,6 @@
       if (nextPage === currentPage) return;
       currentPage = nextPage;
       render();
-      options.scrollTarget?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
     previousButton.addEventListener("click", () => moveTo(currentPage - 1));

@@ -435,6 +435,7 @@ public class TierService {
     String content = description == null || description.isBlank()
         ? title + " 티어리스트를 완성했습니다."
         : description;
+    String postTitle = title + " 결과";
     String sql =
         """
         MERGE INTO POST P
@@ -453,11 +454,11 @@ public class TierService {
     try (PreparedStatement statement = connection.prepareStatement(sql)) {
       statement.setLong(1, tierListId);
       statement.setLong(2, memberId);
-      statement.setString(3, title);
+      statement.setString(3, postTitle);
       statement.setString(4, content);
       statement.setLong(5, memberId);
       statement.setLong(6, tierListId);
-      statement.setString(7, title);
+      statement.setString(7, postTitle);
       statement.setString(8, content);
       statement.executeUpdate();
     }

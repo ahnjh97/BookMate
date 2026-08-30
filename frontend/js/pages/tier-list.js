@@ -4,7 +4,6 @@ let templates = [], selectedParticipation = "all";
 const pagination = window.BookMateListPagination.create({
   root: document.getElementById("tier-pagination"),
   pageSize: 8,
-  scrollTarget: grid,
   onRender: renderTemplates,
 });
 document.getElementById("template-reset-button").addEventListener("click", () => {

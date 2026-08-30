@@ -6,14 +6,17 @@
 
     <title>게시글 | BookMate</title>
 
-    <link rel="stylesheet" href="/assets/css/style.css?v=20260830-5">
-    <link rel="stylesheet" href="/assets/css/post.css?v=20260828-5">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260831-2">
+    <link rel="stylesheet" href="/assets/css/post.css?v=20260831-8">
 </head>
 
 <body>
 <header class="site-header" data-navbar></header>
 
 <main class="post-page-main">
+    <div class="post-detail-back">
+        <a class="back-navigation" href="/pages/post/list.html">← 커뮤니티 목록으로</a>
+    </div>
     <article id="post-detail" class="post-detail" hidden>
         <div class="post-detail-category">
             <span id="post-category"></span>
@@ -49,6 +52,10 @@
             <h2 id="post-tier-list-heading">티어리스트 결과</h2>
             <div id="post-tier-board" class="post-tier-board"></div>
         </section>
+        <section id="post-worldcup-result" class="post-worldcup-result" aria-labelledby="post-worldcup-heading" hidden>
+            <h2 id="post-worldcup-heading">이상형월드컵 결과</h2>
+            <div id="post-worldcup-winner"></div>
+        </section>
 
         <div class="post-detail-actions">
             <div id="writer-actions" class="post-action-group" hidden>
@@ -61,8 +68,6 @@
                 <button id="post-like-button" class="button" type="button">좋아요</button>
                 <button id="post-report-button" class="button" type="button">신고</button>
             </div>
-
-            <a class="back-navigation" href="/pages/post/list.html">← 커뮤니티 목록으로</a>
         </div>
     </article>
 
@@ -72,6 +77,7 @@
 </main>
 
 <script src="/js/components/navbar.js" charset="UTF-8" defer></script>
-<script src="/js/pages/post-detail.js?v=20260830-1" charset="UTF-8" defer></script>
+<script src="/js/components/flash-toast.js?v=20260831-1" defer></script>
+<script src="/js/pages/post-detail.js?v=20260831-3" charset="UTF-8" defer></script>
 </body>
 </html>

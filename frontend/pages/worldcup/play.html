@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>이상형 월드컵 | BookMate</title>
   <link rel="stylesheet" href="/assets/css/style.css?v=20260828-5">
-  <link rel="stylesheet" href="/assets/css/worldcup.css?v=1">
+  <link rel="stylesheet" href="/assets/css/worldcup.css?v=20260831-13">
   <script src="/js/components/auth-guard.js"></script>
 </head>
 <body>
@@ -14,10 +14,14 @@
     <div class="worldcup-container">
       <header class="worldcup-header">
         <div>
-          <h1 id="title">이상형 월드컵</h1>
+          <h1 id="title" class="page-gradient-title"><span class="page-title-icon page-title-icon-trophy" aria-hidden="true"></span>이상형월드컵</h1>
           <p id="description"></p>
-        </div><a id="stats-link" class="button button-white">전체 통계</a>
+        </div>
+        <div class="worldcup-actions worldcup-play-actions">
+          <a id="previous-result" class="button button-white" href="#">내 참여 결과 보기</a>
+        </div>
       </header>
+      <p id="result-toast" class="worldcup-toast" role="status" aria-live="polite"></p>
       <section id="setup">
         <h2 style="text-align: center">몇 강으로 시작할까요?</h2>
         <div class="round-picker">
@@ -34,10 +38,7 @@
         </div>
         <p id="setup-message" class="worldcup-status" style="text-align: center">
         </p>
-        <div style="text-align: center">
-          <a id="previous-result" class="button button-white" hidden>
-            내 참여 결과 보기
-          </a>
+        <div class="worldcup-start-action">
           <button id="start" class="button button-teal">
             월드컵 시작
           </button>
@@ -53,6 +54,6 @@
     </div>
   </main>
   <script src="/js/components/navbar.js" defer></script>
-  <script src="/js/pages/worldcup-play.js?v=1" defer></script>
+  <script src="/js/pages/worldcup-play.js?v=20260831-4" defer></script>
 </body>
 </html>

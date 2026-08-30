@@ -33,13 +33,17 @@ const readerRatingsListElement = document.querySelector("#reader-ratings-list");
 const readerRatingsPaginationElement = document.querySelector("#reader-ratings-pagination");
 const readerRatingFilterButtons = document.querySelectorAll("[data-reader-score]");
 const bookCommunityElement = document.querySelector("#book-community");
+const bookTemplatesHeadingElement = document.querySelector("#book-tier-templates-heading");
 const bookTierTemplatesStatusElement = document.querySelector("#book-tier-templates-status");
 const bookTierTemplatesListElement = document.querySelector("#book-tier-templates-list");
+const bookTemplateTypeButtons = document.querySelectorAll("[data-template-type]");
 const bookTierTemplatesPagination = window.BookMateListPagination.create({
   root: document.querySelector("#book-tier-templates-pagination"),
   pageSize: 4,
-  onRender: renderBookTierTemplatePage,
+  onRender: renderBookTemplatePage,
 });
+const bookTemplates = { tier: [], worldcup: [] };
+let selectedBookTemplateType = "tier";
 let currentRating = null;
 let isLoggedIn = false;
 let currentRatingsPage = 1;
@@ -128,7 +132,7 @@ async function loadBook() {
       throw new Error(result.message || "책 정보를 불러오지 못했습니다.");
     }
     renderBook(result.data);
-    await loadBookTierTemplates(bookId);
+    await loadBookTemplates(bookId);
     await loadMyRating(bookId);
     await loadPublicRatings(bookId, currentRatingsPage);
   } catch (error) {
@@ -140,31 +144,67 @@ async function loadBook() {
   }
 }
 
-async function loadBookTierTemplates(bookId) {
+async function loadBookTemplates(bookId) {
   try {
-    const response = await fetch(`/api/tier-templates?bookId=${bookId}`);
-    const result = await response.json();
-    if (!response.ok || !result.success) throw new Error(result.message || "티어리스트를 불러오지 못했습니다.");
-    const templates = result.templates || [];
-    bookTierTemplatesStatusElement.textContent = `총 ${templates.length}개`;
-    bookTierTemplatesPagination.setItems(templates);
+    const [tierResponse, worldcupResponse] = await Promise.all([
+      fetch(`/api/tier-templates?bookId=${bookId}`),
+      fetch(`/api/worldcup/templates?bookId=${bookId}`),
+    ]);
+    const [tierResult, worldcupResult] = await Promise.all([
+      tierResponse.json(),
+      worldcupResponse.json(),
+    ]);
+    if (!tierResponse.ok || !tierResult.success) {
+      throw new Error(tierResult.message || "티어리스트를 불러오지 못했습니다.");
+    }
+    if (!worldcupResponse.ok || !worldcupResult.success) {
+      throw new Error(worldcupResult.message || "이상형월드컵을 불러오지 못했습니다.");
+    }
+    bookTemplates.tier = tierResult.templates || [];
+    bookTemplates.worldcup = worldcupResult.templates || [];
+    renderSelectedBookTemplates();
   } catch (error) {
+    bookTemplates.tier = [];
+    bookTemplates.worldcup = [];
     bookTierTemplatesPagination.setItems([]);
-    bookTierTemplatesStatusElement.textContent = error.message || "티어리스트를 불러오지 못했습니다.";
+    bookTierTemplatesStatusElement.textContent = error.message || "템플릿을 불러오지 못했습니다.";
   }
 }
 
-function renderBookTierTemplatePage(templates) {
+function renderSelectedBookTemplates() {
+  const templates = bookTemplates[selectedBookTemplateType];
+  bookTemplatesHeadingElement.textContent = selectedBookTemplateType === "tier"
+    ? "이 책이 포함된 티어리스트 템플릿"
+    : "이 책이 포함된 이상형월드컵 템플릿";
+  bookTierTemplatesStatusElement.textContent = `총 ${templates.length}개`;
+  bookTierTemplatesPagination.setItems(templates);
+}
+
+function renderBookTemplatePage(templates) {
   bookTierTemplatesListElement.replaceChildren();
   templates.forEach((template) => {
       const link = document.createElement("a");
       link.className = "book-tier-template-link";
-      link.href = `/pages/tier/maker.html?id=${template.templateId}`;
+      link.href = selectedBookTemplateType === "tier"
+        ? `/pages/tier/maker.html?id=${template.templateId}`
+        : `/pages/worldcup/play.html?id=${template.templateId}`;
       const categoryClass = getTierCategoryClass(template.category);
       link.innerHTML = `<strong>${escapeHtml(template.title)}</strong><span class="category-chip ${categoryClass}">${escapeHtml(template.category)}</span>`;
       bookTierTemplatesListElement.append(link);
   });
 }
+
+bookTemplateTypeButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    selectedBookTemplateType = button.dataset.templateType;
+    bookTemplateTypeButtons.forEach((item) => {
+      const selected = item === button;
+      item.classList.toggle("is-active", selected);
+      item.setAttribute("aria-selected", String(selected));
+    });
+    renderSelectedBookTemplates();
+  });
+});
 
 function getTierCategoryClass(category) {
   return {
@@ -384,7 +424,6 @@ function createPageButton(label, page, disabled) {
     const bookId = getBookId();
     if (!bookId) return;
     await loadPublicRatings(bookId, page);
-    readerRatingsElement.scrollIntoView({ behavior: "smooth", block: "start" });
   });
   return button;
 }

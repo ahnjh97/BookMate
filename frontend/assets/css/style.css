@@ -574,6 +574,34 @@ button {
   border: 0;
 }
 
+.flash-toast {
+  position: fixed;
+  z-index: 1200;
+  top: calc(var(--navbar-height) + 18px);
+  left: 50%;
+  max-width: min(560px, calc(100vw - 32px));
+  margin: 0;
+  padding: 13px 19px;
+  border: 1px solid rgb(15 163 193 / 24%);
+  border-radius: 10px;
+  color: var(--color-primary-dark);
+  background: rgb(245 253 255 / 98%);
+  box-shadow: 0 12px 32px rgb(16 24 40 / 17%);
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.5;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -10px);
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.flash-toast[data-visible="true"] {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
 /* 페이지 상단에서 공통으로 사용하는 BookMate 그라데이션 제목 */
 .page-gradient-title {
   display: inline-block;
@@ -610,6 +638,11 @@ button {
 .page-title-icon-medal {
   mask-image: url("/assets/icons/medal.svg");
   -webkit-mask-image: url("/assets/icons/medal.svg");
+}
+
+.page-title-icon-tier {
+  mask-image: url("/assets/icons/tier-ranking.svg");
+  -webkit-mask-image: url("/assets/icons/tier-ranking.svg");
 }
 
 .page-title-icon-trophy {

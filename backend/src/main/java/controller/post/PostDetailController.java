@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpSession;
 import service.PostLikeService;
 import service.PostService;
 import service.TierService;
+import service.IdealService;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -22,6 +23,7 @@ public class PostDetailController extends HttpServlet {
     private PostService postService;
     private PostLikeService postLikeService;
     private TierService tierService;
+    private IdealService idealService;
     private Gson gson;
 
     @Override
@@ -29,6 +31,7 @@ public class PostDetailController extends HttpServlet {
         postService = new PostService();
         postLikeService = new PostLikeService();
         tierService = new TierService();
+        idealService = new IdealService();
         gson = new GsonBuilder()
                 .setDateFormat("yyyy-MM-dd HH:mm:ss")
                 .create();
@@ -83,6 +86,9 @@ public class PostDetailController extends HttpServlet {
                     tierList.remove("publishedToCommunity");
                 }
                 result.put("tierList", tierList);
+            }
+            if (post.getIdealRunId() != null) {
+                result.put("worldcupResult", idealService.result(post.getIdealRunId()));
             }
 
             gson.toJson(result, response.getWriter());

@@ -14,6 +14,7 @@ const categoryNames = {
     RECOMMEND: "추천",
     REVIEW: "리뷰",
     TIER: "티어리스트",
+    WORLDCUP: "이상형월드컵",
     AUTHOR: "작가"
 };
 
@@ -28,7 +29,6 @@ let allPosts = [];
 const postPagination = window.BookMateListPagination.create({
     root: document.querySelector("#post-pagination"),
     pageSize: 15,
-    scrollTarget: document.querySelector(".post-table-wrap"),
     onRender: renderPosts
 });
 

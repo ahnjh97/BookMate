@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.*;
 import service.IdealService;
 
-@WebServlet(urlPatterns = {"/api/worldcup/templates", "/api/worldcup/runs", "/api/worldcup/stats"})
+@WebServlet(urlPatterns = {"/api/worldcup/templates", "/api/worldcup/runs", "/api/worldcup/stats", "/api/worldcup/share"})
 public class IdealController extends HttpServlet {
   private final Gson gson = new Gson();
   private final IdealService service = new IdealService();
@@ -22,10 +22,11 @@ public class IdealController extends HttpServlet {
             r,
             id == null ? "templates" : "template",
             id == null
-                ? service.findTemplates(q.getParameter("keyword"), member(q))
+                ? service.findTemplates(
+                    q.getParameter("keyword"), member(q), positiveLong(q.getParameter("bookId")))
                 : service.findTemplate(Long.parseLong(id), member(q)));
       } else if (path.endsWith("runs"))
-        ok(r, "result", service.result(Long.parseLong(q.getParameter("id"))));
+        ok(r, "result", service.result(Long.parseLong(q.getParameter("id")), member(q)));
       else ok(r, "stats", service.stats(Long.parseLong(q.getParameter("templateId"))));
     } catch (NumberFormatException e) {
       err(r, 400, "올바른 번호가 필요합니다.");
@@ -52,7 +53,15 @@ public class IdealController extends HttpServlet {
       if (q.getServletPath().endsWith("templates")) {
         long id = service.createTemplate(member, b.title, b.description, b.category, b.bookIds);
         r.setStatus(201);
-        ok(r, "templateId", id);
+        gson.toJson(
+            Map.of(
+                "success", true,
+                "templateId", id,
+                "message", "월드컵 템플릿이 관리자 검토 대기열에 등록되었습니다."),
+            r.getWriter());
+      } else if (q.getServletPath().endsWith("share")) {
+        long postId = service.publishResult(b.runId, member, b.content);
+        ok(r, "postId", postId);
       } else {
         List<IdealService.Match> ms =
             (b.matches == null ? List.<MatchBody>of() : b.matches)
@@ -84,6 +93,16 @@ public class IdealController extends HttpServlet {
     return o instanceof Number n ? n.longValue() : null;
   }
 
+  private Long positiveLong(String value) {
+    if (value == null || value.isBlank()) return null;
+    try {
+      long parsed = Long.parseLong(value);
+      if (parsed > 0) return parsed;
+    } catch (NumberFormatException ignored) {
+    }
+    throw new IllegalArgumentException("올바른 책 번호가 필요합니다.");
+  }
+
   private void json(HttpServletResponse r) {
     r.setContentType("application/json");
     r.setCharacterEncoding("UTF-8");
@@ -103,9 +122,10 @@ public class IdealController extends HttpServlet {
   }
 
   static class Body {
-    String title, description, category;
+    String title, description, category, content;
     List<Long> bookIds;
     long templateId;
+    long runId;
     int bracketSize;
     List<MatchBody> matches;
   }

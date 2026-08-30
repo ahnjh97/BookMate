@@ -35,7 +35,7 @@ public class SeedCsvExporter {
                     ORDER BY template_id,sort_order
                     """, false);
             export(connection, "ideal-templates.csv", """
-                    SELECT T.template_id,M.login_id AS creator_login_id,T.title,T.description,T.category
+                    SELECT T.template_id,M.login_id AS creator_login_id,T.title,T.description,T.category,T.status
                     FROM IDEAL_TEMPLATE T JOIN MEMBER M ON M.member_id=T.member_id ORDER BY T.template_id
                     """, false);
             export(connection, "ideal-template-items.csv", """

@@ -165,6 +165,23 @@
             </div>
         </section>
 
+        <section class="admin-section">
+            <div class="admin-section-header"><div><h2>이상형월드컵 템플릿 검토</h2><p>회원이 신청한 월드컵 구성을 확인하고 공개 여부를 결정합니다.</p></div><button type="button" class="button" id="worldcup-refresh-button">신청 목록 새로고침</button></div>
+            <div class="admin-table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                    <tr>
+                        <th>번호</th><th>신청자</th><th>카테고리</th><th>템플릿명</th>
+                        <th>책 수</th><th>상태</th><th>신청일</th><th>관리</th>
+                    </tr>
+                    </thead>
+                    <tbody id="worldcup-table-body">
+                    <tr><td colspan="8" class="admin-empty">월드컵 템플릿 신청을 불러오는 중입니다.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
 
     </div>
 
@@ -184,7 +201,7 @@
      관리자 페이지 JavaScript
      ========================================= -->
 <script
-        src="/js/pages/admin.js"
+        src="/js/pages/admin.js?v=20260831-1"
         defer>
 </script>
 

@@ -14,7 +14,7 @@ public class HomeDAO {
                        (SELECT COUNT(*) FROM RATING) AS rating_count,
                        (SELECT COUNT(*) FROM TIER_TEMPLATE WHERE status = 'APPROVED') AS tier_template_count,
                        (SELECT COUNT(*) FROM TIER_LIST) AS tier_participation_count,
-                       (SELECT COUNT(*) FROM IDEAL_TEMPLATE) AS worldcup_template_count,
+                       (SELECT COUNT(*) FROM IDEAL_TEMPLATE WHERE status = 'APPROVED') AS worldcup_template_count,
                        (SELECT COUNT(*) FROM IDEAL_RUN) AS worldcup_participation_count
                   FROM DUAL
                 """;
