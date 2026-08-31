@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BookMate 관리자 댓글 관리">
+    <title>댓글 관리 | BookMate</title>
+
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260831-2">
+    <link rel="stylesheet" href="/assets/css/admin.css?v=20260831-4">
+</head>
+
+<body class="admin-page">
+<header class="site-header" data-navbar></header>
+
+<main class="admin-main">
+    <div class="container">
+
+        <!-- 1. 관리자 페이지 상단 -->
+        <section class="admin-hero">
+            <span class="admin-label">ADMIN</span>
+            <h1>관리자 페이지</h1>
+            <p>회원과 커뮤니티 콘텐츠를 관리할 수 있습니다.</p>
+        </section>
+
+        <!-- 2. 관리자 영역 -->
+        <div class="admin-workspace">
+
+            <!-- 2-1. 관리자 메뉴 -->
+            <aside class="admin-side-menu">
+                <a href="/pages/admin/admin.html" class="admin-side-button">
+                    관리자 홈
+                </a>
+
+                <a href="/pages/admin/book-approval.html" class="admin-side-button">
+                    책 승인 관리
+                </a>
+
+                <a href="/pages/admin/author-approval.html" class="admin-side-button">
+                    작가 승인 관리
+                </a>
+
+                <a href="/pages/admin/member-management.html" class="admin-side-button">
+                    회원 관리
+                </a>
+
+                <a href="/pages/admin/post-management.html" class="admin-side-button">
+                    게시글 관리
+                </a>
+
+                <a href="/pages/admin/comment-management.html" class="admin-side-button active">
+                    댓글 관리
+                </a>
+
+                <a href="/pages/admin/report-management.html" class="admin-side-button">
+                    신고 관리
+                </a>
+
+                <a href="/pages/admin/admin-log.html" class="admin-side-button">
+                    처리 내역
+                </a>
+            </aside>
+
+            <!-- 2-2. 댓글 관리 -->
+            <section class="admin-management-content">
+
+                <!-- 댓글 관리 상단 -->
+                <div class="admin-management-header">
+                    <h2>댓글 관리</h2>
+                    <p>
+                        커뮤니티에 등록된 댓글을 확인하고
+                        관리자 권한으로 관리할 수 있습니다.
+                    </p>
+                </div>
+
+                <!-- 댓글 관리 카드 -->
+                <section class="admin-management-card">
+
+                    <div class="admin-management-toolbar">
+                        <button
+                                type="button"
+                                class="button button-outline"
+                                id="comment-refresh-button"
+                        >
+                            새로고침
+                        </button>
+                    </div>
+
+                    <div class="admin-table-wrapper">
+                        <table class="admin-table">
+                            <thead>
+                            <tr>
+                                <th>댓글번호</th>
+                                <th>게시글번호</th>
+                                <th>작성자</th>
+                                <th>내용</th>
+                                <th>상태</th>
+                                <th>작성일</th>
+                                <th>관리</th>
+                            </tr>
+                            </thead>
+
+                            <tbody id="comment-table-body">
+                            <tr>
+                                <td colspan="7" class="admin-empty">
+                                    댓글 관리 기능을 연결할 예정입니다.
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </section>
+            </section>
+
+        </div>
+    </div>
+</main>
+
+<script type="module" src="/js/components/navbar.js" defer></script>
+<script type="module" src="/js/pages/admin.js?v=20260831-2" defer></script>
+</body>
+</html>

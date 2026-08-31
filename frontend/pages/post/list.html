@@ -13,13 +13,39 @@
 
 <main class="page-main" data-page="community">
     <section class="page-content">
+
+        <!-- 1. 커뮤니티 상단 -->
         <div class="community-page-hero">
-            <button id="community-reset-button" class="page-gradient-title page-title-button" type="button">
-                <span class="page-title-icon page-title-icon-community" aria-hidden="true"></span>커뮤니티
-            </button>
+            <div class="community-page-header">
+                <div class="community-page-heading">
+                    <button
+                            id="community-reset-button"
+                            class="page-gradient-title page-title-button"
+                            type="button"
+                    >
+                        <span
+                                class="page-title-icon page-title-icon-community"
+                                aria-hidden="true"
+                        ></span>
+                        커뮤니티
+                    </button>
+
+                    <p class="community-page-description">
+                        책을 좋아하는 사람들이 자유롭게 이야기를 나누는 공간입니다.
+                    </p>
+                </div>
+
+                <a
+                        class="button button-primary community-create-button"
+                        href="/pages/post/create.html"
+                >
+                    + 게시글 작성
+                </a>
+            </div>
         </div>
 
-        <div id="community-filter">
+        <!-- 2. 커뮤니티 필터 -->
+        <section id="community-filter" class="community-filter">
             <div class="post-filter-group">
                 <span class="post-filter-label">카테고리</span>
 
@@ -30,6 +56,7 @@
                     <button type="button" data-category="REVIEW">리뷰</button>
                     <button type="button" data-category="TIER">티어리스트</button>
                     <button type="button" data-category="WORLDCUP">이상형월드컵</button>
+                    <button type="button" data-category="AUTHOR">작가</button>
                 </div>
             </div>
 
@@ -47,58 +74,110 @@
                     <button type="button" data-genre="IT">IT</button>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- 검색 및 게시글 작성 -->
+        <!-- 3. 게시글 검색 -->
         <div class="post-list-toolbar">
             <form id="post-search-form" class="post-search-form" role="search">
-                <input id="post-keyword" type="search" placeholder="게시글 제목 또는 작성자 검색">
-                <button class="button button-primary" type="submit">검색</button>
+                <input
+                        id="post-keyword"
+                        type="search"
+                        placeholder="게시글 제목 또는 작성자 검색"
+                        aria-label="게시글 검색"
+                >
+                <button class="button button-primary" type="submit">
+                    검색
+                </button>
             </form>
+
             <div class="post-toolbar-actions">
-                <label class="post-sort-control" for="post-sort"><span class="sr-only">게시글 정렬</span>
+                <label class="post-sort-control" for="post-sort">
+                    <span class="sr-only">게시글 정렬</span>
+
                     <select id="post-sort">
                         <option value="latest">등록일순</option>
                         <option value="likes">좋아요순</option>
                         <option value="views">조회순</option>
                     </select>
                 </label>
-                <a class="button button-primary" href="/pages/post/create.html">게시글 작성</a>
+
+                <a
+                        class="button button-primary"
+                        href="/pages/post/create.html"
+                >
+                    게시글 작성
+                </a>
             </div>
         </div>
 
-        <p id="post-result-message" class="post-result-message"></p>
-
-        <!-- 게시글 목록 -->
-        <div class="post-table-wrap">
-            <table class="post-table">
-                <colgroup>
-                    <col class="post-col-category">
-                    <col class="post-col-title">
-                    <col class="post-col-genre">
-                    <col class="post-col-writer">
-                    <col class="post-col-date">
-                    <col class="post-col-count">
-                    <col class="post-col-count">
-                    <col class="post-col-count">
-                </colgroup>
-                <thead id="post-table-head"></thead>
-                <tbody id="post-list"></tbody>
-            </table>
+        <!-- 4. 검색 결과 -->
+        <div class="post-list-information">
+            <p id="post-result-message" class="post-result-message"></p>
         </div>
 
-        <p id="post-status" aria-live="polite">게시글을 불러오는 중입니다.</p>
+        <!-- 5. 게시글 목록 -->
+        <section class="post-list-section">
+            <div class="post-table-wrap">
+                <table class="post-table">
+                    <colgroup>
+                        <col class="post-col-category">
+                        <col class="post-col-title">
+                        <col class="post-col-genre">
+                        <col class="post-col-writer">
+                        <col class="post-col-date">
+                        <col class="post-col-count">
+                        <col class="post-col-count">
+                        <col class="post-col-count">
+                    </colgroup>
 
-        <nav id="post-pagination" class="list-pagination" aria-label="커뮤니티 목록 페이지">
-            <button class="button button-outline" type="button" data-pagination-prev>이전</button>
-            <div class="list-page-numbers" data-pagination-numbers aria-live="polite"></div>
-            <button class="button button-outline" type="button" data-pagination-next>다음</button>
+                    <thead id="post-table-head"></thead>
+                    <tbody id="post-list"></tbody>
+                </table>
+            </div>
+
+            <p
+                    id="post-status"
+                    class="post-status"
+                    aria-live="polite"
+            >
+                게시글을 불러오는 중입니다.
+            </p>
+        </section>
+
+        <!-- 6. 페이지네이션 -->
+        <nav
+                id="post-pagination"
+                class="list-pagination"
+                aria-label="커뮤니티 목록 페이지"
+        >
+            <button
+                    class="button button-outline"
+                    type="button"
+                    data-pagination-prev
+            >
+                이전
+            </button>
+
+            <div
+                    class="list-page-numbers"
+                    data-pagination-numbers
+                    aria-live="polite"
+            ></div>
+
+            <button
+                    class="button button-outline"
+                    type="button"
+                    data-pagination-next
+            >
+                다음
+            </button>
         </nav>
+
     </section>
 </main>
 
-<script src="/js/components/navbar.js" charset="UTF-8" defer></script>
+<script src="/js/components/navbar.js" defer></script>
 <script src="/js/components/list-pagination.js?v=20260831-2" defer></script>
-<script src="/js/pages/post-list.js?v=20260831-8" charset="UTF-8" defer></script>
+<script src="/js/pages/post-list.js?v=20260831-8" defer></script>
 </body>
 </html>

@@ -1,102 +1,314 @@
+/* 1. 관리자 페이지 */
 .admin-main {
   min-height: calc(100vh - var(--navbar-height));
-  padding: 56px 0 90px;
+  padding: 48px 20px 90px;
   background: var(--color-surface);
 }
-.admin-hero {
-  padding: 34px 38px;
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  background: #fff;
+
+.admin-main .container {
+  width: min(1200px, 100%);
+  margin: 0 auto;
 }
+
+/* 2. 관리자 페이지 상단 */
+.admin-hero {
+  margin-bottom: 20px;
+  padding: 30px 34px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-background);
+}
+
 .admin-label {
   color: var(--color-primary);
-  font-size: 0.78rem;
+  font-size: 12px;
   font-weight: 900;
   letter-spacing: 0.13em;
 }
+
 .admin-hero h1 {
-  margin: 8px 0 5px;
-  font-size: 2.4rem;
-  letter-spacing: -0.05em;
+  margin: 8px 0 6px;
+  color: var(--color-text);
+  font-size: 30px;
+  font-weight: 800;
 }
-.admin-hero p, .admin-section-header p {
+
+.admin-hero p {
   margin: 0;
   color: var(--color-muted);
+  font-size: 13px;
 }
-.admin-message {
-  min-height: 24px;
-  margin: 18px 0;
-  color: var(--color-primary-dark);
-  font-weight: 700;
+
+/* 3. 관리자 작업 영역 */
+.admin-workspace {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
 }
-.admin-section {
-  margin-top: 20px;
-  padding: 28px;
+
+/* 4. 좌측 관리자 메뉴 */
+.admin-side-menu {
+  display: flex;
+  padding: 14px;
   border: 1px solid var(--color-border);
   border-radius: 14px;
-  background: #fff;
+  background: var(--color-background);
+  flex-direction: column;
+  gap: 6px;
 }
-.admin-section-header {
+
+.admin-side-button {
+  display: flex;
+  align-items: center;
+  min-height: 46px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: var(--color-muted);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+          background-color 0.16s ease,
+          color 0.16s ease,
+          border-color 0.16s ease;
+}
+
+.admin-side-button:hover,
+.admin-side-button:focus-visible {
+  color: var(--color-primary-dark);
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  outline: none;
+}
+
+.admin-side-button.active {
+  color: var(--color-primary-dark);
+  border-color: var(--color-primary-soft);
+  background: var(--color-primary-soft);
+}
+
+/* 5. 관리자 홈 콘텐츠 */
+.admin-dashboard-content {
+  min-width: 0;
+}
+
+.admin-dashboard-header {
+  margin-bottom: 18px;
+}
+
+.admin-dashboard-header h2 {
+  margin: 0 0 5px;
+  color: var(--color-text);
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.admin-dashboard-header p {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+/* 6. 현황 카드 */
+.admin-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.admin-summary-card {
+  min-height: 135px;
+  padding: 22px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-background);
+}
+
+.admin-summary-card span {
+  display: block;
+  margin-bottom: 9px;
+  color: var(--color-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-summary-card strong {
+  display: block;
+  color: var(--color-text);
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.admin-summary-card p {
+  margin: 7px 0 0;
+  color: var(--color-muted);
+  font-size: 11px;
+}
+
+/* 7. 최근 현황 */
+.admin-dashboard-panels {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-dashboard-panel {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-background);
+}
+
+.admin-panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  margin-bottom: 20px;
+  min-height: 62px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--color-border);
 }
-.admin-section-header h2 {
-  margin: 0 0 4px;
+
+.admin-panel-header h3 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 800;
 }
-.admin-table-wrapper {
-  overflow: auto;
+
+.admin-panel-header a {
+  color: var(--color-primary-dark);
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
 }
-.admin-table {
+
+.admin-dashboard-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  padding: 20px;
+  color: var(--color-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+/* 8. 반응형 */
+@media (max-width: 900px) {
+  .admin-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-side-menu {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-summary-grid,
+  .admin-dashboard-panels {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-main {
+    padding: 32px 16px 60px;
+  }
+
+  .admin-side-menu,
+  .admin-summary-grid,
+  .admin-dashboard-panels {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 11. 관리자 상세 페이지 공통 콘텐츠 */
+.admin-management-content {
+  min-width: 0;
+}
+
+.admin-management-header {
+  margin-bottom: 18px;
+}
+
+.admin-management-header h2 {
+  margin: 0 0 6px;
+  color: var(--color-text);
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: -0.4px;
+}
+
+.admin-management-header p {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* 12. 회원 관리 카드 */
+.admin-management-card {
+  padding: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-background);
+}
+
+.admin-management-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+/* 13. 회원 관리 테이블 */
+.admin-management-card .admin-table-wrapper {
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  overflow-x: auto;
+  background: var(--color-background);
+}
+
+.admin-management-card .admin-table {
   width: 100%;
+  min-width: 900px;
   border-collapse: collapse;
-  font-size: 0.88rem;
+  font-size: 13px;
 }
-.admin-table th, .admin-table td {
-  padding: 13px 11px;
+
+.admin-management-card .admin-table th,
+.admin-management-card .admin-table td {
+  height: 50px;
+  padding: 10px 12px;
   border-bottom: 1px solid var(--color-border);
   text-align: left;
+  vertical-align: middle;
   white-space: nowrap;
 }
-.admin-table th {
+
+.admin-management-card .admin-table th {
+  height: 44px;
   color: var(--color-muted);
-  background: #f8fafb;
-  font-size: 0.78rem;
-}
-.admin-empty {
-  text-align: center !important;
-  color: var(--color-muted);
-}
-.admin-badge, .admin-self-label {
-  display: inline-block;
-  padding: 3px 8px;
-  border-radius: 999px;
-  background: var(--color-primary-soft);
-  color: var(--color-primary-dark);
-  font-size: 0.76rem;
+  background: var(--color-surface);
+  font-size: 12px;
   font-weight: 700;
 }
-.admin-action-button {
-  padding: 6px 9px;
-  border: 1px solid var(--color-primary);
-  border-radius: 6px;
-  color: var(--color-primary-dark);
-  background: #fff;
-  cursor: pointer;
+
+.admin-management-card .admin-table tbody tr:last-child td {
+  border-bottom: 0;
 }
-.admin-action-danger {
-  border-color: var(--color-danger);
-  color: var(--color-danger);
-}
-@media (max-width: 650px) {
-  .admin-section {
-    padding: 18px;
+
+/* 14. 관리자 상세 페이지 반응형 */
+@media (max-width: 700px) {
+  .admin-management-card {
+    padding: 18px 14px;
   }
-  .admin-section-header {
-    align-items: stretch;
-    flex-direction: column;
+
+  .admin-management-header h2 {
+    font-size: 21px;
   }
 }

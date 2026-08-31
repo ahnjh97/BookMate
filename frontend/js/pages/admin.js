@@ -1,4 +1,4 @@
-/*
+/**
  * =========================================
  * BookMate 관리자 페이지
  * =========================================
@@ -13,13 +13,37 @@ document.addEventListener("DOMContentLoaded", async () => {
   const allowed = await checkAdminAccess();
   if (!allowed) return;
 
-  await loadMembers();
-  await loadPosts();
-  await loadTierTemplates();
-  await loadWorldcupTemplates();
+  /* 현재 페이지에 존재하는 관리자 기능만 조회 */
+  const memberTableBody = document.getElementById("member-table-body");
+  const postTableBody = document.getElementById("post-table-body");
+  const commentTableBody = document.getElementById("comment-table-body");
+  const tierTableBody = document.getElementById("tier-table-body");
+  const worldcupTableBody = document.getElementById("worldcup-table-body");
 
+  if (memberTableBody) {
+    await loadMembers();
+  }
+
+  if (postTableBody) {
+    await loadPosts();
+  }
+
+  if (commentTableBody) {
+    await loadComments();
+  }
+
+  if (tierTableBody) {
+    await loadTierTemplates();
+  }
+
+  if (worldcupTableBody) {
+    await loadWorldcupTemplates();
+  }
+
+  /* 새로고침 버튼 연결 */
   const memberRefreshButton = document.getElementById("member-refresh-button");
   const postRefreshButton = document.getElementById("post-refresh-button");
+  const commentRefreshButton = document.getElementById("comment-refresh-button");
   const tierRefreshButton = document.getElementById("tier-refresh-button");
   const worldcupRefreshButton = document.getElementById("worldcup-refresh-button");
 
@@ -30,136 +54,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (postRefreshButton) {
     postRefreshButton.addEventListener("click", loadPosts);
   }
-  if (tierRefreshButton) tierRefreshButton.addEventListener("click", loadTierTemplates);
-  if (worldcupRefreshButton) worldcupRefreshButton.addEventListener("click", loadWorldcupTemplates);
+
+  if (commentRefreshButton) {
+    commentRefreshButton.addEventListener("click", loadComments);
+  }
+
+  if (tierRefreshButton) {
+    tierRefreshButton.addEventListener("click", loadTierTemplates);
+  }
+
+  if (worldcupRefreshButton) {
+    worldcupRefreshButton.addEventListener("click", loadWorldcupTemplates);
+  }
 });
 
-async function loadTierTemplates() {
-  const tbody = document.getElementById("tier-table-body");
-  if (!tbody) return;
-  try {
-    const response = await fetch("/api/admin/tier-templates", { credentials: "include" });
-    const data = await response.json();
-    if (!response.ok) {
-      handleApiError(response.status, data.message);
-      return;
-    }
-    const templates = data.templates || [];
-    tbody.innerHTML = templates.length
-      ? ""
-      : "<tr><td colspan=\"8\" class=\"admin-empty\">신청된 템플릿이 없습니다.</td></tr>";
-    templates.forEach(template => {
-      const row = document.createElement("tr");
-      const pending = template.status === "PENDING";
-      row.innerHTML = `<td>${template.templateId}</td><td>${escapeHtml(template.creatorNickname)}</td><td>${
-        escapeHtml(template.category)
-      }</td><td>${escapeHtml(template.title)}</td><td>${template.itemCount}권</td><td><span class="admin-badge">${
-        escapeHtml(template.status)
-      }</span></td><td>${formatValue(template.requestedAt)}</td><td>${
-        pending
-          ? `<button class="admin-action-button"
-                     onclick="reviewTierTemplate(${template.templateId}, true)">승인</button>
-             <button class="admin-action-button admin-action-danger"
-                     onclick="reviewTierTemplate(${template.templateId}, false)">반려</button>`
-          : "처리 완료"
-      }</td>`;
-      tbody.append(row);
-    });
-  } catch (error) {
-    console.error(error);
-    showMessage("티어 템플릿 신청을 불러오지 못했습니다.");
-  }
-}
-
-async function reviewTierTemplate(templateId, approved) {
-  const reason = approved ? "" : prompt("반려 사유를 입력해 주세요.");
-  if (!approved && !reason) return;
-  if (approved && !confirm(`${templateId}번 템플릿을 공개 승인할까요?`)) return;
-  try {
-    const response = await fetch("/api/admin/tier-templates", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ templateId, approved, reason }),
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      handleApiError(response.status, data.message);
-      return;
-    }
-    showMessage(data.message);
-    await loadTierTemplates();
-  } catch (error) {
-    console.error(error);
-    showMessage("검토 결과를 저장하지 못했습니다.");
-  }
-}
-
-async function loadWorldcupTemplates() {
-  const tbody = document.getElementById("worldcup-table-body");
-  if (!tbody) return;
-  try {
-    const response = await fetch("/api/admin/worldcup-templates", { credentials: "include" });
-    const data = await response.json();
-    if (!response.ok) {
-      handleApiError(response.status, data.message);
-      return;
-    }
-    const templates = data.templates || [];
-    tbody.innerHTML = templates.length
-      ? ""
-      : '<tr><td colspan="8" class="admin-empty">신청된 월드컵 템플릿이 없습니다.</td></tr>';
-    templates.forEach(template => {
-      const row = document.createElement("tr");
-      const pending = template.status === "PENDING";
-      row.innerHTML = `<td>${template.templateId}</td><td>${escapeHtml(template.creatorNickname)}</td>`
-        + `<td>${escapeHtml(template.category)}</td><td>${escapeHtml(template.title)}</td>`
-        + `<td>${template.itemCount}권</td><td><span class="admin-badge">${escapeHtml(template.status)}</span></td>`
-        + `<td>${formatValue(template.requestedAt)}</td><td>${pending
-          ? `<button class="admin-action-button" onclick="reviewWorldcupTemplate(${template.templateId}, true)">승인</button>
-             <button class="admin-action-button admin-action-danger" onclick="reviewWorldcupTemplate(${template.templateId}, false)">반려</button>`
-          : "처리 완료"}</td>`;
-      tbody.append(row);
-    });
-  } catch (error) {
-    console.error(error);
-    showMessage("월드컵 템플릿 신청을 불러오지 못했습니다.");
-  }
-}
-
-async function reviewWorldcupTemplate(templateId, approved) {
-  const reason = approved ? "" : prompt("반려 사유를 입력해 주세요.");
-  if (!approved && !reason) return;
-  if (approved && !confirm(`${templateId}번 월드컵 템플릿을 공개 승인할까요?`)) return;
-  try {
-    const response = await fetch("/api/admin/worldcup-templates", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ templateId, approved, reason }),
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      handleApiError(response.status, data.message);
-      return;
-    }
-    showMessage(data.message);
-    await loadWorldcupTemplates();
-  } catch (error) {
-    console.error(error);
-    showMessage("월드컵 템플릿 검토 결과를 저장하지 못했습니다.");
-  }
-}
-
-/*
- * =========================================
- * 관리자 페이지 접근 권한 확인
- * GET /api/auth/session
- * =========================================
- */
+/* 1. 관리자 페이지 접근 권한 확인 */
 async function checkAdminAccess() {
   try {
-    // 수정: authApi.checkSession()이 credentials/헤더 등을 대신 처리
     const auth = await authApi.checkSession().catch(() => null);
 
     if (!auth || !auth.loggedIn) {
@@ -182,12 +93,7 @@ async function checkAdminAccess() {
   }
 }
 
-/*
- * =========================================
- * 회원 목록 조회
- * GET /api/admin/members
- * =========================================
- */
+/* 2. 회원 목록 조회 */
 async function loadMembers() {
   try {
     const response = await fetch("/api/admin/members", {
@@ -217,31 +123,24 @@ async function loadMembers() {
   }
 }
 
-/*
- * =========================================
- * 회원 목록 화면 출력
- * =========================================
- */
+/* 3. 회원 목록 화면 출력 */
 function renderMembers(members) {
   const tbody = document.getElementById("member-table-body");
 
   if (!tbody) {
-    console.error("member-table-body 요소를 찾을 수 없습니다.");
     return;
   }
 
   tbody.innerHTML = "";
 
   if (members.length === 0) {
-    const row = document.createElement("tr");
-
-    row.innerHTML = `
-            <td colspan="9" class="admin-empty">
-                등록된 회원이 없습니다.
-            </td>
-        `;
-
-    tbody.appendChild(row);
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="9" class="admin-empty">
+          등록된 회원이 없습니다.
+        </td>
+      </tr>
+    `;
     return;
   }
 
@@ -256,48 +155,43 @@ function renderMembers(members) {
 
     if (isAdmin) {
       managementHtml = `
-                <span class="admin-self-label">
-                    ${isSelf ? "현재 관리자" : "관리자 계정"}
-                </span>
-            `;
+        <span class="admin-self-label">
+          ${isSelf ? "현재 관리자" : "관리자 계정"}
+        </span>
+      `;
     } else {
       managementHtml = `
-                <button
-                    type="button"
-                    class="admin-action-button"
-                    onclick="changeMemberLock(${member.memberId}, ${!locked})"
-                >
-                    ${locked ? "잠금 해제" : "회원 잠금"}
-                </button>
-            `;
+        <button
+          type="button"
+          class="admin-action-button"
+          onclick="changeMemberLock(${member.memberId}, ${!locked})"
+        >
+          ${locked ? "잠금 해제" : "회원 잠금"}
+        </button>
+      `;
     }
 
     row.innerHTML = `
-            <td>${member.memberId}</td>
-            <td>${escapeHtml(member.loginId)}</td>
-            <td>${escapeHtml(member.nickname)}</td>
-            <td>${escapeHtml(member.email)}</td>
-            <td>
-                <span class="admin-badge">
-                    ${escapeHtml(member.role)}
-                </span>
-            </td>
-            <td>${formatValue(member.failCount)}</td>
-            <td>${locked ? "잠금" : "정상"}</td>
-            <td>${formatValue(member.createdAt)}</td>
-            <td>${managementHtml}</td>
-        `;
+      <td>${member.memberId}</td>
+      <td>${escapeHtml(member.loginId)}</td>
+      <td>${escapeHtml(member.nickname)}</td>
+      <td>${escapeHtml(member.email)}</td>
+      <td>
+        <span class="admin-badge">
+          ${escapeHtml(member.role)}
+        </span>
+      </td>
+      <td>${formatValue(member.failCount)}</td>
+      <td>${locked ? "잠금" : "정상"}</td>
+      <td>${formatValue(member.createdAt)}</td>
+      <td>${managementHtml}</td>
+    `;
 
     tbody.appendChild(row);
   });
 }
 
-/*
- * =========================================
- * 회원 잠금 / 잠금 해제
- * POST /api/admin/members/lock
- * =========================================
- */
+/* 4. 회원 잠금 / 잠금 해제 */
 async function changeMemberLock(memberId, locked) {
   const targetMember = memberMap.get(Number(memberId));
 
@@ -344,15 +238,10 @@ async function changeMemberLock(memberId, locked) {
   }
 }
 
-/*
- * =========================================
- * 게시글 목록 조회
- * GET /api/posts
- * =========================================
- */
+/* 5. 게시글 목록 조회 */
 async function loadPosts() {
   try {
-    const response = await fetch("/api/posts", {
+    const response = await fetch("/api/admin/posts", {
       method: "GET",
       credentials: "include",
     });
@@ -371,76 +260,78 @@ async function loadPosts() {
   }
 }
 
-/*
- * =========================================
- * 게시글 목록 화면 출력
- * =========================================
- */
+/* 6. 게시글 목록 화면 출력 */
 function renderPosts(posts) {
   const tbody = document.getElementById("post-table-body");
 
   if (!tbody) {
-    console.error("post-table-body 요소를 찾을 수 없습니다.");
     return;
   }
 
   tbody.innerHTML = "";
 
   if (posts.length === 0) {
-    const row = document.createElement("tr");
-
-    row.innerHTML = `
-            <td colspan="9" class="admin-empty">
-                게시글이 없습니다.
-            </td>
-        `;
-
-    tbody.appendChild(row);
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="9" class="admin-empty">
+          게시글이 없습니다.
+        </td>
+      </tr>
+    `;
     return;
   }
 
   posts.forEach(post => {
     const row = document.createElement("tr");
+
     const pinned = post.isPinned === "Y";
+    const active = post.status === "ACTIVE";
+
+    const managementHtml = active
+        ? `
+        <button
+          type="button"
+          class="admin-action-button"
+          onclick="changePostPin(${post.postId}, ${!pinned})"
+        >
+          ${pinned ? "고정 해제" : "상단 고정"}
+        </button>
+
+        <button
+          type="button"
+          class="admin-action-button admin-action-danger"
+          onclick="deletePostByAdmin(${post.postId})"
+        >
+          관리자 삭제
+        </button>
+      `
+        : `
+        <span class="admin-self-label">
+          처리 완료
+        </span>
+      `;
 
     row.innerHTML = `
-            <td>${post.postId}</td>
-            <td>${escapeHtml(post.memberNickname)}</td>
-            <td>${escapeHtml(post.category)}</td>
-            <td>${escapeHtml(post.title)}</td>
-            <td>${formatValue(post.viewCount)}</td>
-            <td>${pinned ? "고정" : "-"}</td>
-            <td>${escapeHtml(post.status)}</td>
-            <td>${formatValue(post.createdAt)}</td>
-            <td>
-                <button
-                    type="button"
-                    class="admin-action-button"
-                    onclick="changePostPin(${post.postId}, ${!pinned})"
-                >
-                    ${pinned ? "고정 해제" : "상단 고정"}
-                </button>
-
-                <button
-                    type="button"
-                    class="admin-action-button admin-action-danger"
-                    onclick="deletePostByAdmin(${post.postId})"
-                >
-                    관리자 삭제
-                </button>
-            </td>
-        `;
+      <td>${post.postId}</td>
+      <td>${escapeHtml(post.memberNickname)}</td>
+      <td>${escapeHtml(post.category)}</td>
+      <td>${escapeHtml(post.title)}</td>
+      <td>${formatValue(post.viewCount)}</td>
+      <td>${pinned ? "고정" : "-"}</td>
+      <td>
+        <span class="admin-badge">
+          ${escapeHtml(post.status)}
+        </span>
+      </td>
+      <td>${formatValue(post.createdAt)}</td>
+      <td>${managementHtml}</td>
+    `;
 
     tbody.appendChild(row);
   });
 }
 
-/*
- * =========================================
- * 게시글 상단 고정 / 해제
- * POST /api/admin/posts/pin
- * =========================================
- */
+/* 7. 게시글 상단 고정 / 해제 */
 async function changePostPin(postId, pinned) {
   const actionName = pinned ? "상단 고정" : "고정 해제";
   const confirmed = confirm(`게시글 ${postId}번을 ${actionName}하시겠습니까?`);
@@ -475,15 +366,10 @@ async function changePostPin(postId, pinned) {
   }
 }
 
-/*
- * =========================================
- * 관리자 게시글 삭제
- * POST /api/admin/posts/delete
- * =========================================
- */
+/* 8. 관리자 게시글 삭제 */
 async function deletePostByAdmin(postId) {
   const confirmed = confirm(
-    `게시글 ${postId}번을 삭제하시겠습니까?\n`
+      `게시글 ${postId}번을 삭제하시겠습니까?\n`
       + "삭제된 게시글은 일반 목록에서 보이지 않습니다.",
   );
 
@@ -516,11 +402,345 @@ async function deletePostByAdmin(postId) {
   }
 }
 
-/*
- * =========================================
- * API 오류 공통 처리
- * =========================================
- */
+/* 9. 관리자 댓글 목록 조회 */
+async function loadComments() {
+  try {
+    const response = await fetch("/api/admin/comments", {
+      method: "GET",
+      credentials: "include",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      handleApiError(response.status, data.message);
+      return;
+    }
+
+    renderComments(data.comments || []);
+  } catch (error) {
+    console.error("댓글 목록 조회 실패:", error);
+    showMessage("댓글 목록을 불러오는 중 오류가 발생했습니다.");
+  }
+}
+
+/* 10. 관리자 댓글 목록 화면 출력 */
+function renderComments(comments) {
+  const tbody = document.getElementById("comment-table-body");
+
+  if (!tbody) {
+    return;
+  }
+
+  tbody.innerHTML = "";
+
+  if (comments.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="admin-empty">
+          등록된 댓글이 없습니다.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  comments.forEach(comment => {
+    const row = document.createElement("tr");
+    const active = comment.status === "ACTIVE";
+
+    const managementHtml = active
+        ? `
+        <button
+          type="button"
+          class="admin-action-button admin-action-danger"
+          onclick="deleteCommentByAdmin(${comment.commentId})"
+        >
+          관리자 삭제
+        </button>
+      `
+        : `
+        <span class="admin-self-label">
+          처리 완료
+        </span>
+      `;
+
+    row.innerHTML = `
+      <td>${comment.commentId}</td>
+      <td>${comment.postId}</td>
+      <td>${escapeHtml(comment.memberNickname)}</td>
+      <td>${escapeHtml(comment.content)}</td>
+      <td>
+        <span class="admin-badge">
+          ${escapeHtml(comment.status)}
+        </span>
+      </td>
+      <td>${formatValue(comment.createdAt)}</td>
+      <td>${managementHtml}</td>
+    `;
+
+    tbody.appendChild(row);
+  });
+}
+
+/* 11. 관리자 댓글 삭제 */
+async function deleteCommentByAdmin(commentId) {
+  const confirmed = confirm(
+      `댓글 ${commentId}번을 삭제하시겠습니까?\n`
+      + "삭제된 댓글은 일반 댓글 목록에서 보이지 않습니다.",
+  );
+
+  if (!confirmed) return;
+
+  try {
+    const response = await fetch("/api/admin/comments", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        commentId: commentId,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      handleApiError(response.status, data.message);
+      return;
+    }
+
+    showMessage(data.message || "댓글이 삭제되었습니다.");
+    await loadComments();
+  } catch (error) {
+    console.error("관리자 댓글 삭제 실패:", error);
+    showMessage("댓글 삭제 중 오류가 발생했습니다.");
+  }
+}
+
+/* 12. 티어 템플릿 목록 조회 */
+async function loadTierTemplates() {
+  const tbody = document.getElementById("tier-table-body");
+  if (!tbody) return;
+
+  try {
+    const response = await fetch("/api/admin/tier-templates", {
+      credentials: "include",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      handleApiError(response.status, data.message);
+      return;
+    }
+
+    const templates = data.templates || [];
+
+    tbody.innerHTML = templates.length
+        ? ""
+        : `<tr><td colspan="8" class="admin-empty">신청된 템플릿이 없습니다.</td></tr>`;
+
+    templates.forEach(template => {
+      const row = document.createElement("tr");
+      const pending = template.status === "PENDING";
+
+      row.innerHTML = `
+        <td>${template.templateId}</td>
+        <td>${escapeHtml(template.creatorNickname)}</td>
+        <td>${escapeHtml(template.category)}</td>
+        <td>${escapeHtml(template.title)}</td>
+        <td>${template.itemCount}권</td>
+        <td>
+          <span class="admin-badge">
+            ${escapeHtml(template.status)}
+          </span>
+        </td>
+        <td>${formatValue(template.requestedAt)}</td>
+        <td>
+          ${
+          pending
+              ? `
+                <button
+                  class="admin-action-button"
+                  onclick="reviewTierTemplate(${template.templateId}, true)"
+                >
+                  승인
+                </button>
+
+                <button
+                  class="admin-action-button admin-action-danger"
+                  onclick="reviewTierTemplate(${template.templateId}, false)"
+                >
+                  반려
+                </button>
+              `
+              : "처리 완료"
+      }
+        </td>
+      `;
+
+      tbody.append(row);
+    });
+  } catch (error) {
+    console.error(error);
+    showMessage("티어 템플릿 신청을 불러오지 못했습니다.");
+  }
+}
+
+/* 13. 티어 템플릿 승인 / 반려 */
+async function reviewTierTemplate(templateId, approved) {
+  const reason = approved ? "" : prompt("반려 사유를 입력해 주세요.");
+
+  if (!approved && !reason) return;
+
+  if (approved && !confirm(`${templateId}번 템플릿을 공개 승인할까요?`)) {
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/admin/tier-templates", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        templateId,
+        approved,
+        reason,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      handleApiError(response.status, data.message);
+      return;
+    }
+
+    showMessage(data.message);
+    await loadTierTemplates();
+  } catch (error) {
+    console.error(error);
+    showMessage("검토 결과를 저장하지 못했습니다.");
+  }
+}
+
+/* 14. 월드컵 템플릿 목록 조회 */
+async function loadWorldcupTemplates() {
+  const tbody = document.getElementById("worldcup-table-body");
+  if (!tbody) return;
+
+  try {
+    const response = await fetch("/api/admin/worldcup-templates", {
+      credentials: "include",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      handleApiError(response.status, data.message);
+      return;
+    }
+
+    const templates = data.templates || [];
+
+    tbody.innerHTML = templates.length
+        ? ""
+        : `<tr><td colspan="8" class="admin-empty">신청된 월드컵 템플릿이 없습니다.</td></tr>`;
+
+    templates.forEach(template => {
+      const row = document.createElement("tr");
+      const pending = template.status === "PENDING";
+
+      row.innerHTML = `
+        <td>${template.templateId}</td>
+        <td>${escapeHtml(template.creatorNickname)}</td>
+        <td>${escapeHtml(template.category)}</td>
+        <td>${escapeHtml(template.title)}</td>
+        <td>${template.itemCount}권</td>
+        <td>
+          <span class="admin-badge">
+            ${escapeHtml(template.status)}
+          </span>
+        </td>
+        <td>${formatValue(template.requestedAt)}</td>
+        <td>
+          ${
+          pending
+              ? `
+                <button
+                  class="admin-action-button"
+                  onclick="reviewWorldcupTemplate(${template.templateId}, true)"
+                >
+                  승인
+                </button>
+
+                <button
+                  class="admin-action-button admin-action-danger"
+                  onclick="reviewWorldcupTemplate(${template.templateId}, false)"
+                >
+                  반려
+                </button>
+              `
+              : "처리 완료"
+      }
+        </td>
+      `;
+
+      tbody.append(row);
+    });
+  } catch (error) {
+    console.error(error);
+    showMessage("월드컵 템플릿 신청을 불러오지 못했습니다.");
+  }
+}
+
+/* 15. 월드컵 템플릿 승인 / 반려 */
+async function reviewWorldcupTemplate(templateId, approved) {
+  const reason = approved ? "" : prompt("반려 사유를 입력해 주세요.");
+
+  if (!approved && !reason) return;
+
+  if (
+      approved
+      && !confirm(`${templateId}번 월드컵 템플릿을 공개 승인할까요?`)
+  ) {
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/admin/worldcup-templates", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        templateId,
+        approved,
+        reason,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      handleApiError(response.status, data.message);
+      return;
+    }
+
+    showMessage(data.message);
+    await loadWorldcupTemplates();
+  } catch (error) {
+    console.error(error);
+    showMessage("월드컵 템플릿 검토 결과를 저장하지 못했습니다.");
+  }
+}
+
+/* 16. API 오류 공통 처리 */
 function handleApiError(status, message) {
   if (status === 401) {
     showMessage(message || "로그인이 필요합니다.");
@@ -545,11 +765,7 @@ function handleApiError(status, message) {
   showMessage(message || "서버 오류가 발생했습니다.");
 }
 
-/*
- * =========================================
- * 메시지 표시
- * =========================================
- */
+/* 17. 메시지 표시 */
 function showMessage(message) {
   const messageElement = document.getElementById("admin-message");
 
@@ -561,11 +777,7 @@ function showMessage(message) {
   messageElement.textContent = message || "";
 }
 
-/*
- * =========================================
- * null / undefined 표시 방지
- * =========================================
- */
+/* 18. null / undefined 표시 방지 */
 function formatValue(value) {
   if (value === null || value === undefined || value === "") {
     return "-";
@@ -574,20 +786,24 @@ function formatValue(value) {
   return value;
 }
 
-/*
- * =========================================
- * HTML 삽입 방지
- * =========================================
- */
+/* 19. HTML 삽입 방지 */
 function escapeHtml(value) {
   if (value === null || value === undefined) {
     return "";
   }
 
   return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll("\"", "&quot;")
-    .replaceAll("'", "&#039;");
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll("\"", "&quot;")
+      .replaceAll("'", "&#039;");
 }
+
+/* 관리자 기능을 HTML onclick에서 사용할 수 있도록 연결 */
+window.changeMemberLock = changeMemberLock;
+window.changePostPin = changePostPin;
+window.deletePostByAdmin = deletePostByAdmin;
+window.deleteCommentByAdmin = deleteCommentByAdmin;
+window.reviewTierTemplate = reviewTierTemplate;
+window.reviewWorldcupTemplate = reviewWorldcupTemplate;
