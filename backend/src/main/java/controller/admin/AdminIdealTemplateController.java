@@ -5,11 +5,11 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import service.IdealService;
+import util.SessionUtil;
 
 @WebServlet("/api/admin/worldcup-templates")
 public class AdminIdealTemplateController extends HttpServlet {
@@ -19,6 +19,7 @@ public class AdminIdealTemplateController extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     json(response);
+    if (!requireAdmin(request, response)) return;
     gson.toJson(
         Map.of(
             "success", true,
@@ -30,13 +31,11 @@ public class AdminIdealTemplateController extends HttpServlet {
   protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
     request.setCharacterEncoding("UTF-8");
     json(response);
+    if (!requireAdmin(request, response)) return;
     try {
       ReviewRequest body = gson.fromJson(request.getReader(), ReviewRequest.class);
-      HttpSession session = request.getSession(false);
-      Object rawMemberId = session == null ? null : session.getAttribute("loginMemberId");
-      if (!(rawMemberId instanceof Number memberId))
-        throw new IllegalArgumentException("관리자 정보를 확인할 수 없습니다.");
-      service.reviewTemplate(body.templateId, memberId.longValue(), body.approved, body.reason);
+      service.reviewTemplate(
+          body.templateId, SessionUtil.memberId(request), body.approved, body.reason);
       gson.toJson(
           Map.of(
               "success", true,
@@ -55,6 +54,19 @@ public class AdminIdealTemplateController extends HttpServlet {
   private void json(HttpServletResponse response) {
     response.setContentType("application/json");
     response.setCharacterEncoding("UTF-8");
+  }
+
+  private boolean requireAdmin(HttpServletRequest request, HttpServletResponse response)
+      throws IOException {
+    if (SessionUtil.memberId(request) == null) {
+      error(response, HttpServletResponse.SC_UNAUTHORIZED, "로그인이 필요한 기능입니다.");
+      return false;
+    }
+    if (!"ADMIN".equals(SessionUtil.role(request))) {
+      error(response, HttpServletResponse.SC_FORBIDDEN, "관리자 권한이 필요한 기능입니다.");
+      return false;
+    }
+    return true;
   }
 
   private void error(HttpServletResponse response, int status, String message) throws IOException {

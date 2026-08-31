@@ -54,7 +54,9 @@ public class IdealService {
                SELECT 1 FROM IDEAL_TEMPLATE_ITEM BI WHERE BI.template_id=T.template_id AND BI.book_id=?
            ))
          GROUP BY T.template_id,T.title,T.description,T.category,T.status,M.nickname,T.created_at
-         ORDER BY CASE T.status WHEN 'PENDING' THEN 0 ELSE 1 END, T.created_at DESC
+         ORDER BY CASE T.status WHEN 'PENDING' THEN 0 ELSE 1 END,
+                  T.created_at DESC,
+                  T.template_id DESC
         """;
     List<Map<String, Object>> out = new ArrayList<>();
     try (Connection c = DBUtil.getConnection();

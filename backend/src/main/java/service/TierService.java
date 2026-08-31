@@ -51,7 +51,9 @@ public class TierService {
            ))
          GROUP BY T.template_id, T.title, T.description, T.category, T.status,
                   T.requested_at, M.nickname
-         ORDER BY CASE T.status WHEN 'PENDING' THEN 0 ELSE 1 END, T.requested_at DESC
+         ORDER BY CASE T.status WHEN 'PENDING' THEN 0 ELSE 1 END,
+                  T.requested_at DESC,
+                  T.template_id DESC
         """;
     String normalized = normalize(keyword);
     String pattern = normalized == null ? null : "%" + normalized.toLowerCase() + "%";
