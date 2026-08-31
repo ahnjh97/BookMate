@@ -5,6 +5,7 @@ const postStatusElement = document.querySelector("#post-status");
 const postResultMessageElement = document.querySelector("#post-result-message");
 const postSearchForm = document.querySelector("#post-search-form");
 const postKeywordInput = document.querySelector("#post-keyword");
+const communityResetButton = document.querySelector("#community-reset-button");
 const categoryButtons = document.querySelectorAll("[data-category]");
 const genreButtons = document.querySelectorAll("[data-genre]");
 
@@ -26,13 +27,15 @@ const filterState = {
 };
 
 let allPosts = [];
+
+/* 3. 게시글 목록 페이지네이션 */
 const postPagination = window.BookMateListPagination.create({
     root: document.querySelector("#post-pagination"),
     pageSize: 15,
     onRender: renderPosts
 });
 
-/* 3. 게시글 목록 불러오기 */
+/* 4. 게시글 목록 불러오기 */
 async function loadPosts() {
     postStatusElement.textContent = "게시글을 불러오는 중입니다.";
     postListElement.replaceChildren();
@@ -42,99 +45,168 @@ async function loadPosts() {
         const result = await response.json();
 
         if (!response.ok || !result.success) {
-            throw new Error(result.message || "게시글을 불러오지 못했습니다.");
+            throw new Error(
+                result.message ||
+                "게시글을 불러오지 못했습니다."
+            );
         }
 
-        allPosts = Array.isArray(result.posts) ? result.posts : [];
+        allPosts = Array.isArray(result.posts)
+            ? result.posts
+            : [];
 
         applyFilters();
     } catch (error) {
         console.error(error);
-        postStatusElement.textContent = error.message || "게시글을 불러오지 못했습니다.";
+
+        postStatusElement.textContent =
+            error.message ||
+            "게시글을 불러오지 못했습니다.";
     }
 }
 
-/* 4. 전체 필터 적용 */
+/* 5. 게시글 필터 적용 */
 function applyFilters() {
     let posts = [...allPosts];
 
     if (filterState.category) {
-        posts = posts.filter(post => post.category === filterState.category);
+        posts = posts.filter(
+            post => post.category === filterState.category
+        );
     }
 
     if (filterState.genre) {
-        posts = posts.filter(post => post.genre === filterState.genre);
+        posts = posts.filter(
+            post => post.genre === filterState.genre
+        );
     }
 
     if (filterState.keyword) {
-        const keyword = filterState.keyword.toLowerCase();
+        const keyword =
+            filterState.keyword.toLowerCase();
 
         posts = posts.filter(post => {
-            const title = String(post.title || "").toLowerCase();
-            const writer = String(post.memberNickname || "").toLowerCase();
+            const title =
+                String(post.title || "").toLowerCase();
 
-            return title.includes(keyword) || writer.includes(keyword);
+            const writer =
+                String(post.memberNickname || "").toLowerCase();
+
+            return (
+                title.includes(keyword) ||
+                writer.includes(keyword)
+            );
         });
     }
 
-    posts.sort((a, b) => getTime(b.createdAt) - getTime(a.createdAt));
+    posts.sort(
+        (a, b) =>
+            getTime(b.createdAt) -
+            getTime(a.createdAt)
+    );
 
     renderTableHeader();
-    postPagination.setItems(posts);
     updateResultMessage(posts);
+    postPagination.setItems(posts);
 }
 
-/* 5. 표 제목 변경 */
+/* 6. 게시글 목록 표 제목 출력 */
 function renderTableHeader() {
     postTableHead.innerHTML = `
         <tr>
-            <th>순위</th>
+            <th>번호</th>
             <th>카테고리</th>
             <th>제목</th>
             <th>장르</th>
             <th>작성자</th>
             <th>작성일</th>
             <th>조회수</th>
+            <th>좋아요</th>
         </tr>
     `;
 }
 
-/* 6. 게시글 목록 렌더링 */
+/* 7. 게시글 목록 출력 */
 function renderPosts(posts, startIndex, totalCount) {
     postListElement.replaceChildren();
 
     if (!Array.isArray(posts) || posts.length === 0) {
-        postStatusElement.textContent = "조건에 맞는 게시글이 없습니다.";
+        postStatusElement.textContent =
+            "조건에 맞는 게시글이 없습니다.";
         return;
     }
 
-    const fragment = document.createDocumentFragment();
+    const fragment =
+        document.createDocumentFragment();
 
     posts.forEach((post, index) => {
-        const row = document.createElement("tr");
+        const row =
+            document.createElement("tr");
 
-        renderRealtimeRow(row, post, startIndex + index);
+        renderPostRow(
+            row,
+            post,
+            startIndex + index
+        );
 
         fragment.append(row);
     });
 
     postListElement.append(fragment);
-    postStatusElement.textContent = `게시글 ${totalCount}개를 표시하고 있습니다.`;
+
+    postStatusElement.textContent =
+        `게시글 ${totalCount}개를 표시하고 있습니다.`;
 }
 
-/* 7. 실시간 게시글 행 */
-function renderRealtimeRow(row, post, index) {
-    const numberCell = createCell("post-number", index + 1);
-    const categoryCell = createCell(
-        "post-category",
-        categoryNames[post.category] || post.category || "-"
-    );
+/* 8. 게시글 행 출력 */
+function renderPostRow(row, post, index) {
+    const numberCell =
+        createCell(
+            "post-number",
+            index + 1
+        );
 
-    const titleCell = createTitleCell(post);
-    const genreCell = createCell("post-genre", post.genre || "-");
-    const writerCell = createCell("post-writer", post.memberNickname || "알 수 없음");
-    const dateCell = createCell("post-date", formatDate(post.createdAt));
-    const viewCell = createCell("post-views", post.viewCount ?? 0);
+    const categoryCell =
+        createCell(
+            "post-category",
+            categoryNames[post.category] ||
+            post.category ||
+            "-"
+        );
+
+    const titleCell =
+        createTitleCell(post);
+
+    const genreCell =
+        createCell(
+            "post-genre",
+            post.genre || "-"
+        );
+
+    const writerCell =
+        createCell(
+            "post-writer",
+            post.memberNickname ||
+            "알 수 없음"
+        );
+
+    const dateCell =
+        createCell(
+            "post-date",
+            formatDate(post.createdAt)
+        );
+
+    const viewCell =
+        createCell(
+            "post-views",
+            post.viewCount ?? 0
+        );
+
+    const likeCell =
+        createCell(
+            "post-likes",
+            post.likeCount ?? 0
+        );
 
     row.append(
         numberCell,
@@ -143,13 +215,15 @@ function renderRealtimeRow(row, post, index) {
         genreCell,
         writerCell,
         dateCell,
-        viewCell
+        viewCell,
+        likeCell
     );
 }
 
 /* 9. 일반 셀 생성 */
 function createCell(className, value) {
-    const cell = document.createElement("td");
+    const cell =
+        document.createElement("td");
 
     cell.className = className;
     cell.textContent = value;
@@ -159,104 +233,190 @@ function createCell(className, value) {
 
 /* 10. 게시글 제목 셀 생성 */
 function createTitleCell(post) {
-    const cell = document.createElement("td");
-    const link = document.createElement("a");
+    const cell =
+        document.createElement("td");
+
+    const link =
+        document.createElement("a");
 
     cell.className = "post-title";
 
-    link.href = `/pages/post/detail.html?postId=${post.postId}`;
-    link.textContent = post.title || "제목 없음";
+    link.href =
+        `/pages/post/detail.html?postId=${encodeURIComponent(post.postId)}`;
+
+    link.textContent =
+        post.title ||
+        "제목 없음";
 
     cell.append(link);
 
     return cell;
 }
 
-/* 13. 검색 및 필터 결과 안내 */
+/* 11. 검색 및 필터 결과 안내 */
 function updateResultMessage(posts) {
     const messages = [];
 
     if (filterState.category) {
-        messages.push(categoryNames[filterState.category] || filterState.category);
+        messages.push(
+            categoryNames[filterState.category] ||
+            filterState.category
+        );
     }
 
     if (filterState.genre) {
-        messages.push(filterState.genre);
+        messages.push(
+            filterState.genre
+        );
     }
 
     if (filterState.keyword) {
-        messages.push(`"${filterState.keyword}" 검색`);
+        messages.push(
+            `"${filterState.keyword}" 검색`
+        );
     }
 
     if (messages.length === 0) {
-        messages.push("전체 게시글");
-    }
+        postResultMessageElement.textContent =
+            `전체 게시글 — ${posts.length}개`;
 
-    postResultMessageElement.textContent = `${messages.join(" · ")} — ${posts.length}개`;
-}
-
-/* 16. 게시글 카테고리 변경 */
-categoryButtons.forEach(button => {
-    button.addEventListener("click", () => {
-        filterState.category = button.dataset.category;
-
-        setActiveButton(categoryButtons, button);
-        applyFilters();
-    });
-});
-
-/* 17. 게시글 장르 변경 */
-genreButtons.forEach(button => {
-    button.addEventListener("click", () => {
-        filterState.genre = button.dataset.genre;
-
-        setActiveButton(genreButtons, button);
-        applyFilters();
-    });
-});
-
-/* 18. 게시글 검색 */
-postSearchForm.addEventListener("submit", event => {
-    event.preventDefault();
-
-    filterState.keyword = postKeywordInput.value.trim();
-
-    applyFilters();
-});
-
-/* 19. 검색어 삭제 시 검색 조건 해제 */
-postKeywordInput.addEventListener("input", () => {
-    if (postKeywordInput.value.trim() !== "") {
         return;
     }
 
-    filterState.keyword = "";
+    postResultMessageElement.textContent =
+        `${messages.join(" · ")} — ${posts.length}개`;
+}
 
-    applyFilters();
+/* 12. 게시글 카테고리 변경 */
+categoryButtons.forEach(button => {
+    button.addEventListener("click", () => {
+        filterState.category =
+            button.dataset.category || "";
+
+        setActiveButton(
+            categoryButtons,
+            button
+        );
+
+        applyFilters();
+    });
 });
 
-document.querySelector("#community-reset-button").addEventListener("click", () => {
-    window.location.assign("/pages/post/list.html");
+/* 13. 게시글 장르 변경 */
+genreButtons.forEach(button => {
+    button.addEventListener("click", () => {
+        filterState.genre =
+            button.dataset.genre || "";
+
+        setActiveButton(
+            genreButtons,
+            button
+        );
+
+        applyFilters();
+    });
 });
 
-/* 20. 선택 버튼 활성화 */
-function setActiveButton(buttons, selectedButton) {
+/* 14. 게시글 검색 */
+postSearchForm.addEventListener(
+    "submit",
+    event => {
+        event.preventDefault();
+
+        filterState.keyword =
+            postKeywordInput.value.trim();
+
+        applyFilters();
+    }
+);
+
+/* 15. 검색어 삭제 시 검색 조건 해제 */
+postKeywordInput.addEventListener(
+    "input",
+    () => {
+        if (
+            postKeywordInput.value.trim() !== ""
+        ) {
+            return;
+        }
+
+        filterState.keyword = "";
+        applyFilters();
+    }
+);
+
+/* 16. 커뮤니티 필터 초기화 */
+communityResetButton.addEventListener(
+    "click",
+    () => {
+        filterState.category = "";
+        filterState.genre = "";
+        filterState.keyword = "";
+
+        postKeywordInput.value = "";
+
+        const allCategoryButton =
+            Array.from(categoryButtons).find(
+                button =>
+                    !button.dataset.category
+            );
+
+        const allGenreButton =
+            Array.from(genreButtons).find(
+                button =>
+                    !button.dataset.genre
+            );
+
+        setActiveButton(
+            categoryButtons,
+            allCategoryButton
+        );
+
+        setActiveButton(
+            genreButtons,
+            allGenreButton
+        );
+
+        applyFilters();
+    }
+);
+
+/* 17. 선택 버튼 활성화 */
+function setActiveButton(
+    buttons,
+    selectedButton
+) {
     buttons.forEach(button => {
-        button.classList.toggle("is-active", button === selectedButton);
+        button.classList.toggle(
+            "is-active",
+            button === selectedButton
+        );
     });
 }
 
-/* 21. 날짜 변환 */
+/* 18. 날짜 변환 */
 function formatDate(value) {
-    return value ? String(value).substring(0, 10) : "-";
+    return value
+        ? String(value).substring(0, 10)
+        : "-";
 }
 
-/* 22. 날짜 정렬용 시간값 변환 */
+/* 19. 날짜 정렬용 시간값 변환 */
 function getTime(value) {
-    const time = new Date(value).getTime();
+    if (!value) {
+        return 0;
+    }
 
-    return Number.isNaN(time) ? 0 : time;
+    const normalizedValue =
+        String(value).replace(" ", "T");
+
+    const time =
+        new Date(normalizedValue).getTime();
+
+    return Number.isNaN(time)
+        ? 0
+        : time;
 }
 
-/* 23. 게시글 목록 초기 실행 */
+/* 20. 게시글 목록 초기 실행 */
 loadPosts();

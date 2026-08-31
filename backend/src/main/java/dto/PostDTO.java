@@ -21,6 +21,7 @@ public class PostDTO {
     private String content;
     private String genre;
     private int viewCount;
+    private int likeCount;
     private String status;
     private Timestamp createdAt;
     private Timestamp updatedAt;

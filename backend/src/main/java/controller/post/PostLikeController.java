@@ -38,6 +38,7 @@ public class PostLikeController extends HttpServlet {
         }
 
         final LikePostRequest likeRequest;
+
         try {
             likeRequest = readRequestBody(request);
         } catch (JsonSyntaxException e) {
@@ -51,9 +52,11 @@ public class PostLikeController extends HttpServlet {
         }
 
         try {
-            PostLikeService.LikeResult result = postLikeService.togglePostLike(likeRequest.getPostId(), loginMemberId);
+            PostLikeService.LikeResult result =
+                    postLikeService.togglePostLike(likeRequest.getPostId(), loginMemberId);
 
             response.setStatus(HttpServletResponse.SC_OK);
+
             gson.toJson(
                     Map.of(
                             "success", true,
@@ -84,11 +87,13 @@ public class PostLikeController extends HttpServlet {
     /* 로그인 세션에서 회원 번호 조회 */
     private Long getLoginMemberId(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
+
         if (session == null) {
             return null;
         }
 
         Object memberIdAttribute = session.getAttribute("loginMemberId");
+
         if (!(memberIdAttribute instanceof Number)) {
             return null;
         }
@@ -105,6 +110,7 @@ public class PostLikeController extends HttpServlet {
     /* 오류 응답 전송 */
     private void sendError(HttpServletResponse response, int status, String message) throws IOException {
         response.setStatus(status);
+
         gson.toJson(
                 Map.of(
                         "success", false,
