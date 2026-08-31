@@ -4,15 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>책 상세 | BookMate</title>
-  <link rel="stylesheet" href="/assets/css/style.css">
-  <link rel="stylesheet" href="/assets/css/book-detail.css?v=20260828-11">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260830-6">
+  <link rel="stylesheet" href="/assets/css/book-detail.css?v=20260831-1">
 </head>
 <body>
   <header class="site-header" data-navbar></header>
 
   <main data-page="book-detail">
     <section class="book-detail-shell" aria-labelledby="book-title">
-      <a class="back-link" href="/pages/book/list.html">← 책 목록으로</a>
+      <a class="back-navigation" href="/pages/book/list.html">← 책 목록으로</a>
       <p id="book-detail-status" class="book-detail-status" role="status" aria-live="polite">
         책 정보를 불러오는 중입니다.
       </p>
@@ -64,22 +64,42 @@
         </div>
 
         <div id="book-community" class="book-community">
-          <section class="book-tier-templates" aria-labelledby="book-tier-templates-heading">
-            <h2 id="book-tier-templates-heading">이 책이 포함된 티어리스트</h2>
-            <p id="book-tier-templates-status">템플릿을 불러오는 중입니다.</p>
-            <div id="book-tier-templates-list" class="book-tier-templates-list"></div>
-          </section>
-
           <section id="reader-ratings" class="reader-ratings" aria-labelledby="reader-ratings-heading">
             <div class="reader-ratings-heading">
               <div>
                 <h2 id="reader-ratings-heading">독자 평가</h2>
                 <p id="reader-ratings-summary">평가를 불러오는 중입니다.</p>
               </div>
+              <div class="choice-tabs reader-rating-tabs" role="group" aria-label="독자 평가 별점 필터">
+                <button class="is-active" type="button" data-reader-score="all" aria-pressed="true">전체</button>
+                <button type="button" data-reader-score="5" aria-pressed="false">5점</button>
+                <button type="button" data-reader-score="4" aria-pressed="false">4점</button>
+                <button type="button" data-reader-score="3" aria-pressed="false">3점</button>
+                <button type="button" data-reader-score="2" aria-pressed="false">2점</button>
+                <button type="button" data-reader-score="1" aria-pressed="false">1점</button>
+              </div>
             </div>
             <p id="reader-ratings-status" class="reader-ratings-status" role="status" aria-live="polite"></p>
             <div id="reader-ratings-list" class="reader-ratings-list"></div>
             <nav id="reader-ratings-pagination" class="reader-ratings-pagination" aria-label="독자 평가 페이지"></nav>
+          </section>
+
+          <section class="book-tier-templates" aria-labelledby="book-tier-templates-heading">
+            <h2 id="book-tier-templates-heading">이 책이 포함된 티어리스트 템플릿</h2>
+            <div class="choice-tabs book-template-tabs" role="tablist" aria-label="포함된 템플릿 종류">
+              <button class="is-active" type="button" role="tab" data-template-type="tier"
+                      aria-selected="true">티어리스트</button>
+              <button type="button" role="tab" data-template-type="worldcup"
+                      aria-selected="false">이상형월드컵</button>
+            </div>
+            <p id="book-tier-templates-status">템플릿을 불러오는 중입니다.</p>
+            <div id="book-tier-templates-list" class="book-tier-templates-list"></div>
+            <nav id="book-tier-templates-pagination" class="list-pagination"
+                 aria-label="포함된 템플릿 페이지">
+              <button class="button button-outline" type="button" data-pagination-prev>이전</button>
+              <div class="list-page-numbers" data-pagination-numbers aria-live="polite"></div>
+              <button class="button button-outline" type="button" data-pagination-next>다음</button>
+            </nav>
           </section>
         </div>
 
@@ -89,7 +109,7 @@
               <p>나의 독서 기록</p>
               <h2 id="rating-form-heading" tabindex="-1">이 책은 어떠셨나요?</h2>
             </div>
-            <button id="close-rating-form" class="back-link rating-back-button" type="button">← 책 정보로 돌아가기</button>
+            <button id="close-rating-form" class="back-navigation rating-back-button" type="button">← 책 정보로 돌아가기</button>
           </div>
 
           <form id="rating-form" class="rating-form">
@@ -124,6 +144,7 @@
     </section>
   </main>
   <script type="module" src="/js/components/navbar.js" defer></script>
-  <script src="/js/pages/book-detail.js?v=20260828-8" defer></script>
+  <script type="module" src="/js/components/list-pagination.js?v=20260831-1" defer></script>
+  <script type="module" src="/js/pages/book-detail.js?v=20260831-2" defer></script>
 </body>
 </html>

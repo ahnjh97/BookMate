@@ -32,7 +32,7 @@ loginForm.addEventListener("submit", async (event) => {
     //   headers: { "Content-Type": "application/json" },
     //   body: JSON.stringify(data)
     // });
-    // authApi.login(data) 한 줄이 아래 4개 역할을 전부 대신함
+    // authApi.login(data) 한 줄이 아래 4개 역할을 전부 대체
     // URL(/api/auth), method(POST)      → endpoints.js + authApi.js
     // headers, JSON.stringify(body)     → http.js
     // 응답 실패 판단 + throw            → http.js

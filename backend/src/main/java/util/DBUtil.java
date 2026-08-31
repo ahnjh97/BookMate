@@ -6,15 +6,15 @@
 
 package util;
 
-import java.sql.Connection;      // HikariCP 설정값(URL/계정/풀크기 등)을 담는 객체
-import java.sql.SQLException;  // 실제 커넥션 풀 — Connection을 빌려주고 반납받는 주체
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.Files;                            // DB 연결 객체 타입(자바 표준 API)
+import java.nio.file.Path;                           // DB 연결 실패 시 발생하는 예외 타입(자바 표준 API)
+import java.sql.Connection;
+import java.sql.SQLException;
 
-import com.zaxxer.hikari.HikariConfig;   // 루트 .env 파일을 읽어오는 라이브러리
-import com.zaxxer.hikari.HikariDataSource;                 // DB 연결 객체 타입(자바 표준 API)
+import com.zaxxer.hikari.HikariConfig;                  // HikariCP 설정값(URL/계정/풀크기 등)을 담는 객체
+import com.zaxxer.hikari.HikariDataSource;               // 실제 커넥션 풀 — Connection을 빌려주고 반납받는 주체
 
-import io.github.cdimascio.dotenv.Dotenv;               // DB 연결 실패 시 발생하는 예외 타입(자바 표준 API)
+import io.github.cdimascio.dotenv.Dotenv;                // 루트 .env 파일을 읽어오는 라이브러리
 import io.github.cdimascio.dotenv.DotenvBuilder;
 
 public class DBUtil {
