@@ -27,7 +27,12 @@ public class PostDAO {
                     P.is_pinned,
                     P.status,
                     P.created_at,
-                    P.updated_at
+                    P.updated_at,
+                    (
+                        SELECT COUNT(*)
+                        FROM POST_LIKE PL
+                        WHERE PL.post_id = P.post_id
+                    ) AS like_count
                 FROM POST P
                 JOIN MEMBER M
                   ON P.member_id = M.member_id
@@ -66,7 +71,12 @@ public class PostDAO {
                     P.is_pinned,
                     P.status,
                     P.created_at,
-                    P.updated_at
+                    P.updated_at,
+                    (
+                        SELECT COUNT(*)
+                        FROM POST_LIKE PL
+                        WHERE PL.post_id = P.post_id
+                    ) AS like_count
                 FROM POST P
                 JOIN MEMBER M
                   ON P.member_id = M.member_id
@@ -185,13 +195,13 @@ public class PostDAO {
     /* 작성자에 의한 게시글 숨김 */
     public int hidePostByWriter(Connection conn, long postId) throws SQLException {
         String sql = """
-            UPDATE POST
-            SET
-                status = 'HIDDEN_BY_WRITER',
-                updated_at = SYSDATE
-            WHERE post_id = ?
-              AND status = 'ACTIVE'
-            """;
+                UPDATE POST
+                SET
+                    status = 'HIDDEN_BY_WRITER',
+                    updated_at = SYSDATE
+                WHERE post_id = ?
+                  AND status = 'ACTIVE'
+                """;
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setLong(1, postId);
@@ -274,21 +284,27 @@ public class PostDAO {
     /* 게시글 목록 결과를 DTO로 변환 */
     private PostDTO mapPostListRow(ResultSet rs) throws SQLException {
         PostDTO post = new PostDTO();
+
         post.setPostId(rs.getLong("post_id"));
         post.setMemberId(rs.getLong("member_id"));
+
         long tierListId = rs.getLong("tier_list_id");
         post.setTierListId(rs.wasNull() ? null : tierListId);
+
         long idealRunId = rs.getLong("ideal_run_id");
         post.setIdealRunId(rs.wasNull() ? null : idealRunId);
+
         post.setMemberNickname(rs.getString("member_nickname"));
         post.setCategory(rs.getString("category"));
         post.setTitle(rs.getString("title"));
         post.setGenre(rs.getString("genre"));
         post.setViewCount(rs.getInt("view_count"));
+        post.setLikeCount(rs.getInt("like_count"));
         post.setIsPinned(rs.getString("is_pinned"));
         post.setStatus(rs.getString("status"));
         post.setCreatedAt(rs.getTimestamp("created_at"));
         post.setUpdatedAt(rs.getTimestamp("updated_at"));
+
         return post;
     }
 
