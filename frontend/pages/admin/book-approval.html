@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="BookMate 책 승인 관리">
+    <title>책 승인 관리 | BookMate</title>
+
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260831-2">
+    <link rel="stylesheet" href="/assets/css/admin.css?v=20260831-5">
+</head>
+
+<body class="admin-page">
+<header class="site-header" data-navbar></header>
+
+<main class="admin-main">
+    <div class="container">
+
+        <!-- 1. 관리자 페이지 상단 -->
+        <section class="admin-hero">
+            <span class="admin-label">ADMIN</span>
+            <h1>관리자 페이지</h1>
+            <p>회원과 커뮤니티 콘텐츠를 관리할 수 있습니다.</p>
+        </section>
+
+        <!-- 2. 관리자 영역 -->
+        <div class="admin-workspace">
+
+            <!-- 2-1. 관리자 메뉴 -->
+            <aside class="admin-side-menu">
+                <a href="/pages/admin/admin.html" class="admin-side-button">
+                    관리자 홈
+                </a>
+
+                <a href="/pages/admin/book-approval.html" class="admin-side-button active">
+                    책 승인 관리
+                </a>
+
+                <a href="/pages/admin/member-management.html" class="admin-side-button">
+                    회원 관리
+                </a>
+
+                <a href="/pages/admin/post-management.html" class="admin-side-button">
+                    게시글 관리
+                </a>
+
+                <a href="/pages/admin/comment-management.html" class="admin-side-button">
+                    댓글 관리
+                </a>
+
+                <a href="/pages/admin/report-management.html" class="admin-side-button">
+                    신고 관리
+                </a>
+
+                <a href="/pages/admin/admin-log.html" class="admin-side-button">
+                    처리 내역
+                </a>
+            </aside>
+
+            <!-- 2-2. 책 승인 관리 -->
+            <section class="admin-management-content">
+
+                <div class="admin-management-header">
+                    <h2>책 승인 관리</h2>
+                    <p>사용자가 요청한 책 등록 신청을 확인하고 승인 또는 거절할 수 있습니다.</p>
+                </div>
+
+                <!-- 3. 승인 상태 필터 -->
+                <div class="admin-approval-tabs">
+                    <button class="active" type="button">
+                        전체
+                        <span>5</span>
+                    </button>
+
+                    <button type="button">
+                        승인 대기
+                        <span>2</span>
+                    </button>
+
+                    <button type="button">
+                        승인 완료
+                        <span>2</span>
+                    </button>
+
+                    <button type="button">
+                        거절
+                        <span>1</span>
+                    </button>
+                </div>
+
+                <!-- 4. 책 승인 목록 -->
+                <section class="admin-management-card">
+
+                    <div class="admin-book-toolbar">
+                        <div class="admin-book-search">
+                            <select aria-label="검색 조건">
+                                <option>책 제목</option>
+                                <option>작가</option>
+                                <option>ISBN</option>
+                                <option>요청자</option>
+                            </select>
+
+                            <input
+                                    type="search"
+                                    placeholder="검색어를 입력하세요"
+                                    aria-label="검색어">
+
+                            <button class="admin-primary-button" type="button">
+                                검색
+                            </button>
+                        </div>
+
+                        <select class="admin-book-sort" aria-label="정렬">
+                            <option>요청일 최신순</option>
+                            <option>요청일 오래된순</option>
+                        </select>
+                    </div>
+
+                    <div class="admin-table-wrapper">
+                        <table class="admin-table admin-book-table">
+                            <thead>
+                            <tr>
+                                <th>번호</th>
+                                <th>책 제목</th>
+                                <th>작가</th>
+                                <th>ISBN</th>
+                                <th>요청자</th>
+                                <th>요청일</th>
+                                <th>상태</th>
+                                <th>상세</th>
+                            </tr>
+                            </thead>
+
+                            <tbody>
+                            <tr>
+                                <td>5</td>
+                                <td class="admin-book-title-cell">
+                                    <span class="admin-book-thumbnail">책</span>
+                                    <strong>삼체</strong>
+                                </td>
+                                <td>류츠신</td>
+                                <td>9788936471880</td>
+                                <td>우주탐험가</td>
+                                <td>2026.08.30</td>
+                                <td>
+                                    <span class="admin-status admin-status-pending">
+                                        승인 대기
+                                    </span>
+                                </td>
+                                <td>
+                                    <a
+                                            class="admin-detail-link"
+                                            href="/pages/admin/book-approval-detail.html?requestId=5">
+                                        보기
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>4</td>
+                                <td class="admin-book-title-cell">
+                                    <span class="admin-book-thumbnail">책</span>
+                                    <strong>파친코</strong>
+                                </td>
+                                <td>이민진</td>
+                                <td>9788952218612</td>
+                                <td>독서광</td>
+                                <td>2026.08.29</td>
+                                <td>
+                                    <span class="admin-status admin-status-approved">
+                                        승인 완료
+                                    </span>
+                                </td>
+                                <td>
+                                    <a
+                                            class="admin-detail-link"
+                                            href="/pages/admin/book-approval-detail.html?requestId=4">
+                                        보기
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>3</td>
+                                <td class="admin-book-title-cell">
+                                    <span class="admin-book-thumbnail">책</span>
+                                    <strong>존재의 세 가지 거짓말</strong>
+                                </td>
+                                <td>아고타 크리스토프</td>
+                                <td>9788959061068</td>
+                                <td>북클럽장</td>
+                                <td>2026.08.28</td>
+                                <td>
+                                    <span class="admin-status admin-status-rejected">
+                                        거절
+                                    </span>
+                                </td>
+                                <td>
+                                    <a
+                                            class="admin-detail-link"
+                                            href="/pages/admin/book-approval-detail.html?requestId=3">
+                                        보기
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>2</td>
+                                <td class="admin-book-title-cell">
+                                    <span class="admin-book-thumbnail">책</span>
+                                    <strong>채식주의자</strong>
+                                </td>
+                                <td>한강</td>
+                                <td>9788936470920</td>
+                                <td>문학청년</td>
+                                <td>2026.08.27</td>
+                                <td>
+                                    <span class="admin-status admin-status-approved">
+                                        승인 완료
+                                    </span>
+                                </td>
+                                <td>
+                                    <a
+                                            class="admin-detail-link"
+                                            href="/pages/admin/book-approval-detail.html?requestId=2">
+                                        보기
+                                    </a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>1</td>
+                                <td class="admin-book-title-cell">
+                                    <span class="admin-book-thumbnail">책</span>
+                                    <strong>소년이 온다</strong>
+                                </td>
+                                <td>한강</td>
+                                <td>9788936472054</td>
+                                <td>한강팬</td>
+                                <td>2026.08.26</td>
+                                <td>
+                                    <span class="admin-status admin-status-pending">
+                                        승인 대기
+                                    </span>
+                                </td>
+                                <td>
+                                    <a
+                                            class="admin-detail-link"
+                                            href="/pages/admin/book-approval-detail.html?requestId=1">
+                                        보기
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 5. 페이지네이션 -->
+                    <nav class="admin-pagination" aria-label="책 승인 목록 페이지">
+                        <button type="button" disabled>이전</button>
+                        <button class="active" type="button">1</button>
+                        <button type="button">2</button>
+                        <button type="button">3</button>
+                        <button type="button">다음</button>
+                    </nav>
+
+                </section>
+            </section>
+        </div>
+    </div>
+</main>
+
+<script type="module" src="/js/components/navbar.js" defer></script>
+</body>
+</html>

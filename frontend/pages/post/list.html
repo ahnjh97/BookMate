@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>커뮤니티 | BookMate</title>
     <link rel="stylesheet" href="/assets/css/style.css?v=20260830-4">
-    <link rel="stylesheet" href="/assets/css/post.css?v=20260831-6">
+    <link rel="stylesheet" href="/assets/css/post.css?v=20260831-7">
 </head>
 
 <body>
@@ -46,76 +46,150 @@
 
         <!-- 2. 커뮤니티 필터 -->
         <section id="community-filter" class="community-filter">
+
+            <!-- 2-1. 카테고리 -->
             <div class="post-filter-group">
                 <span class="post-filter-label">카테고리</span>
 
                 <div class="post-category-tabs choice-tabs">
-                    <button class="is-active" type="button" data-category="">전체</button>
-                    <button type="button" data-category="FREE">자유</button>
-                    <button type="button" data-category="RECOMMEND">추천</button>
-                    <button type="button" data-category="REVIEW">리뷰</button>
-                    <button type="button" data-category="TIER">티어리스트</button>
-                    <button type="button" data-category="WORLDCUP">이상형월드컵</button>
-                    <button type="button" data-category="AUTHOR">작가</button>
+                    <button
+                            class="is-active"
+                            type="button"
+                            data-category=""
+                    >
+                        전체
+                    </button>
+
+                    <button type="button" data-category="FREE">
+                        자유
+                    </button>
+
+                    <button type="button" data-category="RECOMMEND">
+                        추천
+                    </button>
+
+                    <button type="button" data-category="REVIEW">
+                        리뷰
+                    </button>
+
+                    <button type="button" data-category="TIER">
+                        티어리스트
+                    </button>
+
+                    <button type="button" data-category="WORLDCUP">
+                        이상형월드컵
+                    </button>
+
+                    <button type="button" data-category="AUTHOR">
+                        작가
+                    </button>
                 </div>
             </div>
 
+            <!-- 2-2. 장르 -->
             <div class="post-filter-group">
                 <span class="post-filter-label">장르</span>
 
                 <div class="post-genre-tabs choice-tabs">
-                    <button class="is-active" type="button" data-genre="">전체</button>
-                    <button type="button" data-genre="판타지">판타지</button>
-                    <button type="button" data-genre="SF">SF</button>
-                    <button type="button" data-genre="추리">추리</button>
-                    <button type="button" data-genre="인문">인문/사회</button>
-                    <button type="button" data-genre="자기계발">자기계발</button>
-                    <button type="button" data-genre="과학">과학</button>
-                    <button type="button" data-genre="IT">IT</button>
+                    <button
+                            class="is-active"
+                            type="button"
+                            data-genre=""
+                    >
+                        전체
+                    </button>
+
+                    <button type="button" data-genre="판타지">
+                        판타지
+                    </button>
+
+                    <button type="button" data-genre="SF">
+                        SF
+                    </button>
+
+                    <button type="button" data-genre="추리">
+                        추리
+                    </button>
+
+                    <button type="button" data-genre="인문">
+                        인문/사회
+                    </button>
+
+                    <button type="button" data-genre="자기계발">
+                        자기계발
+                    </button>
+
+                    <button type="button" data-genre="과학">
+                        과학
+                    </button>
+
+                    <button type="button" data-genre="IT">
+                        IT
+                    </button>
                 </div>
             </div>
+
+            <!-- 2-3. 정렬 및 검색 -->
+            <div class="post-filter-group post-filter-toolbar">
+                <span class="post-filter-label">정렬</span>
+
+                <div class="post-toolbar-content">
+                    <div class="post-sort-tabs" role="group" aria-label="게시글 정렬">
+                        <button
+                                class="is-active"
+                                type="button"
+                                data-sort="latest"
+                        >
+                            최신순
+                        </button>
+                        <button
+                                type="button"
+                                data-sort="views"
+                        >
+                            조회순
+                        </button>
+                        <button
+                                type="button"
+                                data-sort="likes"
+                        >
+                            좋아요순
+                        </button>
+                    </div>
+
+                    <form id="post-search-form" class="post-search-form" role="search">
+                        <label class="post-search-type-control">
+                            <span class="sr-only">검색 조건</span>
+                            <select id="post-search-type">
+                                <option value="title">제목</option>
+                                <option value="writer">작성자</option>
+                            </select>
+                        </label>
+
+                        <input
+                                id="post-keyword"
+                                type="search"
+                                placeholder="검색어를 입력하세요"
+                                aria-label="게시글 검색"
+                        >
+
+                        <button class="button button-primary" type="submit">
+                            검색
+                        </button>
+                    </form>
+                </div>
+            </div>
+
         </section>
 
-        <!-- 3. 게시글 검색 -->
-        <div class="post-list-toolbar">
-            <form id="post-search-form" class="post-search-form" role="search">
-                <input
-                        id="post-keyword"
-                        type="search"
-                        placeholder="게시글 제목 또는 작성자 검색"
-                        aria-label="게시글 검색"
-                >
-                <button class="button button-primary" type="submit">
-                    검색
-                </button>
-            </form>
-
-            <div class="post-toolbar-actions">
-                <label class="post-sort-control" for="post-sort">
-                    <span class="sr-only">게시글 정렬</span>
-
-                    <select id="post-sort">
-                        <option value="latest">등록일순</option>
-                        <option value="likes">좋아요순</option>
-                        <option value="views">조회순</option>
-                    </select>
-                </label>
-
-                <a
-                        class="button button-primary"
-                        href="/pages/post/create.html"
-                >
-                    게시글 작성
-                </a>
-            </div>
-        </div>
-
-        <!-- 4. 검색 결과 -->
+        <!-- 3. 검색 결과 -->
         <div class="post-list-information">
-            <p id="post-result-message" class="post-result-message"></p>
+            <p
+                    id="post-result-message"
+                    class="post-result-message"
+            ></p>
         </div>
 
-        <!-- 5. 게시글 목록 -->
+        <!-- 4. 게시글 목록 -->
         <section class="post-list-section">
             <div class="post-table-wrap">
                 <table class="post-table">
@@ -131,6 +205,7 @@
                     </colgroup>
 
                     <thead id="post-table-head"></thead>
+
                     <tbody id="post-list"></tbody>
                 </table>
             </div>
@@ -144,7 +219,7 @@
             </p>
         </section>
 
-        <!-- 6. 페이지네이션 -->
+        <!-- 5. 페이지네이션 -->
         <nav
                 id="post-pagination"
                 class="list-pagination"
@@ -178,6 +253,6 @@
 
 <script src="/js/components/navbar.js" defer></script>
 <script src="/js/components/list-pagination.js?v=20260831-2" defer></script>
-<script src="/js/pages/post-list.js?v=20260831-8" defer></script>
+<script src="/js/pages/post-list.js?v=20260831-9" defer></script>
 </body>
 </html>

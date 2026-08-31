@@ -5,8 +5,7 @@ const postStatusElement = document.querySelector("#post-status");
 const postResultMessageElement = document.querySelector("#post-result-message");
 const postSearchForm = document.querySelector("#post-search-form");
 const postKeywordInput = document.querySelector("#post-keyword");
-const postSortSelect = document.querySelector("#post-sort");
-const categoryButtons = document.querySelectorAll("[data-category]");
+const sortButtons = document.querySelectorAll("[data-sort]");const categoryButtons = document.querySelectorAll("[data-category]");
 const genreButtons = document.querySelectorAll("[data-genre]");
 
 const categoryNames = {
@@ -254,9 +253,14 @@ postKeywordInput.addEventListener("input", () => {
     applyFilters();
 });
 
-postSortSelect.addEventListener("change", () => {
-    filterState.sort = postSortSelect.value;
-    loadPosts(1);
+/* 19. 게시글 정렬 변경 */
+sortButtons.forEach(button => {
+    button.addEventListener("click", () => {
+        filterState.sort = button.dataset.sort;
+
+        setActiveButton(sortButtons, button);
+        loadPosts(1);
+    });
 });
 
 document.querySelector("#community-reset-button").addEventListener("click", () => {

@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="BookMate 책 승인 상세">
+  <title>책 승인 상세 | BookMate</title>
+
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260831-2">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=20260831-5">
+</head>
+
+<body class="admin-page">
+<header class="site-header" data-navbar></header>
+
+<main class="admin-main">
+  <div class="container">
+
+    <!-- 1. 관리자 페이지 상단 -->
+    <section class="admin-hero">
+      <span class="admin-label">ADMIN</span>
+      <h1>관리자 페이지</h1>
+      <p>회원과 커뮤니티 콘텐츠를 관리할 수 있습니다.</p>
+    </section>
+
+    <!-- 2. 관리자 영역 -->
+    <div class="admin-workspace">
+
+      <!-- 2-1. 관리자 메뉴 -->
+      <aside class="admin-side-menu">
+        <a href="/pages/admin/admin.html" class="admin-side-button">
+          관리자 홈
+        </a>
+
+        <a href="/pages/admin/book-approval.html" class="admin-side-button active">
+          책 승인 관리
+        </a>
+
+        <a href="/pages/admin/member-management.html" class="admin-side-button">
+          회원 관리
+        </a>
+
+        <a href="/pages/admin/post-management.html" class="admin-side-button">
+          게시글 관리
+        </a>
+
+        <a href="/pages/admin/comment-management.html" class="admin-side-button">
+          댓글 관리
+        </a>
+
+        <a href="/pages/admin/report-management.html" class="admin-side-button">
+          신고 관리
+        </a>
+
+        <a href="/pages/admin/admin-log.html" class="admin-side-button">
+          처리 내역
+        </a>
+      </aside>
+
+      <!-- 2-2. 책 승인 상세 -->
+      <section class="admin-management-content">
+
+        <div class="admin-detail-back">
+          <a href="/pages/admin/book-approval.html">
+            ← 책 승인 목록으로
+          </a>
+        </div>
+
+        <div class="admin-management-header">
+          <h2>책 등록 요청 상세</h2>
+          <p>책 정보를 확인한 뒤 등록 승인 여부를 결정할 수 있습니다.</p>
+        </div>
+
+        <!-- 3. 요청 상세 -->
+        <section class="admin-book-detail-layout">
+
+          <!-- 3-1. 표지 및 상태 -->
+          <article class="admin-book-cover-card">
+            <div class="admin-book-cover">
+              <span>BOOK</span>
+              <strong>삼체</strong>
+            </div>
+
+            <div class="admin-book-request-number">
+              <span>요청 번호</span>
+              <strong>#5</strong>
+            </div>
+
+            <span class="admin-status admin-status-pending">
+                            승인 대기
+                        </span>
+          </article>
+
+          <!-- 3-2. 책 정보 -->
+          <article class="admin-book-info-card">
+
+            <div class="admin-book-info-grid">
+              <div class="admin-book-info-item">
+                <span>책 제목</span>
+                <strong>삼체</strong>
+              </div>
+
+              <div class="admin-book-info-item">
+                <span>작가</span>
+                <strong>류츠신</strong>
+              </div>
+
+              <div class="admin-book-info-item">
+                <span>출판사</span>
+                <strong>자음과모음</strong>
+              </div>
+
+              <div class="admin-book-info-item">
+                <span>ISBN</span>
+                <strong>9788936471880</strong>
+              </div>
+
+              <div class="admin-book-info-item">
+                <span>장르</span>
+                <strong>SF · 과학소설</strong>
+              </div>
+
+              <div class="admin-book-info-item">
+                <span>출간일</span>
+                <strong>2013년 12월 06일</strong>
+              </div>
+            </div>
+
+            <div class="admin-book-description">
+              <span>책 소개</span>
+              <p>
+                문화대혁명 시기, 물리학자 예원제는 외계 문명에
+                지구의 위치를 발신한다. 수십 년 후 과학자들이
+                연속으로 죽음을 맞으며 정체불명의 사건이 시작된다.
+              </p>
+            </div>
+
+            <div class="admin-book-request-meta">
+              <div>
+                <span>등록 요청자</span>
+                <strong>우주탐험가</strong>
+              </div>
+
+              <div>
+                <span>요청일</span>
+                <strong>2026.08.30</strong>
+              </div>
+            </div>
+
+          </article>
+        </section>
+
+        <!-- 4. 유사 도서 -->
+        <section class="admin-similar-card">
+          <div class="admin-section-title">
+            <h3>유사한 기존 등록 도서 확인</h3>
+            <p>승인 전 이미 등록된 도서와 중복 여부를 확인해주세요.</p>
+          </div>
+
+          <div class="admin-similar-grid">
+
+            <article class="admin-similar-book">
+              <span class="admin-similar-thumbnail">책</span>
+
+              <div>
+                <strong>삼체 1</strong>
+                <p>류츠신</p>
+                <span>9788936471880</span>
+              </div>
+
+              <em>유사도 높음</em>
+            </article>
+
+            <article class="admin-similar-book">
+              <span class="admin-similar-thumbnail">책</span>
+
+              <div>
+                <strong>삼체 2: 암흑의 숲</strong>
+                <p>류츠신</p>
+                <span>9788936471897</span>
+              </div>
+
+              <em>유사도 보통</em>
+            </article>
+
+            <div class="admin-similar-empty">
+              추가 유사 도서 없음
+            </div>
+
+          </div>
+        </section>
+
+        <!-- 5. 관리 버튼 -->
+        <div class="admin-book-detail-actions">
+          <a
+                  class="admin-secondary-button"
+                  href="/pages/admin/book-approval.html">
+            목록으로
+          </a>
+
+          <button class="admin-reject-button" type="button">
+            거절
+          </button>
+
+          <button class="admin-primary-button" type="button">
+            승인
+          </button>
+        </div>
+
+      </section>
+    </div>
+  </div>
+</main>
+
+<script type="module" src="/js/components/navbar.js" defer></script>
+</body>
+</html>
