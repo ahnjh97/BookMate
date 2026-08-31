@@ -1,12 +1,12 @@
 /* 1. 관리자 페이지 */
 .admin-main {
   min-height: calc(100vh - var(--navbar-height));
-  padding: 48px 20px 90px;
+  padding: 40px 20px 90px;
   background: var(--color-surface);
 }
 
 .admin-main .container {
-  width: min(1200px, 100%);
+  width: min(1180px, 100%);
   margin: 0 auto;
 }
 
@@ -23,7 +23,7 @@
   color: var(--color-primary);
   font-size: 12px;
   font-weight: 900;
-  letter-spacing: 0.13em;
+  letter-spacing: 0.12em;
 }
 
 .admin-hero h1 {
@@ -31,69 +31,72 @@
   color: var(--color-text);
   font-size: 30px;
   font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: -0.5px;
 }
 
 .admin-hero p {
   margin: 0;
   color: var(--color-muted);
   font-size: 13px;
+  line-height: 1.6;
 }
 
 /* 3. 관리자 작업 영역 */
 .admin-workspace {
   display: grid;
-  grid-template-columns: 210px minmax(0, 1fr);
+  grid-template-columns: 190px minmax(0, 1fr);
   gap: 20px;
   align-items: start;
 }
 
-/* 4. 좌측 관리자 메뉴 */
+/* 4. 관리자 사이드 메뉴 */
 .admin-side-menu {
   display: flex;
-  padding: 14px;
+  position: sticky;
+  top: calc(var(--navbar-height) + 20px);
+  padding: 12px;
   border: 1px solid var(--color-border);
-  border-radius: 14px;
+  border-radius: 12px;
   background: var(--color-background);
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
+/* 5. 관리자 사이드 메뉴 버튼 */
 .admin-side-button {
   display: flex;
   align-items: center;
-  min-height: 46px;
-  padding: 0 16px;
-  border: 1px solid transparent;
-  border-radius: 9px;
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 8px;
   color: var(--color-muted);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   text-decoration: none;
   transition:
-          background-color 0.16s ease,
           color 0.16s ease,
-          border-color 0.16s ease;
+          background-color 0.16s ease;
 }
 
 .admin-side-button:hover,
 .admin-side-button:focus-visible {
   color: var(--color-primary-dark);
-  border-color: var(--color-primary);
   background: var(--color-primary-soft);
   outline: none;
 }
 
 .admin-side-button.active {
   color: var(--color-primary-dark);
-  border-color: var(--color-primary-soft);
   background: var(--color-primary-soft);
 }
 
-/* 5. 관리자 홈 콘텐츠 */
+/* 6. 관리자 메인 콘텐츠 */
 .admin-dashboard-content {
   min-width: 0;
 }
 
+/* 7. 관리자 대시보드 제목 */
 .admin-dashboard-header {
   margin-bottom: 18px;
 }
@@ -101,27 +104,29 @@
 .admin-dashboard-header h2 {
   margin: 0 0 5px;
   color: var(--color-text);
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 800;
+  line-height: 1.4;
 }
 
 .admin-dashboard-header p {
   margin: 0;
   color: var(--color-muted);
   font-size: 13px;
+  line-height: 1.6;
 }
 
-/* 6. 현황 카드 */
+/* 8. 관리자 요약 카드 */
 .admin-summary-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
   margin-bottom: 20px;
 }
 
 .admin-summary-card {
-  min-height: 135px;
-  padding: 22px;
+  min-width: 0;
+  padding: 20px;
   border: 1px solid var(--color-border);
   border-radius: 12px;
   background: var(--color-background);
@@ -129,7 +134,7 @@
 
 .admin-summary-card span {
   display: block;
-  margin-bottom: 9px;
+  margin-bottom: 10px;
   color: var(--color-muted);
   font-size: 12px;
   font-weight: 700;
@@ -137,178 +142,168 @@
 
 .admin-summary-card strong {
   display: block;
+  margin-bottom: 6px;
   color: var(--color-text);
-  font-size: 32px;
+  font-size: 26px;
   font-weight: 800;
+  line-height: 1.2;
 }
 
 .admin-summary-card p {
-  margin: 7px 0 0;
+  margin: 0;
   color: var(--color-muted);
   font-size: 11px;
 }
 
-/* 7. 최근 현황 */
+/* 9. 관리자 대시보드 패널 */
 .admin-dashboard-panels {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
 }
 
 .admin-dashboard-panel {
-  overflow: hidden;
+  padding: 22px;
   border: 1px solid var(--color-border);
   border-radius: 12px;
   background: var(--color-background);
 }
 
+/* 10. 관리자 패널 상단 */
 .admin-panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 62px;
-  padding: 16px 18px;
-  border-bottom: 1px solid var(--color-border);
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
 .admin-panel-header h3 {
   margin: 0;
   color: var(--color-text);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 800;
 }
 
 .admin-panel-header a {
   color: var(--color-primary-dark);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   text-decoration: none;
 }
 
+.admin-panel-header a:hover {
+  text-decoration: underline;
+}
+
+/* 11. 관리자 대시보드 빈 화면 */
 .admin-dashboard-empty {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 180px;
+  min-height: 100px;
   padding: 20px;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
   color: var(--color-muted);
+  background: var(--color-surface);
   font-size: 12px;
   text-align: center;
 }
 
-/* 8. 반응형 */
-@media (max-width: 900px) {
-  .admin-workspace {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-side-menu {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .admin-summary-grid,
-  .admin-dashboard-panels {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 600px) {
-  .admin-main {
-    padding: 32px 16px 60px;
-  }
-
-  .admin-side-menu,
-  .admin-summary-grid,
-  .admin-dashboard-panels {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* 11. 관리자 상세 페이지 공통 콘텐츠 */
-.admin-management-content {
-  min-width: 0;
-}
-
-.admin-management-header {
-  margin-bottom: 18px;
-}
-
-.admin-management-header h2 {
-  margin: 0 0 6px;
-  color: var(--color-text);
-  font-size: 24px;
-  font-weight: 800;
-  line-height: 1.4;
-  letter-spacing: -0.4px;
-}
-
-.admin-management-header p {
-  margin: 0;
-  color: var(--color-muted);
+/* 12. 관리자 메시지 */
+.admin-message {
+  min-height: 24px;
+  margin: 0 0 16px;
+  color: var(--color-primary-dark);
   font-size: 13px;
-  line-height: 1.6;
+  font-weight: 700;
 }
 
-/* 12. 회원 관리 카드 */
-.admin-management-card {
-  padding: 24px;
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  background: var(--color-background);
-}
-
-.admin-management-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  margin-bottom: 16px;
-}
-
-/* 13. 회원 관리 테이블 */
-.admin-management-card .admin-table-wrapper {
+/* 13. 관리자 공통 테이블 */
+.admin-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
   border: 1px solid var(--color-border);
   border-radius: 10px;
-  overflow-x: auto;
   background: var(--color-background);
 }
 
-.admin-management-card .admin-table {
+.admin-table {
   width: 100%;
-  min-width: 900px;
+  min-width: 850px;
   border-collapse: collapse;
   font-size: 13px;
 }
 
-.admin-management-card .admin-table th,
-.admin-management-card .admin-table td {
-  height: 50px;
-  padding: 10px 12px;
+.admin-table th,
+.admin-table td {
+  padding: 11px 12px;
   border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
   text-align: left;
   vertical-align: middle;
   white-space: nowrap;
 }
 
-.admin-management-card .admin-table th {
-  height: 44px;
+.admin-table th {
   color: var(--color-muted);
   background: var(--color-surface);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
 }
 
-.admin-management-card .admin-table tbody tr:last-child td {
+.admin-table tbody tr:last-child td {
   border-bottom: 0;
 }
 
-/* 14. 관리자 상세 페이지 반응형 */
-@media (max-width: 700px) {
-  .admin-management-card {
-    padding: 18px 14px;
+.admin-empty {
+  height: 90px;
+  color: var(--color-muted) !important;
+  text-align: center !important;
+}
+
+/* 14. 관리자 기본 반응형 */
+@media (max-width: 1000px) {
+  .admin-summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .admin-main {
+    padding: 28px 16px 60px;
   }
 
-  .admin-management-header h2 {
-    font-size: 21px;
+  .admin-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-side-menu {
+    position: static;
+    overflow-x: auto;
+    flex-direction: row;
+  }
+
+  .admin-side-button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .admin-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-hero {
+    padding: 24px 20px;
+  }
+
+  .admin-hero h1 {
+    font-size: 26px;
   }
 }

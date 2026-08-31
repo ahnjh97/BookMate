@@ -44,12 +44,6 @@ public class AdminAuthFilter implements Filter {
         }
 
         String role = SessionUtil.role(request);
-        Object roleAttribute =
-                session.getAttribute("loginRole");
-
-        String role = roleAttribute == null
-                ? null
-                : roleAttribute.toString();
 
         if (!"ADMIN".equals(role)) {
             sendError(
