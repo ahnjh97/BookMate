@@ -2,7 +2,7 @@
 .page-main[data-page="community"] {
     min-height: calc(100vh - var(--navbar-height));
     place-items: start center;
-    padding: 32px 20px 90px;
+    padding: 40px 20px 90px;
     text-align: left;
 }
 
@@ -11,14 +11,73 @@
     margin: 0 auto;
 }
 
-.community-page-hero {
+.community-page-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 20px;
-    margin-bottom: 18px;
+    gap: 32px;
+    margin-bottom: 28px;
 }
 
+.community-page-heading {
+    min-width: 0;
+}
+
+.community-page-heading .page-title-button {
+    margin: 0;
+}
+
+.community-page-description {
+    margin: 8px 0 0;
+    color: var(--color-muted);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.community-create-button {
+    flex: 0 0 auto;
+}
+
+.community-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-bottom: 24px;
+    padding: 22px 24px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-surface);
+}
+
+.post-list-information {
+    min-height: 24px;
+}
+
+.post-list-section {
+    width: 100%;
+}
+
+.post-status {
+    margin: 12px 0 0;
+    color: var(--color-muted);
+    font-size: 13px;
+}
+
+@media (max-width: 700px) {
+    .community-page-header {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .community-create-button {
+        align-self: flex-start;
+    }
+
+    .community-filter {
+        padding: 18px;
+    }
+}
 /* 2. 게시글 공통 페이지 */
 .post-page-main {
     min-height: calc(100vh - var(--navbar-height));
@@ -314,40 +373,106 @@
 }
 
 /* 8. 게시글 작성 화면 */
+/* 8. 게시글 작성 및 수정 화면 */
+.post-editor-page {
+    width: min(900px, 100%);
+    margin: 0 auto;
+}
+
+.post-editor-back {
+    margin-bottom: 18px;
+}
+
+.post-editor-header {
+    margin-bottom: 28px;
+}
+
+.post-editor-header h1 {
+    margin: 0 0 6px;
+    color: var(--color-text);
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.4;
+    letter-spacing: -0.5px;
+}
+
+.post-editor-header p {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.post-editor-form,
 #post-create-form {
     display: grid;
-    gap: 18px;
+    gap: 24px;
+    padding: 32px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-background);
     text-align: left;
 }
 
-#post-create-form > div {
-    display: grid;
-    gap: 8px;
+.post-editor-form .form-group,
+#post-create-form > .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    min-width: 0;
 }
 
+.post-editor-form label,
 #post-create-form label {
     color: var(--color-text);
+    font-size: 14px;
     font-weight: 700;
 }
 
+.form-required {
+    margin-left: 2px;
+    color: var(--color-primary);
+}
+
+.post-editor-form input,
+.post-editor-form select,
+.post-editor-form textarea,
 #post-create-form input,
 #post-create-form select,
 #post-create-form textarea {
     width: 100%;
-    min-height: 44px;
-    padding: 10px 12px;
+    box-sizing: border-box;
+    padding: 11px 13px;
     border: 1px solid var(--color-border);
     border-radius: 8px;
     color: var(--color-text);
     background: var(--color-background);
     font: inherit;
+    font-size: 14px;
 }
 
+.post-editor-form input,
+.post-editor-form select,
+#post-create-form input,
+#post-create-form select {
+    min-height: 46px;
+}
+
+.post-editor-form textarea,
 #post-create-form textarea {
-    min-height: 240px;
+    min-height: 320px;
+    line-height: 1.7;
     resize: vertical;
 }
 
+.post-editor-form input::placeholder,
+.post-editor-form textarea::placeholder {
+    color: var(--color-muted);
+}
+
+.post-editor-form input:focus,
+.post-editor-form select:focus,
+.post-editor-form textarea:focus,
 #post-create-form input:focus,
 #post-create-form select:focus,
 #post-create-form textarea:focus {
@@ -355,10 +480,42 @@
     outline: 2px solid rgb(15 163 193 / 18%);
 }
 
-#post-create-form > div:last-child {
+.post-editor-form > .form-row,
+#post-create-form > .form-row {
     display: flex;
+    align-items: flex-end;
+    gap: 16px;
+}
+
+.post-editor-form > .form-row > .form-group,
+#post-create-form > .form-row > .form-group {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 9px;
+    min-width: 0;
+}
+
+.form-help {
+    margin: -2px 0 0;
+    color: var(--color-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.post-editor-actions {
+    display: flex;
+    align-items: center;
     justify-content: flex-end;
     gap: 8px;
+    padding-top: 4px;
+}
+
+.post-editor-message {
+    margin: 14px 0 0;
+    color: var(--color-muted);
+    font-size: 13px;
+    text-align: center;
 }
 
 /* 9. 카테고리와 장르를 같은 행에 배치 */
@@ -382,51 +539,104 @@
 }
 
 /* 10. 게시글 상세 */
+/* 10. 게시글 상세 */
 .post-detail-back {
     display: flex;
     width: min(900px, 100%);
-    margin: 0 auto 14px;
+    margin: 0 auto 18px;
     justify-content: flex-start;
+}
+
+.back-navigation {
+    color: var(--color-muted);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.back-navigation:hover,
+.back-navigation:focus-visible {
+    color: var(--color-primary);
+    outline: none;
 }
 
 .post-detail {
     width: min(900px, 100%);
     margin: 0 auto;
-    padding: 32px;
+    padding: 36px 40px;
     border: 1px solid var(--color-border);
     border-radius: 12px;
     background: var(--color-background);
 }
 
+.post-detail-header {
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.post-detail-category {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
 .post-detail-category span {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
     padding: 5px 10px;
     border-radius: 999px;
     color: var(--color-primary);
     background: var(--color-primary-soft);
-    font-size: 0.82rem;
+    font-size: 12px;
     font-weight: 700;
 }
 
+.post-detail-category span:empty {
+    display: none;
+}
+
 .post-detail h1 {
-    margin: 14px 0;
-    font-size: 2rem;
+    margin: 0 0 16px;
+    color: var(--color-text);
+    font-size: clamp(24px, 3vw, 32px);
+    font-weight: 800;
+    line-height: 1.4;
+    letter-spacing: -0.5px;
     overflow-wrap: anywhere;
 }
 
 .post-detail-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px 22px;
-    padding-bottom: 18px;
-    border-bottom: 1px solid var(--color-border);
+    align-items: center;
+    gap: 6px;
     color: var(--color-muted);
-    font-size: 0.9rem;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.post-detail-meta strong {
+    color: inherit;
+    font-weight: 600;
+}
+
+.post-detail-writer strong {
+    color: var(--color-text);
+    font-weight: 700;
+}
+
+.post-detail-meta-divider {
+    color: var(--color-border);
 }
 
 .post-detail-content {
-    min-height: 260px;
-    padding: 30px 0;
+    min-height: 280px;
+    padding: 36px 4px;
+    color: var(--color-text);
+    font-size: 15px;
+    line-height: 1.85;
     overflow-wrap: anywhere;
     white-space: pre-wrap;
 }
@@ -434,7 +644,7 @@
 .post-detail.has-tier-list .post-detail-content,
 .post-detail.has-worldcup-result .post-detail-content {
     min-height: 0;
-    padding: 22px 0 14px;
+    padding-bottom: 22px;
 }
 
 .post-detail.has-tier-list .post-tier-list {
@@ -604,11 +814,25 @@
 }
 
 /* 13. 게시글 상세 버튼 */
+/* 13. 게시글 상세 버튼 */
 .post-detail-actions {
     display: flex;
-    justify-content: flex-end;
-    padding-top: 18px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-top: 20px;
     border-top: 1px solid var(--color-border);
+}
+
+.post-detail-action-right,
+.post-action-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.post-action-group[hidden] {
+    display: none;
 }
 
 /* 14. 게시글 댓글 */
@@ -971,9 +1195,25 @@
 
 /* 18. 반응형 */
 @media (max-width: 768px) {
+    .post-editor-form,
+    #post-create-form {
+        padding: 24px 20px;
+    }
+
+    .post-editor-form > .form-row,
     #post-create-form > .form-row {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    .post-editor-form > .form-row > .form-group,
+    #post-create-form > .form-row > .form-group {
+        width: 100%;
+    }
+
+    .post-editor-form textarea,
+    #post-create-form textarea {
+        min-height: 260px;
     }
 }
 
@@ -1053,5 +1293,22 @@
         min-height: 34px;
         padding: 6px 10px;
         font-size: 12px;
+    }
+    .post-detail {
+        padding: 26px 20px;
+    }
+
+    .post-detail-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .post-detail-action-right,
+    .post-action-group {
+        flex-wrap: wrap;
+    }
+
+    .post-detail-meta-divider {
+        display: none;
     }
 }

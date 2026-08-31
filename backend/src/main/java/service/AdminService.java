@@ -1,7 +1,10 @@
 package service;
 
 import dao.AdminDAO;
+import dao.PostCommentDAO;
 import dto.AdminMemberDTO;
+import dto.PostCommentDTO;
+import dto.PostDTO;
 import util.DBUtil;
 
 import java.sql.Connection;
@@ -12,22 +15,17 @@ import java.util.NoSuchElementException;
 public class AdminService {
 
     private final AdminDAO adminDAO;
+    private final PostCommentDAO postCommentDAO;
 
     public AdminService() {
         this.adminDAO = new AdminDAO();
+        this.postCommentDAO = new PostCommentDAO();
     }
 
-
-    /*
-     * =========================================
-     * 관리자 회원 목록 조회
-     * =========================================
-     */
+    /* 1. 관리자 회원 목록 조회 */
     public List<AdminMemberDTO> getMemberList() {
-
         try (Connection conn = DBUtil.getConnection()) {
             return adminDAO.selectMemberList(conn);
-
         } catch (SQLException e) {
             throw new RuntimeException(
                     "회원 목록을 불러오지 못했습니다.",
@@ -36,20 +34,36 @@ public class AdminService {
         }
     }
 
+    /* 2. 관리자 게시글 전체 목록 조회 */
+    public List<PostDTO> getPostList() {
+        try (Connection conn = DBUtil.getConnection()) {
+            return adminDAO.selectPostList(conn);
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    "게시글 목록을 불러오지 못했습니다.",
+                    e
+            );
+        }
+    }
 
-    /*
-     * =========================================
-     * 회원 잠금 / 잠금 해제
-     *
-     * ADMIN 계정은 잠금/해제 불가
-     * =========================================
-     */
+    /* 3. 관리자 댓글 전체 목록 조회 */
+    public List<PostCommentDTO> getCommentList() {
+        try (Connection conn = DBUtil.getConnection()) {
+            return postCommentDAO.selectAdminCommentList(conn);
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    "댓글 목록을 불러오지 못했습니다.",
+                    e
+            );
+        }
+    }
+
+    /* 4. 회원 잠금 / 잠금 해제 */
     public void changeMemberLock(
             long memberId,
             boolean locked,
             long loginAdminMemberId
     ) {
-
         validateMemberId(memberId);
         validateMemberId(loginAdminMemberId);
 
@@ -59,42 +73,28 @@ public class AdminService {
             conn = DBUtil.getConnection();
             conn.setAutoCommit(false);
 
-            /*
-             * 변경 대상 회원 ROLE 조회
-             */
-            String targetRole =
-                    adminDAO.selectMemberRole(
-                            conn,
-                            memberId
-                    );
+            String targetRole = adminDAO.selectMemberRole(
+                    conn,
+                    memberId
+            );
 
-            /*
-             * 존재하지 않는 회원
-             */
             if (targetRole == null) {
                 throw new NoSuchElementException(
                         "존재하지 않는 회원입니다."
                 );
             }
 
-            /*
-             * 관리자 계정 보호
-             */
             if ("ADMIN".equals(targetRole)) {
                 throw new IllegalArgumentException(
                         "관리자 계정은 잠금 또는 잠금 해제할 수 없습니다."
                 );
             }
 
-            /*
-             * 일반회원 잠금 상태 변경
-             */
-            int result =
-                    adminDAO.updateMemberLock(
-                            conn,
-                            memberId,
-                            locked
-                    );
+            int result = adminDAO.updateMemberLock(
+                    conn,
+                    memberId,
+                    locked
+            );
 
             if (result == 0) {
                 throw new NoSuchElementException(
@@ -121,17 +121,11 @@ public class AdminService {
         }
     }
 
-
-    /*
-     * =========================================
-     * 게시글 상단 고정 / 해제
-     * =========================================
-     */
+    /* 5. 게시글 상단 고정 / 해제 */
     public void changePostPin(
             long postId,
             boolean pinned
     ) {
-
         validatePostId(postId);
 
         Connection conn = null;
@@ -140,12 +134,11 @@ public class AdminService {
             conn = DBUtil.getConnection();
             conn.setAutoCommit(false);
 
-            int result =
-                    adminDAO.updatePostPin(
-                            conn,
-                            postId,
-                            pinned
-                    );
+            int result = adminDAO.updatePostPin(
+                    conn,
+                    postId,
+                    pinned
+            );
 
             if (result == 0) {
                 throw new NoSuchElementException(
@@ -172,14 +165,48 @@ public class AdminService {
         }
     }
 
+    /* 6. 관리자 댓글 삭제 */
+    public void deleteCommentByAdmin(long commentId) {
+        validateCommentId(commentId);
 
-    /*
-     * =========================================
-     * 회원번호 검증
-     * =========================================
-     */
+        Connection conn = null;
+
+        try {
+            conn = DBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            int result = postCommentDAO.deleteComment(
+                    conn,
+                    commentId
+            );
+
+            if (result == 0) {
+                throw new NoSuchElementException(
+                        "존재하지 않거나 이미 삭제된 댓글입니다."
+                );
+            }
+
+            conn.commit();
+
+        } catch (SQLException e) {
+            rollback(conn);
+
+            throw new RuntimeException(
+                    "댓글 삭제에 실패했습니다.",
+                    e
+            );
+
+        } catch (RuntimeException e) {
+            rollback(conn);
+            throw e;
+
+        } finally {
+            close(conn);
+        }
+    }
+
+    /* 7. 회원번호 검증 */
     private void validateMemberId(long memberId) {
-
         if (memberId <= 0) {
             throw new IllegalArgumentException(
                     "올바르지 않은 회원 번호입니다."
@@ -187,14 +214,8 @@ public class AdminService {
         }
     }
 
-
-    /*
-     * =========================================
-     * 게시글번호 검증
-     * =========================================
-     */
+    /* 8. 게시글번호 검증 */
     private void validatePostId(long postId) {
-
         if (postId <= 0) {
             throw new IllegalArgumentException(
                     "올바르지 않은 게시글 번호입니다."
@@ -202,41 +223,36 @@ public class AdminService {
         }
     }
 
+    /* 9. 댓글번호 검증 */
+    private void validateCommentId(long commentId) {
+        if (commentId <= 0) {
+            throw new IllegalArgumentException(
+                    "올바르지 않은 댓글 번호입니다."
+            );
+        }
+    }
 
-    /*
-     * =========================================
-     * 트랜잭션 ROLLBACK
-     * =========================================
-     */
+    /* 10. 트랜잭션 ROLLBACK */
     private void rollback(Connection conn) {
-
         if (conn == null) {
             return;
         }
 
         try {
             conn.rollback();
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-
-    /*
-     * =========================================
-     * Connection 종료
-     * =========================================
-     */
+    /* 11. Connection 종료 */
     private void close(Connection conn) {
-
         if (conn == null) {
             return;
         }
 
         try {
             conn.close();
-
         } catch (SQLException e) {
             e.printStackTrace();
         }

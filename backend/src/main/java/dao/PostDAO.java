@@ -11,7 +11,7 @@ import java.util.List;
 
 public class PostDAO {
 
-    /* 게시글 전체 목록 조회: ACTIVE 게시글만 조회하고 고정 게시글을 먼저 정렬 */
+    /* 1. 게시글 전체 목록 조회 */
     public List<PostDTO> selectPostList(Connection conn) throws SQLException {
         String sql = """
                 SELECT
@@ -43,6 +43,7 @@ public class PostDAO {
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
+
             while (rs.next()) {
                 postList.add(mapPostListRow(rs));
             }
@@ -51,6 +52,7 @@ public class PostDAO {
         return postList;
     }
 
+    /* 2. 게시글 상세 조회 */
     public List<PostDTO> selectPostPage(Connection conn, String category, String genre, String keyword, String sort,
                                         int offset, int limit) throws SQLException {
         String orderBy = switch (sort) {
@@ -155,7 +157,7 @@ public class PostDAO {
         return null;
     }
 
-    /* 게시글 등록: 새 게시글은 IS_PINNED = 'N'으로 등록 */
+    /* 3. 게시글 등록 */
     public long insertPost(Connection conn, PostDTO post) throws SQLException {
         String sql = """
                 INSERT INTO POST (
@@ -208,7 +210,7 @@ public class PostDAO {
         throw new SQLException("생성된 게시글 번호를 가져오지 못했습니다.");
     }
 
-    /* 게시글 수정 */
+    /* 4. 게시글 수정 */
     public int updatePost(Connection conn, PostDTO post) throws SQLException {
         String sql = """
                 UPDATE POST
@@ -233,7 +235,7 @@ public class PostDAO {
         }
     }
 
-    /* 작성자에 의한 게시글 소프트 삭제 */
+    /* 5. 작성자 게시글 삭제 */
     public int deletePostByWriter(Connection conn, long postId) throws SQLException {
         String sql = """
                 UPDATE POST
@@ -250,7 +252,7 @@ public class PostDAO {
         }
     }
 
-    /* 작성자에 의한 게시글 숨김 */
+    /* 6. 작성자 게시글 숨김 */
     public int hidePostByWriter(Connection conn, long postId) throws SQLException {
         String sql = """
             UPDATE POST
@@ -267,7 +269,7 @@ public class PostDAO {
         }
     }
 
-    /* 관리자에 의한 게시글 소프트 삭제 */
+    /* 7. 관리자 게시글 삭제 */
     public int deletePostByAdmin(Connection conn, long postId) throws SQLException {
         String sql = """
                 UPDATE POST
@@ -284,7 +286,7 @@ public class PostDAO {
         }
     }
 
-    /* 조회수 증가 */
+    /* 8. 조회수 증가 */
     public int increaseViewCount(Connection conn, long postId) throws SQLException {
         String sql = """
                 UPDATE POST
@@ -299,7 +301,7 @@ public class PostDAO {
         }
     }
 
-    /* 게시글 존재 여부 확인 */
+    /* 9. 게시글 존재 여부 확인 */
     public boolean existsPost(Connection conn, long postId) throws SQLException {
         String sql = """
                 SELECT COUNT(*)
@@ -317,7 +319,7 @@ public class PostDAO {
         }
     }
 
-    /* 게시글 작성자 번호 조회 */
+    /* 10. 게시글 작성자 번호 조회 */
     public Long selectWriterId(Connection conn, long postId) throws SQLException {
         String sql = """
                 SELECT member_id
@@ -339,9 +341,10 @@ public class PostDAO {
         return null;
     }
 
-    /* 게시글 목록 결과를 DTO로 변환 */
+    /* 11. 게시글 목록 결과 DTO 변환 */
     private PostDTO mapPostListRow(ResultSet rs) throws SQLException {
         PostDTO post = new PostDTO();
+
         post.setPostId(rs.getLong("post_id"));
         post.setMemberId(rs.getLong("member_id"));
         long tierListId = rs.getLong("tier_list_id");
@@ -359,10 +362,11 @@ public class PostDAO {
         post.setStatus(rs.getString("status"));
         post.setCreatedAt(rs.getTimestamp("created_at"));
         post.setUpdatedAt(rs.getTimestamp("updated_at"));
+
         return post;
     }
 
-    /* 게시글 상세 결과를 DTO로 변환 */
+    /* 12. 게시글 상세 결과 DTO 변환 */
     private PostDTO mapPostDetailRow(ResultSet rs) throws SQLException {
         PostDTO post = mapPostListRow(rs);
         post.setContent(rs.getString("content"));

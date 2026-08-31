@@ -4,23 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>게시글 작성 | BookMate</title>
-    <link rel="stylesheet" href="/assets/css/style.css">
-    <link rel="stylesheet" href="/assets/css/post.css">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260831-2">
+    <link rel="stylesheet" href="/assets/css/post.css?v=20260831-10">
 </head>
 
 <body>
 <header class="site-header" data-navbar></header>
 
-<main class="page-main">
-    <section class="page-content"  id="post-create-page" hidden>
-        <h1>게시글 작성</h1>
+<main class="post-page-main">
+    <section
+            id="post-create-page"
+            class="post-page-content post-editor-page"
+            hidden
+    >
+        <!-- 1. 페이지 이동 -->
+        <div class="post-editor-back">
+            <a class="back-navigation" href="/pages/post/list.html">
+                ← 커뮤니티 목록으로
+            </a>
+        </div>
 
-        <form id="post-create-form">
+        <!-- 2. 작성 페이지 제목 -->
+        <header class="post-editor-header">
+            <h1>게시글 작성</h1>
+            <p>책에 대한 생각과 이야기를 자유롭게 나눠보세요.</p>
+        </header>
+
+        <!-- 3. 게시글 작성 폼 -->
+        <form id="post-create-form" class="post-editor-form">
             <div class="form-row">
                 <div class="form-group">
-                    <label for="category">카테고리</label>
+                    <label for="category">
+                        카테고리
+                        <span class="form-required">*</span>
+                    </label>
+
                     <select id="category" required>
-                        <option value="">선택하세요</option>
+                        <option value="">카테고리를 선택해주세요.</option>
                         <option value="FREE">자유</option>
                         <option value="RECOMMEND">추천</option>
                         <option value="REVIEW">리뷰</option>
@@ -29,6 +49,7 @@
 
                 <div class="form-group">
                     <label for="genre">장르</label>
+
                     <select id="genre">
                         <option value="">선택 안 함</option>
                         <option value="판타지">판타지</option>
@@ -41,26 +62,66 @@
                     </select>
                 </div>
             </div>
-            <div>
-                <label for="title">제목</label>
-                <input id="title" type="text" maxlength="200" required>
+
+            <div class="form-group">
+                <label for="title">
+                    제목
+                    <span class="form-required">*</span>
+                </label>
+
+                <input
+                        id="title"
+                        type="text"
+                        maxlength="200"
+                        placeholder="제목을 입력해주세요."
+                        required
+                >
             </div>
 
-            <div>
-                <label for="content">내용</label>
-                <textarea id="content" maxlength="4000" rows="15" required></textarea>
+            <div class="form-group">
+                <label for="content">
+                    내용
+                    <span class="form-required">*</span>
+                </label>
+
+                <textarea
+                        id="content"
+                        maxlength="4000"
+                        rows="15"
+                        placeholder="내용을 입력해주세요."
+                        required
+                ></textarea>
+
+                <p class="form-help">
+                    최대 4,000자까지 입력할 수 있습니다.
+                </p>
             </div>
 
-            <button class="button button-primary" type="submit">등록</button>
-            <a id="post-cancel-link" class="button" href="/pages/post/list.html">취소</a>
+            <!-- 4. 작성 버튼 -->
+            <div class="post-editor-actions">
+                <a
+                        id="post-cancel-link"
+                        class="button button-outline"
+                        href="/pages/post/list.html"
+                >
+                    취소
+                </a>
 
+                <button
+                        class="button button-primary"
+                        type="submit"
+                >
+                    게시글 등록
+                </button>
+            </div>
         </form>
 
-        <p id="message"></p>
+        <!-- 5. 처리 결과 -->
+        <p id="message" class="post-editor-message" aria-live="polite"></p>
     </section>
 </main>
 
-<script type="module" src="/js/components/navbar.js" defer></script>
-<script type="module" src="/js/pages/post-create.js" defer></script>
+<script src="/js/components/navbar.js" charset="UTF-8" defer></script>
+<script src="/js/pages/post-create.js?v=20260831-3" charset="UTF-8" defer></script>
 </body>
 </html>
