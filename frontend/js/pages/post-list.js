@@ -3,6 +3,7 @@ const postListElement = document.querySelector("#post-list");
 const postTableHead = document.querySelector("#post-table-head");
 const postStatusElement = document.querySelector("#post-status");
 const postResultMessageElement = document.querySelector("#post-result-message");
+const postTotalCountElement = document.querySelector("#post-total-count");
 const postSearchForm = document.querySelector("#post-search-form");
 const postKeywordInput = document.querySelector("#post-keyword");
 const postSortSelect = document.querySelector("#post-sort");
@@ -72,10 +73,18 @@ async function loadPosts(page = 1) {
         }
 
         const posts = Array.isArray(result.posts) ? result.posts : [];
+        const pinnedPosts = Array.isArray(result.pinnedPosts) ? result.pinnedPosts : [];
+        const visiblePosts = [...pinnedPosts, ...posts];
         const totalCount = Number(result.totalCount);
+        const paginationTotalCount = Number(result.paginationTotalCount);
         renderTableHeader();
         if (Number.isFinite(totalCount)) {
-            postPagination.setPage(posts, Number(result.page) || page, totalCount);
+            postPagination.setPage(
+                visiblePosts,
+                Number(result.page) || page,
+                Number.isFinite(paginationTotalCount) ? paginationTotalCount : totalCount,
+                Number(result.totalPages) || undefined
+            );
             updateResultMessage(totalCount, requestFilter);
         } else {
             // 구버전 API 응답도 화면이 깨지지 않도록 전체 배열 방식으로 처리합니다.
@@ -119,8 +128,8 @@ function renderPosts(posts, startIndex, totalCount) {
     postListElement.replaceChildren();
 
     if (!Array.isArray(posts) || posts.length === 0) {
-        postStatusElement.hidden = false;
-        postStatusElement.textContent = "조건에 맞는 게시글이 없습니다.";
+        postStatusElement.hidden = true;
+        postStatusElement.textContent = "";
         return;
     }
 
@@ -128,6 +137,8 @@ function renderPosts(posts, startIndex, totalCount) {
 
     posts.forEach((post, index) => {
         const row = document.createElement("tr");
+
+        row.classList.toggle("is-pinned", post.isPinned === "Y" || post.isPinned === true);
 
         renderRealtimeRow(row, post, startIndex + index);
 
@@ -148,7 +159,10 @@ function renderRealtimeRow(row, post, index) {
 
     const titleCell = createTitleCell(post);
     const genreCell = createCell("post-genre", post.genre || "-");
-    const writerCell = createCell("post-writer", post.memberNickname || "알 수 없음");
+    const writerCell = createWriterCell(
+        post.memberNickname || "알 수 없음",
+        post.memberId
+    );
     const dateCell = createCell("post-date", formatDate(post.createdAt));
     const commentCell = createCell("post-comments-count", post.commentCount ?? 0);
     const likeCell = createCell("post-likes", post.likeCount ?? 0);
@@ -176,6 +190,18 @@ function createCell(className, value) {
     return cell;
 }
 
+function createWriterCell(value, memberId) {
+    const cell = document.createElement("td");
+    const text = document.createElement("span");
+
+    cell.className = "post-writer";
+    text.className = "post-writer-text";
+    window.BookMateBookshelfVisit.render(text, value, memberId);
+    cell.append(text);
+
+    return cell;
+}
+
 /* 10. 게시글 제목 셀 생성 */
 function createTitleCell(post) {
     const cell = document.createElement("td");
@@ -193,6 +219,19 @@ function createTitleCell(post) {
 
 /* 13. 검색 및 필터 결과 안내 */
 function updateResultMessage(totalCount, appliedFilter = filterState) {
+    postTotalCountElement.textContent = `총 ${totalCount}개`;
+
+    if (appliedFilter.keyword) {
+        const keyword = document.createElement("strong");
+        const description = document.createElement("span");
+
+        keyword.textContent = `'${appliedFilter.keyword}'`;
+        description.textContent = "에 대한 검색결과입니다.";
+        postResultMessageElement.classList.add("list-search-result-heading");
+        postResultMessageElement.replaceChildren(keyword, description);
+        return;
+    }
+
     const messages = [];
 
     if (appliedFilter.category) {
@@ -203,14 +242,13 @@ function updateResultMessage(totalCount, appliedFilter = filterState) {
         messages.push(appliedFilter.genre);
     }
 
-    if (appliedFilter.keyword) {
-        messages.push(`"${appliedFilter.keyword}" 검색`);
-    }
-
     if (messages.length === 0) {
-        messages.push("전체 게시글");
+        postResultMessageElement.classList.remove("list-search-result-heading");
+        postResultMessageElement.textContent = "";
+        return;
     }
 
+    postResultMessageElement.classList.remove("list-search-result-heading");
     postResultMessageElement.textContent = `${messages.join(" | ")} | ${totalCount}개`;
 }
 

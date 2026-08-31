@@ -7,7 +7,7 @@
     <title>게시글 | BookMate</title>
 
     <link rel="stylesheet" href="/assets/css/style.css?v=20260831-2">
-    <link rel="stylesheet" href="/assets/css/post.css?v=20260831-8">
+    <link rel="stylesheet" href="/assets/css/post.css?v=20260831-12">
 </head>
 
 <body>
@@ -150,7 +150,6 @@
             <form
                     id="post-comment-form"
                     class="post-comment-form"
-                    hidden
             >
                 <textarea
                         id="post-comment-content"
@@ -173,14 +172,6 @@
                     </button>
                 </div>
             </form>
-
-            <p
-                    id="post-comment-login-message"
-                    class="post-comment-login-message"
-                    hidden
-            >
-                댓글을 작성하려면 로그인이 필요합니다.
-            </p>
 
             <p
                     id="post-comment-status"
@@ -325,8 +316,11 @@
         defer
 ></script>
 
+<script src="/js/components/bookshelf-visit.js?v=20260831-1" defer></script>
+<script src="/js/components/login-prompt.js?v=20260831-1" defer></script>
+
 <script
-        src="/js/pages/post-detail.js?v=20260831-3"
+        src="/js/pages/post-detail.js?v=20260831-8"
         charset="UTF-8"
         defer
 ></script>

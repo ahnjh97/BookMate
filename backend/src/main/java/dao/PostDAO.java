@@ -54,17 +54,19 @@ public class PostDAO {
     public List<PostDTO> selectPostPage(Connection conn, String category, String genre, String keyword, String sort,
                                         int offset, int limit) throws SQLException {
         String orderBy = switch (sort) {
-            case "likes" -> "P.is_pinned DESC,like_count DESC,P.created_at DESC,P.post_id DESC";
-            case "views" -> "P.is_pinned DESC,P.view_count DESC,P.created_at DESC,P.post_id DESC";
-            default -> "P.is_pinned DESC,P.created_at DESC,P.post_id DESC";
+            case "likes" -> "like_count DESC,P.created_at DESC,P.post_id DESC";
+            case "views" -> "P.view_count DESC,P.created_at DESC,P.post_id DESC";
+            case "adminLatest" -> "P.post_id DESC";
+            default -> "P.created_at DESC,P.post_id DESC";
         };
         String sql = """
                 SELECT P.post_id,P.member_id,P.tier_list_id,P.ideal_run_id,M.nickname member_nickname,
                        P.category,P.title,P.genre,P.view_count,P.is_pinned,P.status,P.created_at,P.updated_at,
                        (SELECT COUNT(*) FROM POST_LIKE L WHERE L.post_id=P.post_id) like_count,
                        (SELECT COUNT(*) FROM POST_COMMENT C WHERE C.post_id=P.post_id AND C.status='ACTIVE') comment_count
-                  FROM POST P JOIN MEMBER M ON M.member_id=P.member_id
+                 FROM POST P JOIN MEMBER M ON M.member_id=P.member_id
                  WHERE P.status='ACTIVE'
+                   AND P.is_pinned='N'
                    AND (? IS NULL OR P.category=?)
                    AND (? IS NULL OR P.genre=?)
                    AND (? IS NULL OR LOWER(P.title) LIKE ? OR LOWER(M.nickname) LIKE ?)
@@ -87,6 +89,7 @@ public class PostDAO {
         String sql = """
                 SELECT COUNT(*) FROM POST P JOIN MEMBER M ON M.member_id=P.member_id
                  WHERE P.status='ACTIVE'
+                   AND P.is_pinned='N'
                    AND (? IS NULL OR P.category=?)
                    AND (? IS NULL OR P.genre=?)
                    AND (? IS NULL OR LOWER(P.title) LIKE ? OR LOWER(M.nickname) LIKE ?)
@@ -94,6 +97,75 @@ public class PostDAO {
         try (PreparedStatement statement = conn.prepareStatement(sql)) {
             bindFilters(statement, category, genre, keyword);
             try (ResultSet rs = statement.executeQuery()) { rs.next(); return rs.getInt(1); }
+        }
+    }
+
+    public List<PostDTO> selectPinnedPosts(Connection conn, String category, String genre, String keyword,
+                                           String sort) throws SQLException {
+        String orderBy = switch (sort) {
+            case "likes" -> "like_count DESC,P.created_at DESC,P.post_id DESC";
+            case "views" -> "P.view_count DESC,P.created_at DESC,P.post_id DESC";
+            default -> "P.created_at DESC,P.post_id DESC";
+        };
+        String sql = """
+                SELECT P.post_id,P.member_id,P.tier_list_id,P.ideal_run_id,M.nickname member_nickname,
+                       P.category,P.title,P.genre,P.view_count,P.is_pinned,P.status,P.created_at,P.updated_at,
+                       (SELECT COUNT(*) FROM POST_LIKE L WHERE L.post_id=P.post_id) like_count,
+                       (SELECT COUNT(*) FROM POST_COMMENT C WHERE C.post_id=P.post_id AND C.status='ACTIVE') comment_count
+                  FROM POST P JOIN MEMBER M ON M.member_id=P.member_id
+                 WHERE P.status='ACTIVE' AND P.is_pinned='Y'
+                   AND (? IS NULL OR P.category=?)
+                   AND (? IS NULL OR P.genre=?)
+                   AND (? IS NULL OR LOWER(P.title) LIKE ? OR LOWER(M.nickname) LIKE ?)
+                 ORDER BY %s
+                """.formatted(orderBy);
+        List<PostDTO> posts = new ArrayList<>();
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
+            bindFilters(statement, category, genre, keyword);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) posts.add(mapPostListRow(rs));
+            }
+        }
+        return posts;
+    }
+
+    public List<PostDTO> selectAdminPostPage(Connection conn, String filter, int offset, int limit) throws SQLException {
+        String condition = switch (filter) {
+            case "private" -> "P.status IN ('HIDDEN', 'HIDDEN_BY_WRITER')";
+            case "pinned" -> "P.status = 'ACTIVE' AND P.is_pinned = 'Y'";
+            default -> "P.status = 'ACTIVE'";
+        };
+        String sql = """
+                SELECT P.post_id,P.member_id,P.tier_list_id,P.ideal_run_id,M.nickname member_nickname,
+                       P.category,P.title,P.genre,P.view_count,P.is_pinned,P.status,P.created_at,P.updated_at,
+                       (SELECT COUNT(*) FROM POST_LIKE L WHERE L.post_id=P.post_id) like_count,
+                       (SELECT COUNT(*) FROM POST_COMMENT C WHERE C.post_id=P.post_id AND C.status='ACTIVE') comment_count
+                  FROM POST P JOIN MEMBER M ON M.member_id=P.member_id
+                 WHERE %s
+                 ORDER BY P.post_id DESC
+                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+                """.formatted(condition);
+        List<PostDTO> posts = new ArrayList<>();
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
+            statement.setInt(1, offset);
+            statement.setInt(2, limit);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) posts.add(mapPostListRow(rs));
+            }
+        }
+        return posts;
+    }
+
+    public int countAdminPosts(Connection conn, String filter) throws SQLException {
+        String condition = switch (filter) {
+            case "private" -> "status IN ('HIDDEN', 'HIDDEN_BY_WRITER')";
+            case "pinned" -> "status = 'ACTIVE' AND is_pinned = 'Y'";
+            default -> "status = 'ACTIVE'";
+        };
+        try (PreparedStatement statement = conn.prepareStatement("SELECT COUNT(*) FROM POST WHERE " + condition);
+             ResultSet rs = statement.executeQuery()) {
+            rs.next();
+            return rs.getInt(1);
         }
     }
 
@@ -275,7 +347,7 @@ public class PostDAO {
                     status = 'DELETED_BY_ADMIN',
                     updated_at = SYSDATE
                 WHERE post_id = ?
-                  AND status = 'ACTIVE'
+                  AND status IN ('ACTIVE', 'HIDDEN', 'HIDDEN_BY_WRITER')
                 """;
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {

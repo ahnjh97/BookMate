@@ -34,7 +34,7 @@ public class PostService {
             int totalPages = Math.max(1, (int) Math.ceil(totalCount / (double) safeSize));
             safePage = Math.min(safePage, totalPages);
             String safeSort = switch (sort == null ? "" : sort) {
-                case "likes", "views" -> sort;
+                case "likes", "views", "adminLatest" -> sort;
                 default -> "latest";
             };
             List<PostDTO> posts = postDAO.selectPostPage(conn, category, genre, keyword, safeSort,
@@ -42,6 +42,38 @@ public class PostService {
             return new PostPageDTO(posts, safePage, safeSize, totalCount, totalPages);
         } catch (SQLException exception) {
             throw new RuntimeException("게시글 목록을 불러오지 못했습니다.", exception);
+        }
+    }
+
+    public List<PostDTO> getPinnedPosts(String category, String genre, String keyword, String sort) {
+        String safeSort = switch (sort == null ? "" : sort) {
+            case "likes", "views" -> sort;
+            default -> "latest";
+        };
+        try (Connection connection = DBUtil.getConnection()) {
+            return postDAO.selectPinnedPosts(connection, category, genre, keyword, safeSort);
+        } catch (SQLException exception) {
+            throw new RuntimeException("고정 게시글을 불러오지 못했습니다.", exception);
+        }
+    }
+
+    public PostPageDTO getAdminPostPage(int page, int pageSize, String filter) {
+        int safeSize = Math.min(Math.max(pageSize, 1), 50);
+        int safePage = Math.max(page, 1);
+        String safeFilter = switch (filter == null ? "public" : filter) {
+            case "private" -> "private";
+            case "pinned" -> "pinned";
+            default -> "public";
+        };
+        try (Connection connection = DBUtil.getConnection()) {
+            int totalCount = postDAO.countAdminPosts(connection, safeFilter);
+            int totalPages = Math.max(1, (int) Math.ceil(totalCount / (double) safeSize));
+            safePage = Math.min(safePage, totalPages);
+            return new PostPageDTO(
+                    postDAO.selectAdminPostPage(connection, safeFilter, (safePage - 1) * safeSize, safeSize),
+                    safePage, safeSize, totalCount, totalPages);
+        } catch (SQLException exception) {
+            throw new RuntimeException("관리자 게시글 목록을 불러오지 못했습니다.", exception);
         }
     }
 

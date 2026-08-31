@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>커뮤니티 | BookMate</title>
-    <link rel="stylesheet" href="/assets/css/style.css?v=20260830-4">
-    <link rel="stylesheet" href="/assets/css/post.css?v=20260831-6">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260831-5">
+    <link rel="stylesheet" href="/assets/css/post.css?v=20260831-12">
 </head>
 
 <body>
@@ -51,13 +51,18 @@
 
         <!-- 검색 및 게시글 작성 -->
         <div class="post-list-toolbar">
-            <form id="post-search-form" class="post-search-form" role="search">
+            <form id="post-search-form" class="post-search-form list-search-form" role="search">
                 <input id="post-keyword" type="search" placeholder="게시글 제목 또는 작성자 검색">
                 <button class="button button-primary" type="submit">검색</button>
             </form>
+        </div>
+
+        <div class="post-result-row">
+            <p id="post-result-message" class="post-result-message"></p>
             <div class="post-toolbar-actions">
-                <label class="post-sort-control" for="post-sort"><span class="sr-only">게시글 정렬</span>
-                    <select id="post-sort">
+                <span id="post-total-count" class="post-total-count"></span>
+                <label class="post-sort-control" for="post-sort">
+                    <select id="post-sort" aria-label="게시글 정렬">
                         <option value="latest">등록일순</option>
                         <option value="likes">좋아요순</option>
                         <option value="views">조회순</option>
@@ -66,8 +71,6 @@
                 <a class="button button-primary" href="/pages/post/create.html">게시글 작성</a>
             </div>
         </div>
-
-        <p id="post-result-message" class="post-result-message"></p>
 
         <!-- 게시글 목록 -->
         <div class="post-table-wrap">
@@ -98,7 +101,8 @@
 </main>
 
 <script src="/js/components/navbar.js" charset="UTF-8" defer></script>
-<script src="/js/components/list-pagination.js?v=20260831-2" defer></script>
-<script src="/js/pages/post-list.js?v=20260831-8" charset="UTF-8" defer></script>
+<script src="/js/components/list-pagination.js?v=20260831-3" defer></script>
+<script src="/js/components/bookshelf-visit.js?v=20260831-1" defer></script>
+<script src="/js/pages/post-list.js?v=20260831-18" charset="UTF-8" defer></script>
 </body>
 </html>

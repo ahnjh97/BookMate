@@ -45,12 +45,19 @@ public class PostListController extends HttpServlet {
         try {
             String rawPage = request.getParameter("page");
             if (rawPage != null) {
+                int requestedPageSize = parsePositive(request.getParameter("size"), 10);
+                var pinnedPosts = postService.getPinnedPosts(request.getParameter("category"),
+                        request.getParameter("genre"), request.getParameter("keyword"), request.getParameter("sort"));
+                int regularPageSize = Math.max(1, requestedPageSize - pinnedPosts.size());
                 var page = postService.getPostPage(request.getParameter("category"), request.getParameter("genre"),
                         request.getParameter("keyword"), request.getParameter("sort"), parsePositive(rawPage, 1),
-                        parsePositive(request.getParameter("size"), 10));
+                        regularPageSize);
                 response.setStatus(HttpServletResponse.SC_OK);
-                gson.toJson(Map.of("success", true, "posts", page.posts(), "page", page.page(),
-                        "pageSize", page.pageSize(), "totalCount", page.totalCount(), "totalPages", page.totalPages()),
+                gson.toJson(Map.of("success", true, "posts", page.posts(), "pinnedPosts", pinnedPosts,
+                        "page", page.page(), "pageSize", requestedPageSize,
+                        "totalCount", page.totalCount() + pinnedPosts.size(),
+                        "paginationTotalCount", page.totalCount() + pinnedPosts.size(),
+                        "totalPages", page.totalPages()),
                         response.getWriter());
                 return;
             }

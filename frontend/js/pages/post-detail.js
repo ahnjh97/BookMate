@@ -25,7 +25,6 @@ const commentForm = document.querySelector("#post-comment-form");
 const commentContentElement = document.querySelector("#post-comment-content");
 const commentSubmitButton = document.querySelector("#post-comment-submit");
 const commentLengthElement = document.querySelector("#post-comment-length");
-const commentLoginMessageElement = document.querySelector("#post-comment-login-message");
 const commentStatusElement = document.querySelector("#post-comment-status");
 const commentListElement = document.querySelector("#post-comment-list");
 const commentCountElement = document.querySelector("#post-comment-count");
@@ -258,9 +257,11 @@ function renderPost(post, likeCount) {
         post.genre ||
         "장르 없음";
 
-    writerElement.textContent =
-        post.memberNickname ||
-        "알 수 없음";
+    window.BookMateBookshelfVisit.render(
+        writerElement,
+        post.memberNickname || "알 수 없음",
+        post.memberId
+    );
 
     viewCountElement.textContent =
         post.viewCount ?? 0;
@@ -324,14 +325,13 @@ function renderActions(post, auth, tierList, worldcupResult, liked) {
 
 /* 6. 댓글 작성 영역 표시 */
 function renderCommentForm(auth) {
-    const loggedIn =
-        Boolean(auth?.loggedIn);
+    commentForm.hidden = false;
+}
 
-    commentForm.hidden =
-        !loggedIn;
-
-    commentLoginMessageElement.hidden =
-        loggedIn;
+function requireCommentLogin() {
+    if (currentMember?.loggedIn) return true;
+    window.BookMateLoginPrompt.show();
+    return false;
 }
 
 /* 7. 댓글 목록 조회 */
@@ -385,9 +385,8 @@ function renderComments(comments) {
         comments.length;
 
     if (comments.length === 0) {
-        commentStatusElement.hidden = false;
-        commentStatusElement.textContent =
-            "등록된 댓글이 없습니다.";
+        commentStatusElement.hidden = true;
+        commentStatusElement.textContent = "";
         return;
     }
 
@@ -414,12 +413,13 @@ function renderComments(comments) {
         header.className =
             "post-comment-item-header";
 
-        const writer =
-            document.createElement("strong");
-
-        writer.textContent =
-            comment.memberNickname ||
-            "알 수 없음";
+        const writer = document.createElement("span");
+        writer.className = "post-comment-member";
+        window.BookMateBookshelfVisit.render(
+            writer,
+            comment.memberNickname || "알 수 없음",
+            comment.memberId
+        );
 
         const headerRight =
             document.createElement("div");
@@ -443,6 +443,7 @@ function renderComments(comments) {
 
         if (currentMember?.loggedIn) {
             if (loginMemberId === commentWriterId) {
+                item.classList.add("is-my-comment");
                 const editButton =
                     document.createElement("button");
 
@@ -936,6 +937,8 @@ commentForm.addEventListener(
     async event => {
         event.preventDefault();
 
+        if (!requireCommentLogin()) return;
+
         if (!currentPost) {
             return;
         }
@@ -1002,6 +1005,11 @@ commentContentElement.addEventListener(
     "input",
     updateCommentLength
 );
+
+commentContentElement.addEventListener("focus", () => {
+    if (requireCommentLogin()) return;
+    commentContentElement.blur();
+});
 
 function updateCommentLength() {
     commentLengthElement.textContent =
