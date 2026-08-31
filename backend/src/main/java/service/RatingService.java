@@ -23,20 +23,24 @@ public class RatingService {
         }
     }
 
-    public RatingPageDTO findPublicRatings(long bookId, int page, int pageSize) {
+    public RatingPageDTO findPublicRatings(long bookId, int page, int pageSize, Integer score) {
         if (bookId <= 0) throw new IllegalArgumentException("올바른 책 번호가 필요합니다.");
         if (page <= 0) throw new IllegalArgumentException("페이지 번호는 1 이상이어야 합니다.");
         if (pageSize <= 0 || pageSize > 20) throw new IllegalArgumentException("페이지 크기는 1~20이어야 합니다.");
+        if (score != null && (score < 1 || score > 5)) {
+            throw new IllegalArgumentException("별점은 1~5점이어야 합니다.");
+        }
 
         try (Connection connection = DBUtil.getConnection()) {
             if (!ratingDAO.existsApprovedBook(connection, bookId)) {
                 throw new NoSuchElementException("책을 찾을 수 없습니다.");
             }
-            int totalCount = ratingDAO.countRatingsByBook(connection, bookId);
+            int totalCount = ratingDAO.countRatingsByBook(connection, bookId, score);
             int totalPages = Math.max(1, (totalCount + pageSize - 1) / pageSize);
             int safePage = Math.min(page, totalPages);
             return new RatingPageDTO(
-                    ratingDAO.selectRatingsByBook(connection, bookId, (safePage - 1) * pageSize, pageSize),
+                    ratingDAO.selectRatingsByBook(
+                            connection, bookId, score, (safePage - 1) * pageSize, pageSize),
                     safePage,
                     pageSize,
                     totalCount,

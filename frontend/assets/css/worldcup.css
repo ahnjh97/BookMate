@@ -34,6 +34,17 @@
   gap: 10px;
   flex-wrap: wrap;
 }
+.worldcup-play-actions {
+  justify-content: flex-end;
+  gap: 12px;
+}
+.worldcup-stats-spacing {
+  margin-right: 42px;
+}
+.worldcup-start-action {
+  display: flex;
+  justify-content: center;
+}
 .worldcup-search {
   display: flex;
   gap: 8px;
@@ -77,7 +88,7 @@
   flex: 0 0 160px;
   overflow: hidden;
   height: 160px;
-  background: linear-gradient(135deg, #d8f4f0, #dcecff);
+  background: linear-gradient(135deg, #dff6fb, #e8efff);
   display: grid;
   place-items: center;
   position: relative;
@@ -124,7 +135,7 @@
 }
 .worldcup-cover b {
   font-size: 1.6rem;
-  color: #217c78;
+  color: var(--color-primary-dark);
 }
 .worldcup-card-body {
   position: relative;
@@ -165,6 +176,14 @@
   background: #dff6fb;
   font-size: 0.82rem;
   font-weight: 700;
+}
+.worldcup-category-badge.category-genre {
+  color: #087b96;
+  background: #dff6fb;
+}
+.worldcup-category-badge.category-default {
+  color: #53606d;
+  background: #edf0f3;
 }
 .worldcup-count {
   margin-left: 5px;
@@ -230,6 +249,44 @@
   justify-content: space-between;
   gap: 15px;
 }
+
+.worldcup-create-page #worldcup-filter-label[hidden],
+.worldcup-create-page #worldcup-form-message:empty {
+  display: none;
+}
+
+.worldcup-create-page #worldcup-template-title,
+.worldcup-create-page #worldcup-template-category,
+.worldcup-create-page #worldcup-template-filter,
+.worldcup-create-page #worldcup-template-description {
+  border-color: #c9e5ea;
+  color: var(--color-text);
+  background: rgb(255 255 255 / 88%);
+  box-shadow: inset 0 1px 2px rgb(20 91 106 / 4%);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+}
+
+.worldcup-create-page #worldcup-template-title:focus,
+.worldcup-create-page #worldcup-template-category:focus,
+.worldcup-create-page #worldcup-template-filter:focus,
+.worldcup-create-page #worldcup-template-description:focus {
+  border-color: var(--color-primary);
+  background: #fff;
+  outline: 0;
+  box-shadow: 0 0 0 3px rgb(15 163 193 / 13%);
+}
+
+.worldcup-create-page #worldcup-template-category,
+.worldcup-create-page #worldcup-template-filter {
+  color: #126f84;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.worldcup-create-page #worldcup-template-description {
+  resize: vertical;
+  line-height: 1.65;
+}
 .round-picker {
   display: flex;
   gap: 14px;
@@ -253,9 +310,9 @@
   font-weight: 900;
 }
 .round-choice input:checked + span {
-  border-color: #1d9992;
-  background: #e7f8f5;
-  color: #126d68;
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  color: var(--color-primary-dark);
 }
 .versus {
   display: grid;
@@ -267,16 +324,15 @@
 }
 .versus-card {
   cursor: pointer;
-  border: 2px solid transparent;
+  border: 0;
   border-radius: 20px;
-  background: #fff;
-  box-shadow: 0 12px 35px #142c3817;
+  background: transparent;
+  box-shadow: none;
   padding: 22px;
   text-align: center;
   transition: 0.18s;
 }
 .versus-card:hover {
-  border-color: #20a99f;
   transform: translateY(-5px);
 }
 .versus-card img {
@@ -296,10 +352,22 @@
 .vs-mark {
   font-size: 1.5rem;
   font-weight: 1000;
-  color: #23a59d;
+  color: var(--color-primary);
 }
 .match-progress {
   text-align: center;
+}
+.match-progress strong {
+  display: block;
+  color: var(--color-primary-dark);
+  font-size: clamp(1.7rem, 3vw, 2.35rem);
+  font-weight: 900;
+}
+.match-progress p {
+  margin: 5px 0 15px;
+  color: var(--color-text);
+  font-size: 1.08rem;
+  font-weight: 750;
 }
 .progress-track {
   height: 8px;
@@ -310,99 +378,255 @@
 .progress-track i {
   display: block;
   height: 100%;
-  background: #25aaa0;
+  background: var(--color-primary);
   transition: 0.25s;
 }
 .winner-hero {
   text-align: center;
-  margin: 25px auto 42px;
+  margin: 25px auto 14px;
+}
+.winner-hero > p {
+  margin: 0 0 16px;
+  color: var(--color-primary-dark);
+  font-size: 1.45rem;
+  font-weight: 900;
 }
 .winner-hero a {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  flex-direction: column;
   color: inherit;
   text-decoration: none;
 }
 .winner-hero img {
-  width: 150px;
+  display: block;
+  width: 125px;
   aspect-ratio: 2/3;
   object-fit: cover;
   border-radius: 12px;
   box-shadow: 0 12px 30px #102b3a30;
 }
 .winner-hero h2 {
+  display: block;
   font-size: 2rem;
   margin: 12px 0 5px;
+  color: #079fbd;
+  background: linear-gradient(100deg, #00b8d4 0%, #1689f2 32%, #5b5df0 62%, #d946b9 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 .bracket-scroll {
-  overflow-x: auto;
-  padding: 12px 5px 25px;
+  overflow-x: visible;
+  padding: 4px 8px 28px;
 }
 .bracket {
   display: flex;
-  gap: 56px;
-  min-width: max-content;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
   align-items: stretch;
 }
 .bracket-round {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  gap: 18px;
-  width: 230px;
+  width: 100%;
 }
 .bracket-round h3 {
   text-align: center;
-  margin: 0 0 8px;
-  position: sticky;
-  top: 0;
+  margin: 0 0 10px;
+  color: var(--color-primary-dark);
+  font-size: 0.95rem;
+}
+.bracket-round-matches {
+  display: grid;
+  grid-template-columns: repeat(var(--match-count), minmax(0, 1fr));
+  gap: 12px;
 }
 .bracket-match {
-  position: relative;
-  border: 1px solid #d5e2e5;
-  border-radius: 12px;
-  background: #fff;
-  padding: 8px;
-  box-shadow: 0 5px 15px #18323c0d;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
 }
-.bracket-match:after {
+.bracket-connectors {
+  display: grid;
+  grid-template-columns: repeat(var(--branch-count), minmax(0, 1fr));
+  height: 30px;
+}
+.bracket-connectors > span {
+  position: relative;
+}
+.bracket-connectors > span::before {
   content: "";
   position: absolute;
-  left: 100%;
-  top: 50%;
-  width: 57px;
-  border-top: 2px solid #b5d0d4;
+  top: 14px;
+  left: 25%;
+  width: 50%;
+  border-top: 2px solid #7bcbd8;
 }
-.bracket-round:last-child .bracket-match:after {
-  display: none;
+.bracket-connectors i {
+  position: absolute;
+  width: 0;
+  border-left: 2px solid #7bcbd8;
+}
+.bracket-connectors i:first-child {
+  top: 0;
+  bottom: 16px;
+  left: 50%;
+}
+.bracket-connectors i:nth-child(2) {
+  top: 14px;
+  bottom: 0;
+  left: 25%;
+}
+.bracket-connectors i:last-child {
+  top: 14px;
+  bottom: 0;
+  left: 75%;
 }
 .bracket-entry {
+  position: relative;
   display: flex;
+  width: 60px;
   align-items: center;
-  gap: 8px;
-  padding: 6px;
-  border-radius: 7px;
+  flex: 0 0 60px;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 0;
+  border-radius: 5px;
   color: inherit;
   text-decoration: none;
   transition: background-color 0.16s ease;
 }
 .bracket-entry:hover,
 .bracket-entry:focus-visible {
-  background: var(--color-primary-soft);
+  background: transparent;
   outline: none;
 }
 .bracket-entry + .bracket-entry {
-  border-top: 1px solid #edf1f2;
+  border: 0;
 }
 .bracket-entry.is-winner {
-  background: #e3f7f3;
+  background: transparent;
   font-weight: 900;
-  color: #14736d;
+  color: var(--color-primary-dark);
+}
+.bracket-entry.is-winner::after {
+  content: "승";
+  position: absolute;
+  top: -5px;
+  right: 0;
+  display: grid;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--color-primary);
+  box-shadow: 0 3px 8px rgb(15 163 193 / 24%);
+  font-size: 0.65rem;
+  font-weight: 900;
+  place-items: center;
+}
+.bracket-entry.is-winner img {
+  outline: 3px solid rgb(15 163 193 / 52%);
+  outline-offset: 2px;
 }
 .bracket-entry img {
-  width: 28px;
-  height: 38px;
+  width: 54px;
+  height: 78px;
+  flex: 0 0 auto;
   object-fit: cover;
   border-radius: 3px;
+}
+.bracket-entry span {
+  display: -webkit-box;
+  min-width: 0;
+  overflow: hidden;
+  width: 100%;
+  min-height: 2.7em;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  text-align: center;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.worldcup-toast {
+  position: fixed;
+  z-index: 10;
+  top: calc(var(--navbar-height) + 18px);
+  left: 50%;
+  margin: 0;
+  padding: 11px 17px;
+  border: 1px solid rgb(15 163 193 / 22%);
+  border-radius: 9px;
+  color: var(--color-primary-dark);
+  background: rgb(239 250 252 / 98%);
+  box-shadow: 0 10px 28px rgb(16 24 40 / 16%);
+  font-size: 0.9rem;
+  font-weight: 800;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -7px);
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+.worldcup-toast[data-visible="true"] {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.worldcup-share-dialog {
+  width: min(520px, calc(100% - 32px));
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  box-shadow: 0 20px 70px rgb(0 0 0 / 25%);
+}
+.worldcup-share-dialog::backdrop {
+  background: rgb(8 15 20 / 50%);
+}
+.worldcup-share-dialog form {
+  display: grid;
+  gap: 15px;
+  padding: 26px;
+}
+.worldcup-share-dialog h2,
+.worldcup-share-dialog p {
+  margin: 0;
+}
+.worldcup-share-dialog p {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+.worldcup-share-dialog label {
+  display: grid;
+  gap: 8px;
+  font-weight: 800;
+}
+.worldcup-share-dialog textarea {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  color: var(--color-text);
+  background: #fff;
+  font: inherit;
+  line-height: 1.6;
+  resize: vertical;
+}
+.worldcup-share-dialog textarea:focus {
+  border-color: var(--color-primary);
+  outline: 3px solid rgb(15 163 193 / 13%);
+}
+.worldcup-share-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 .stats-head {
   display: flex;
@@ -427,7 +651,8 @@
   text-align: center;
 }
 .stats-table th {
-  background: #eff8f7;
+  color: var(--color-primary-dark);
+  background: var(--color-primary-soft);
 }
 .stats-book {
   text-align: left !important;
@@ -464,5 +689,17 @@
   }
   .round-choice span {
     padding: 18px 26px;
+  }
+  .worldcup-stats-spacing {
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .bracket-scroll {
+    overflow-x: auto;
+  }
+  .bracket {
+    min-width: 900px;
   }
 }

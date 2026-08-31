@@ -14,6 +14,7 @@ public class PostDTO {
     private long postId;
     private long memberId;
     private Long tierListId;
+    private Long idealRunId;
     private String memberNickname;
     private String category;
     private String title;

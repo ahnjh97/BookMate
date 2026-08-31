@@ -3,25 +3,38 @@ const id = new URLSearchParams(location.search).get("id"),
   desc = document.querySelector("#description"),
   setup = document.querySelector("#setup"),
   game = document.querySelector("#game"),
-  versus = document.querySelector("#versus");
+  versus = document.querySelector("#versus"),
+  previousResult = document.querySelector("#previous-result"),
+  resultToast = document.querySelector("#result-toast");
 let template, roundSize, current = [], next = [], matchIndex = 0, allMatches = [], totalMatches = 0, done = 0;
+let toastTimer = null;
 async function load() {
   try {
     const r = await fetch(`/api/worldcup/templates?id=${id}`), d = await r.json();
     if (!r.ok) throw new Error(d.message);
     template = d.template;
     if (template.participated && template.runId) {
-      const previousResult = document.querySelector("#previous-result");
       previousResult.href = `/pages/worldcup/result.html?id=${template.runId}`;
-      previousResult.hidden = false;
     }
-    title.textContent = template.title;
+    title.innerHTML = `<span class="page-title-icon page-title-icon-trophy" aria-hidden="true"></span>${esc(template.title)}`;
     desc.textContent = template.description || "더 마음에 드는 책을 선택하세요.";
-    document.querySelector("#stats-link").href = `/pages/worldcup/stats.html?id=${id}`;
     if (template.items.length < 16) document.querySelector("input[value=\"16\"]").disabled = true;
   } catch (e) {
     document.querySelector("#setup-message").textContent = e.message;
   }
+}
+previousResult.addEventListener("click", event => {
+  if (template?.participated && template.runId) return;
+  event.preventDefault();
+  showResultToast("참여 내역이 없습니다.");
+});
+function showResultToast(message) {
+  clearTimeout(toastTimer);
+  resultToast.textContent = message;
+  resultToast.dataset.visible = "true";
+  toastTimer = window.setTimeout(() => {
+    resultToast.dataset.visible = "false";
+  }, 2400);
 }
 document.querySelector("#start").onclick = () => {
   const size = Number(document.querySelector("input[name=\"size\"]:checked").value);

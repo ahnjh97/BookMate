@@ -1,6 +1,11 @@
 const grid = document.getElementById("template-grid");
 const participationButtons = document.querySelectorAll(".book-category-tabs [data-participation]");
 let templates = [], selectedParticipation = "all";
+const pagination = window.BookMateListPagination.create({
+  root: document.getElementById("tier-pagination"),
+  pageSize: 8,
+  onRender: renderTemplates,
+});
 document.getElementById("template-reset-button").addEventListener("click", () => {
   selectedParticipation = "all";
   participationButtons.forEach((button, index) => {
@@ -28,7 +33,7 @@ function renderFilteredTemplates() {
   const filtered = templates.filter(t =>
     selectedParticipation === "all" || (selectedParticipation === "participated" ? t.participated : !t.participated)
   );
-  renderTemplates(filtered);
+  pagination.setItems(filtered);
 }
 function renderTemplates(items) {
   grid.replaceChildren();

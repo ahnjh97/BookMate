@@ -9,6 +9,9 @@ const createdAtElement = document.querySelector("#post-created-at");
 const contentElement = document.querySelector("#post-content");
 const tierListElement = document.querySelector("#post-tier-list");
 const tierBoardElement = document.querySelector("#post-tier-board");
+const worldcupResultElement = document.querySelector("#post-worldcup-result");
+const worldcupHeadingElement = document.querySelector("#post-worldcup-heading");
+const worldcupWinnerElement = document.querySelector("#post-worldcup-winner");
 const likeCountElement = document.querySelector("#post-like-count");
 const writerActions = document.querySelector("#writer-actions");
 const memberActions = document.querySelector("#member-actions");
@@ -24,7 +27,8 @@ const categoryNames = {
     RECOMMEND: "추천",
     REVIEW: "리뷰",
     TIER: "티어리스트",
-    AUTHOR: "작가"
+    AUTHOR: "작가",
+    WORLDCUP: "이상형월드컵"
 };
 
 let currentPost = null;
@@ -41,12 +45,15 @@ async function loadPostDetail() {
     }
 
     try {
-        const [postResponse, sessionResult] = await Promise.all([
+        const [postResponse, sessionResponse] = await Promise.all([
             fetch(`/api/posts/detail?postId=${encodeURIComponent(postId)}`),
-            authApi.checkSession().catch(() => ({ loggedIn: false }))
+            fetch("/api/auth/session", { cache: "no-store" })
         ]);
 
         const postResult = await postResponse.json();
+        const sessionResult = sessionResponse.ok
+            ? await sessionResponse.json()
+            : { loggedIn: false };
 
         if (!postResponse.ok || !postResult.success) {
             throw new Error(
@@ -58,9 +65,13 @@ async function loadPostDetail() {
         currentPost = postResult.post;
         currentMember = sessionResult;
 
-        renderPost(currentPost);
+        currentPost = postResult.post;
+        currentMember = sessionResult;
+
+        renderPost(currentPost, postResult.likeCount);
         renderTierList(postResult.tierList);
-        renderActions(currentPost, currentMember, postResult.tierList);
+        renderWorldcupResult(postResult.worldcupResult);
+        renderActions(currentPost, currentMember, postResult.tierList, postResult.worldcupResult, postResult.liked);
     } catch (error) {
         console.error(error);
         showError(
@@ -68,6 +79,24 @@ async function loadPostDetail() {
             "게시글을 불러오지 못했습니다."
         );
     }
+}
+
+function renderWorldcupResult(result) {
+    worldcupWinnerElement.replaceChildren();
+    worldcupResultElement.hidden = !result;
+    detailElement.classList.toggle("has-worldcup-result", Boolean(result));
+    if (!result) return;
+    worldcupHeadingElement.textContent = `${result.title} 결과`;
+    const finalMatch = (result.matches || []).find(match => match.roundSize === 2);
+    if (!finalMatch) return;
+    const winner = finalMatch.winner;
+    const link = document.createElement("a");
+    link.className = "post-worldcup-winner";
+    link.href = `/pages/worldcup/result.html?id=${encodeURIComponent(result.runId)}`;
+    link.innerHTML = `${winner.imageUrl ? `<img src="${escapeHtml(winner.imageUrl)}" alt="">` : ""}`
+        + `<span><small class="post-worldcup-winner-label">최종 우승</small><strong>${escapeHtml(winner.title)}</strong>`
+        + `<b>전체 대진표 보기</b></span>`;
+    worldcupWinnerElement.append(link);
 }
 
 function renderTierList(tierList) {
@@ -102,7 +131,7 @@ function renderTierList(tierList) {
 }
 
 /* 2. 게시글 내용 출력 */
-function renderPost(post) {
+function renderPost(post, likeCount) {
     document.title = `${post.title} | BookMate`;
 
     titleElement.textContent = post.title;
@@ -129,7 +158,7 @@ function renderPost(post) {
 }
 
 /* 3. 로그인 상태와 작성자에 따라 버튼 표시 */
-function renderActions(post, auth, tierList) {
+function renderActions(post, auth, tierList, worldcupResult, liked) {
     writerActions.hidden = true;
     memberActions.hidden = true;
 
@@ -148,14 +177,16 @@ function renderActions(post, auth, tierList) {
         writerActions.hidden = false;
         editLink.href = tierList?.templateId
             ? `/pages/tier/maker.html?id=${encodeURIComponent(tierList.templateId)}`
-            : `/pages/post/update.html?postId=${post.postId}`;
+            : worldcupResult?.runId
+                ? `/pages/worldcup/result.html?id=${encodeURIComponent(worldcupResult.runId)}`
+                : `/pages/post/update.html?postId=${post.postId}`;
         return;
     }
 
     memberActions.hidden = false;
+    likeButton.textContent = liked ? "좋아요 취소" : "좋아요";
 }
 
-/* 4. 게시글 숨김 */
 /* 4. 게시글 숨김 */
 hideButton.addEventListener("click", async () => {
     if (!currentPost) {
@@ -236,9 +267,35 @@ deleteButton.addEventListener("click", async () => {
     }
 });
 
-/* 6. 좋아요 */
-likeButton.addEventListener("click", () => {
-    alert("좋아요 기능은 좋아요 테이블과 API 연결 후 사용할 수 있습니다.");
+/* 6. 게시글 좋아요 */
+likeButton.addEventListener("click", async () => {
+    if (!currentPost) {
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/posts/like", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json;charset=UTF-8"
+            },
+            body: JSON.stringify({
+                postId: currentPost.postId
+            })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            throw new Error(result.message || "좋아요 처리에 실패했습니다.");
+        }
+
+        likeCountElement.textContent = result.likeCount;
+        likeButton.textContent = result.liked ? "좋아요 취소" : "좋아요";
+    } catch (error) {
+        console.error(error);
+        alert(error.message || "좋아요 처리 중 오류가 발생했습니다.");
+    }
 });
 
 /* 7. 신고 */
@@ -271,6 +328,14 @@ function toDateTimeAttribute(value) {
     return String(value)
         .substring(0, 19)
         .replace(" ", "T");
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
 }
 
 /* 11. 게시글 상세 초기 실행 */

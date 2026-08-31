@@ -21,7 +21,7 @@ async function loadHomeBooks() {
     renderHomeBooks(booksResult.data.books);
 
     const bookStat = document.querySelector('[data-home-stat="books"]');
-    if (bookStat.textContent === "-") {
+    if (bookStat && bookStat.textContent === "-") {
       bookStat.textContent = `${numberFormatter.format(booksResult.data.books.length)}${booksResult.data.hasMore ? "+" : ""}`;
     }
   } catch (error) {
@@ -30,9 +30,18 @@ async function loadHomeBooks() {
 }
 
 function renderSummary(summary) {
-  document.querySelector('[data-home-stat="books"]').textContent = numberFormatter.format(summary.bookCount);
-  document.querySelector('[data-home-stat="ratings"]').textContent = numberFormatter.format(summary.ratingCount);
-  document.querySelector('[data-home-stat="tiers"]').textContent = numberFormatter.format(summary.tierListCount);
+  document.querySelector('[data-home-stat="books"]').textContent =
+    `${numberFormatter.format(summary.bookCount)}권`;
+  document.querySelector('[data-home-stat="ratings"]').textContent =
+    `${numberFormatter.format(summary.ratingCount)}개`;
+  document.querySelector('[data-home-stat="tier-templates"]').textContent =
+    `${numberFormatter.format(summary.tierTemplateCount)}개`;
+  document.querySelector('[data-home-stat="tier-participations"]').textContent =
+    `${numberFormatter.format(summary.tierParticipationCount)}회`;
+  document.querySelector('[data-home-stat="worldcup-templates"]').textContent =
+    `${numberFormatter.format(summary.worldcupTemplateCount)}개`;
+  document.querySelector('[data-home-stat="worldcup-participations"]').textContent =
+    `${numberFormatter.format(summary.worldcupParticipationCount)}회`;
 }
 
 function renderHomeBooks(books) {

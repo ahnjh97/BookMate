@@ -189,10 +189,14 @@ public class TierService {
     String listSql =
         """
         SELECT * FROM (
-            SELECT tier_list_id, title, description, is_public, created_at
-              FROM TIER_LIST
-             WHERE member_id = ? AND template_id = ?
-             ORDER BY created_at DESC, tier_list_id DESC
+            SELECT L.tier_list_id, L.title, L.description, L.created_at,
+                   CASE WHEN EXISTS (
+                     SELECT 1 FROM POST P
+                      WHERE P.tier_list_id=L.tier_list_id AND P.status='ACTIVE'
+                   ) THEN 'Y' ELSE 'N' END publish_to_community
+              FROM TIER_LIST L
+             WHERE L.member_id = ? AND L.template_id = ?
+             ORDER BY L.created_at DESC, L.tier_list_id DESC
         ) WHERE ROWNUM = 1
         """;
     String itemSql =
@@ -213,7 +217,9 @@ public class TierService {
         tierList.put("tierListId", tierListId);
         tierList.put("title", repairLegacyUtf8(resultSet.getString("title")));
         tierList.put("description", repairLegacyUtf8(resultSet.getString("description")));
-        tierList.put("isPublic", "Y".equals(resultSet.getString("is_public")));
+        tierList.put(
+            "publishToCommunity",
+            "Y".equals(resultSet.getString("publish_to_community")));
         tierList.put("createdAt", resultSet.getTimestamp("created_at"));
         List<Map<String, Object>> placements = new ArrayList<>();
         try (PreparedStatement itemStatement = connection.prepareStatement(itemSql)) {
@@ -236,13 +242,20 @@ public class TierService {
     }
   }
 
-  public Map<String, Object> findPublicTierList(long tierListId) {
+  public Map<String, Object> findTierList(long tierListId) {
     if (tierListId <= 0) return null;
     String headerSql =
         """
-        SELECT L.tier_list_id, L.template_id, L.title, L.description, M.nickname
-          FROM TIER_LIST L JOIN MEMBER M ON M.member_id = L.member_id
-         WHERE L.tier_list_id = ? AND L.is_public = 'Y'
+        SELECT L.tier_list_id, L.template_id, L.member_id, L.title, L.description,
+               T.description template_description, M.nickname,
+               CASE WHEN EXISTS (
+                 SELECT 1 FROM POST P
+                  WHERE P.tier_list_id=L.tier_list_id AND P.status='ACTIVE'
+               ) THEN 'Y' ELSE 'N' END published_to_community
+          FROM TIER_LIST L
+          JOIN MEMBER M ON M.member_id = L.member_id
+          JOIN TIER_TEMPLATE T ON T.template_id = L.template_id
+         WHERE L.tier_list_id = ?
         """;
     String itemSql =
         """
@@ -262,8 +275,13 @@ public class TierService {
         if (!rs.next()) return null;
         result.put("tierListId", rs.getLong("tier_list_id"));
         result.put("templateId", rs.getLong("template_id"));
+        result.put("memberId", rs.getLong("member_id"));
+        result.put(
+            "publishedToCommunity",
+            "Y".equals(rs.getString("published_to_community")));
         result.put("title", rs.getString("title"));
         result.put("description", rs.getString("description"));
+        result.put("templateDescription", rs.getString("template_description"));
         result.put("memberNickname", rs.getString("nickname"));
       }
       List<Map<String, Object>> items = new ArrayList<>();
@@ -285,18 +303,16 @@ public class TierService {
       result.put("items", items);
       return result;
     } catch (SQLException e) {
-      throw new RuntimeException("공개 티어리스트를 불러오지 못했습니다.", e);
+      throw new RuntimeException("티어리스트를 불러오지 못했습니다.", e);
     }
   }
 
   public long saveTierList(
       long memberId,
       long templateId,
-      String title,
       String description,
-      boolean isPublic,
+      boolean publishToCommunity,
       List<Placement> placements) {
-    String safeTitle = required(title, "티어리스트 제목", 200);
     String safeDescription = optional(description, 1000);
     if (placements == null || placements.isEmpty())
       throw new IllegalArgumentException("배치한 책이 없습니다.");
@@ -309,12 +325,14 @@ public class TierService {
     try (Connection connection = DBUtil.getConnection()) {
       connection.setAutoCommit(false);
       try {
+        String safeTitle;
         try (PreparedStatement check =
             connection.prepareStatement(
-                "SELECT 1 FROM TIER_TEMPLATE WHERE template_id=? AND status='APPROVED'")) {
+                "SELECT title FROM TIER_TEMPLATE WHERE template_id=? AND status='APPROVED'")) {
           check.setLong(1, templateId);
           try (ResultSet rs = check.executeQuery()) {
             if (!rs.next()) throw new IllegalArgumentException("사용할 수 없는 템플릿입니다.");
+            safeTitle = required(rs.getString("title"), "티어리스트 제목", 200);
           }
         }
         Long existingListId = null;
@@ -332,14 +350,13 @@ public class TierService {
         if (existingListId == null) {
           try (PreparedStatement statement =
               connection.prepareStatement(
-                  "INSERT INTO TIER_LIST(tier_list_id, member_id, template_id, title, description,"
-                      + " is_public) VALUES(SEQ_TIER_LIST.NEXTVAL,?,?,?,?,?)",
+                  "INSERT INTO TIER_LIST(tier_list_id, member_id, template_id, title, description)"
+                      + " VALUES(SEQ_TIER_LIST.NEXTVAL,?,?,?,?)",
                   new String[] {"tier_list_id"})) {
             statement.setLong(1, memberId);
             statement.setLong(2, templateId);
             statement.setString(3, safeTitle);
             statement.setString(4, safeDescription);
-            statement.setString(5, isPublic ? "Y" : "N");
             statement.executeUpdate();
             try (ResultSet keys = statement.getGeneratedKeys()) {
               keys.next();
@@ -350,12 +367,11 @@ public class TierService {
           listId = existingListId;
           try (PreparedStatement statement =
               connection.prepareStatement(
-                  "UPDATE TIER_LIST SET title=?, description=?, is_public=? WHERE"
+                  "UPDATE TIER_LIST SET title=?, description=? WHERE"
                       + " tier_list_id=?")) {
             statement.setString(1, safeTitle);
             statement.setString(2, safeDescription);
-            statement.setString(3, isPublic ? "Y" : "N");
-            statement.setLong(4, listId);
+            statement.setLong(3, listId);
             statement.executeUpdate();
           }
           try (PreparedStatement statement =
@@ -381,7 +397,13 @@ public class TierService {
               throw new IllegalArgumentException("템플릿에 없는 책이 포함되어 있습니다.");
           }
         }
-        syncTierPost(connection, memberId, listId, safeTitle, safeDescription, isPublic);
+        syncTierPost(
+            connection,
+            memberId,
+            listId,
+            safeTitle,
+            safeDescription,
+            publishToCommunity);
         connection.commit();
         return listId;
       } catch (Exception e) {
@@ -400,10 +422,20 @@ public class TierService {
       long tierListId,
       String title,
       String description,
-      boolean isPublic)
+      boolean publishToCommunity)
       throws SQLException {
-    String content = description == null ? title + " 티어리스트를 완성했습니다." : description;
-    String status = isPublic ? "ACTIVE" : "PRIVATE";
+    if (!publishToCommunity) {
+      try (PreparedStatement statement =
+          connection.prepareStatement("DELETE FROM POST WHERE tier_list_id=?")) {
+        statement.setLong(1, tierListId);
+        statement.executeUpdate();
+      }
+      return;
+    }
+    String content = description == null || description.isBlank()
+        ? title + " 티어리스트를 완성했습니다."
+        : description;
+    String postTitle = title + " 결과";
     String sql =
         """
         MERGE INTO POST P
@@ -411,25 +443,23 @@ public class TierService {
            ON (P.tier_list_id = S.tier_list_id)
          WHEN MATCHED THEN UPDATE SET
               P.member_id = ?, P.category = 'TIER', P.title = ?, P.content = ?,
-              P.genre = NULL, P.status = ?, P.updated_at = SYSDATE
+              P.genre = NULL, P.status = 'ACTIVE', P.updated_at = SYSDATE
          WHEN NOT MATCHED THEN INSERT (
               post_id, member_id, tier_list_id, category, title, content, genre,
               view_count, is_pinned, status, created_at
          ) VALUES (
-              SEQ_POST.NEXTVAL, ?, ?, 'TIER', ?, ?, NULL, 0, 'N', ?, SYSDATE
+              SEQ_POST.NEXTVAL, ?, ?, 'TIER', ?, ?, NULL, 0, 'N', 'ACTIVE', SYSDATE
          )
         """;
     try (PreparedStatement statement = connection.prepareStatement(sql)) {
       statement.setLong(1, tierListId);
       statement.setLong(2, memberId);
-      statement.setString(3, title);
+      statement.setString(3, postTitle);
       statement.setString(4, content);
-      statement.setString(5, status);
-      statement.setLong(6, memberId);
-      statement.setLong(7, tierListId);
-      statement.setString(8, title);
-      statement.setString(9, content);
-      statement.setString(10, status);
+      statement.setLong(5, memberId);
+      statement.setLong(6, tierListId);
+      statement.setString(7, postTitle);
+      statement.setString(8, content);
       statement.executeUpdate();
     }
   }

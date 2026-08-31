@@ -16,10 +16,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadMembers();
   await loadPosts();
   await loadTierTemplates();
+  await loadWorldcupTemplates();
 
   const memberRefreshButton = document.getElementById("member-refresh-button");
   const postRefreshButton = document.getElementById("post-refresh-button");
   const tierRefreshButton = document.getElementById("tier-refresh-button");
+  const worldcupRefreshButton = document.getElementById("worldcup-refresh-button");
 
   if (memberRefreshButton) {
     memberRefreshButton.addEventListener("click", loadMembers);
@@ -29,6 +31,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     postRefreshButton.addEventListener("click", loadPosts);
   }
   if (tierRefreshButton) tierRefreshButton.addEventListener("click", loadTierTemplates);
+  if (worldcupRefreshButton) worldcupRefreshButton.addEventListener("click", loadWorldcupTemplates);
 });
 
 async function loadTierTemplates() {
@@ -92,6 +95,62 @@ async function reviewTierTemplate(templateId, approved) {
   }
 }
 
+async function loadWorldcupTemplates() {
+  const tbody = document.getElementById("worldcup-table-body");
+  if (!tbody) return;
+  try {
+    const response = await fetch("/api/admin/worldcup-templates", { credentials: "include" });
+    const data = await response.json();
+    if (!response.ok) {
+      handleApiError(response.status, data.message);
+      return;
+    }
+    const templates = data.templates || [];
+    tbody.innerHTML = templates.length
+      ? ""
+      : '<tr><td colspan="8" class="admin-empty">신청된 월드컵 템플릿이 없습니다.</td></tr>';
+    templates.forEach(template => {
+      const row = document.createElement("tr");
+      const pending = template.status === "PENDING";
+      row.innerHTML = `<td>${template.templateId}</td><td>${escapeHtml(template.creatorNickname)}</td>`
+        + `<td>${escapeHtml(template.category)}</td><td>${escapeHtml(template.title)}</td>`
+        + `<td>${template.itemCount}권</td><td><span class="admin-badge">${escapeHtml(template.status)}</span></td>`
+        + `<td>${formatValue(template.requestedAt)}</td><td>${pending
+          ? `<button class="admin-action-button" onclick="reviewWorldcupTemplate(${template.templateId}, true)">승인</button>
+             <button class="admin-action-button admin-action-danger" onclick="reviewWorldcupTemplate(${template.templateId}, false)">반려</button>`
+          : "처리 완료"}</td>`;
+      tbody.append(row);
+    });
+  } catch (error) {
+    console.error(error);
+    showMessage("월드컵 템플릿 신청을 불러오지 못했습니다.");
+  }
+}
+
+async function reviewWorldcupTemplate(templateId, approved) {
+  const reason = approved ? "" : prompt("반려 사유를 입력해 주세요.");
+  if (!approved && !reason) return;
+  if (approved && !confirm(`${templateId}번 월드컵 템플릿을 공개 승인할까요?`)) return;
+  try {
+    const response = await fetch("/api/admin/worldcup-templates", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ templateId, approved, reason }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      handleApiError(response.status, data.message);
+      return;
+    }
+    showMessage(data.message);
+    await loadWorldcupTemplates();
+  } catch (error) {
+    console.error(error);
+    showMessage("월드컵 템플릿 검토 결과를 저장하지 못했습니다.");
+  }
+}
+
 /*
  * =========================================
  * 관리자 페이지 접근 권한 확인
@@ -103,13 +162,7 @@ async function checkAdminAccess() {
     // 수정: authApi.checkSession()이 credentials/헤더 등을 대신 처리
     const auth = await authApi.checkSession().catch(() => null);
 
-    if (!auth) {
-      window.location.href = "/pages/auth/login.html";
-      return false;
-    }
-
-    if (!auth.loggedIn) {
-      alert("로그인이 필요합니다.");
+    if (!auth || !auth.loggedIn) {
       window.location.href = "/pages/auth/login.html";
       return false;
     }

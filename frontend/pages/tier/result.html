@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>티어리스트 결과 | BookMate</title>
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260830-5">
+  <link rel="stylesheet" href="/assets/css/tier.css?v=20260830-4">
+</head>
+<body>
+  <header class="site-header" data-navbar></header>
+  <main class="tier-page readonly-tier-page">
+    <div class="tier-container">
+      <header class="maker-heading">
+        <div>
+          <h1 id="result-title" class="page-gradient-title">티어리스트 결과</h1>
+          <p id="result-description"></p>
+        </div>
+        <a class="back-navigation" href="/pages/tier/list.html">← 티어리스트 목록으로</a>
+      </header>
+      <p id="result-owner" class="drag-help"></p>
+      <p id="result-status" class="tier-status">티어리스트를 불러오는 중입니다.</p>
+      <div id="result-board" class="tier-board" hidden></div>
+    </div>
+  </main>
+  <script src="/js/components/navbar.js" defer></script>
+  <script src="/js/pages/tier-result.js?v=20260830-2" defer></script>
+</body>
+</html>

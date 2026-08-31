@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>책 티어리스트 | BookMate</title>
-  <link rel="stylesheet" href="/assets/css/style.css?v=20260830-3">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260831-2">
   <link rel="stylesheet" href="/assets/css/book-list.css?v=20260830-3">
   <link rel="stylesheet" href="/assets/css/tier.css?v=20260830-6">
 </head>
@@ -15,7 +15,7 @@
     <div class="tier-container">
       <header class="tier-list-header">
         <button id="template-reset-button" class="page-gradient-title page-title-button" type="button">
-          <span class="page-title-icon page-title-icon-medal" aria-hidden="true"></span>티어리스트
+          <span class="page-title-icon page-title-icon-tier" aria-hidden="true"></span>티어리스트
         </button>
       </header>
 
@@ -30,10 +30,17 @@
         </a>
       </div>
       <div id="template-grid" class="template-grid"></div>
+      <nav id="tier-pagination" class="list-pagination" aria-label="티어리스트 목록 페이지">
+        <button class="button button-outline" type="button" data-pagination-prev>이전</button>
+        <div class="list-page-numbers" data-pagination-numbers aria-live="polite"></div>
+        <button class="button button-outline" type="button" data-pagination-next>다음</button>
+      </nav>
     </div>
   </main>
 
-  <script type="module" src="/js/components/navbar.js" defer></script>
-  <script src="/js/pages/tier-list.js?v=20260830-3" defer></script>
+  <script src="/js/components/navbar.js" defer></script>
+  <script src="/js/components/flash-toast.js?v=20260831-1" defer></script>
+  <script src="/js/components/list-pagination.js?v=20260831-1" defer></script>
+  <script src="/js/pages/tier-list.js?v=20260831-1" defer></script>
 </body>
 </html>

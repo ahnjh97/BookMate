@@ -343,6 +343,14 @@
   border-radius: 5px;
   background: #e7ebee;
 }
+
+.readonly-tier-page .tier-book {
+  cursor: pointer;
+}
+
+.readonly-tier-page .tier-dropzone {
+  cursor: default;
+}
 .tier-book span {
   display: block;
   overflow: hidden;
@@ -375,8 +383,68 @@
 }
 .check-line {
   display: flex !important;
-  grid-template-columns: auto 1fr !important;
   align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  width: 100%;
+  padding: 13px 15px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  color: var(--color-text);
+  background: #f8fbfc;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background-color 0.18s ease;
+}
+.check-line input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+}
+.community-share-copy {
+  display: grid;
+  gap: 3px;
+}
+.community-share-copy strong {
+  font-size: 0.93rem;
+}
+.community-share-copy small {
+  color: var(--color-muted);
+  font-size: 0.79rem;
+  font-weight: 500;
+}
+.community-share-switch {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  flex: 0 0 42px;
+  border-radius: 999px;
+  background: #cbd5da;
+  transition: background-color 0.18s ease;
+}
+.community-share-switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 5px rgb(16 24 40 / 20%);
+  transition: transform 0.18s ease;
+}
+.check-line:has(input:checked) {
+  border-color: rgb(15 163 193 / 32%);
+  background: var(--color-primary-soft);
+}
+.check-line input:checked + .community-share-switch {
+  background: var(--color-primary);
+}
+.check-line input:checked + .community-share-switch::after {
+  transform: translateX(18px);
 }
 .dialog-actions {
   display: flex;
@@ -765,6 +833,9 @@
 }
 .tier-book img {
   height: 62px;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 .tier-book span {
   min-height: 30px;
@@ -1001,9 +1072,9 @@
 }
 .tier-create-page .template-form {
   gap: 18px;
-  border-color: #bfe4eb;
-  background: linear-gradient(145deg, #fbfeff 0%, #f2fbfd 48%, #eaf8fb 100%);
-  box-shadow: 0 12px 34px rgb(15 163 193/9%);
+  border-color: var(--color-border);
+  background: #fff;
+  box-shadow: none;
 }
 .tier-create-page .template-form > label, .tier-create-page .form-row > label {
   gap: 9px;

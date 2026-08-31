@@ -1,5 +1,3 @@
-import { authApi } from "/js/api/authApi.js";
-
 const form = document.querySelector("#post-create-form");
 const message = document.querySelector("#message");
 const category = document.querySelector("#category");
@@ -16,7 +14,8 @@ let isRedirecting = false;
 /* 1. 로그인 여부 확인 */
 async function checkLogin() {
     try {
-        const auth = await authApi.checkSession().catch(() => ({ loggedIn: false }));
+        const response = await fetch("/api/auth/session", { cache: "no-store" });
+        const auth = response.ok ? await response.json() : { loggedIn: false };
 
         if (auth.loggedIn) {
             postCreatePage.hidden = false;

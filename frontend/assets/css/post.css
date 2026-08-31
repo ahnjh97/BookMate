@@ -354,6 +354,13 @@
 }
 
 /* 아래 영역은 기존 게시글 상세 페이지 스타일을 유지합니다. */
+.post-detail-back {
+  display: flex;
+  width: min(900px, 100%);
+  margin: 0 auto 14px;
+  justify-content: flex-start;
+}
+
 .post-detail {
   width: min(900px, 100%);
   margin: 0 auto;
@@ -400,6 +407,57 @@
   min-height: 0;
   padding: 22px 0 14px;
 }
+.post-detail.has-worldcup-result .post-detail-content {
+  min-height: 0;
+  padding: 22px 0 14px;
+}
+.post-worldcup-result {
+  width: min(500px, 100%);
+  margin: 0 auto 26px;
+  padding: 20px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  border: 1px solid #c9e6ed;
+  background: #edf9fc;
+}
+.post-worldcup-result h2 {
+  margin: 0 0 14px;
+  font-size: 1.2rem;
+  text-align: center;
+}
+.post-worldcup-winner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: inherit;
+}
+.post-worldcup-winner img {
+  width: 72px;
+  height: 104px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.post-worldcup-winner span {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  text-align: center;
+}
+.post-worldcup-winner small {
+  color: var(--color-muted);
+  font-weight: 900;
+}
+.post-worldcup-winner .post-worldcup-winner-label {
+  color: var(--color-primary-dark);
+}
+.post-worldcup-winner strong {
+  font-size: 1.2rem;
+}
+.post-worldcup-winner b {
+  color: var(--color-muted);
+  font-size: 0.82rem;
+}
 .post-detail.has-tier-list .post-tier-list {
   margin-top: 0;
 }
@@ -407,9 +465,9 @@
 .post-tier-list {
   margin: 0 0 26px;
   padding: 22px;
-  border: 1px solid #cfe8ee;
+  border: 1px solid #c9e6ed;
   border-radius: 12px;
-  background: linear-gradient(135deg, #f9feff, #eaf8fb);
+  background: #edf9fc;
 }
 .post-tier-list h2 {
   margin: 0 0 14px;

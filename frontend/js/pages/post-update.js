@@ -1,5 +1,3 @@
-import { authApi } from "/js/api/authApi.js";
-
 const form = document.querySelector("#post-update-form");
 const message = document.querySelector("#message");
 const category = document.querySelector("#category");
@@ -37,9 +35,13 @@ async function initializeUpdatePage() {
 
     try {
         const [sessionResponse, postResponse] = await Promise.all([
-            authApi.checkSession().catch(() => ({ loggedIn: false })),
+            fetch("/api/auth/session", { cache: "no-store" }),
             fetch(`/api/posts/detail?postId=${encodeURIComponent(postId)}`)
         ]);
+
+        const auth = sessionResponse.ok
+            ? await sessionResponse.json()
+            : { loggedIn: false };
 
         if (!auth.loggedIn) {
             isRedirecting = true;

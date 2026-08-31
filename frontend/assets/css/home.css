@@ -13,7 +13,7 @@
 }
 .hero-description { margin: 26px 0; color: var(--color-muted); font-size: 1.08rem; line-height: 1.8; }
 .button-row { display: flex; gap: 10px; }
-.stats { display: flex; gap: 44px; margin: 42px 0 0; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 24px; max-width: 620px; margin: 42px 0 0; }
 .stats div { display: grid; gap: 2px; }
 .stats dt { font-size: 1.3rem; font-weight: 900; }
 .stats dd { margin: 0; color: var(--color-muted); }
@@ -74,7 +74,7 @@
 .feature-icon.cyan { color: var(--color-primary); background: var(--color-primary-soft); }
 .feature-icon.coral { color: var(--color-danger); background: var(--color-danger-soft); }
 .feature-icon-glyph { width: 22px; height: 22px; background: currentColor; mask-position: center; mask-repeat: no-repeat; mask-size: contain; }
-.medal-icon { mask-image: url("/assets/icons/medal.svg"); }
+.tier-ranking-icon { mask-image: url("/assets/icons/tier-ranking.svg"); }
 .trophy-icon { mask-image: url("/assets/icons/trophy.svg"); }
 .feature-card h3 { margin: 0; font-size: 1.35rem; }
 .feature-card > p { min-height: 66px; margin: 18px 0 22px; color: var(--color-muted); line-height: 1.75; }
@@ -135,10 +135,10 @@
 }
 @media (max-width: 640px) {
   .container { width: min(100% - 28px, 1152px); }
-  .account-actions .login, .icon-button { display: none; }
+  .account-actions .login { display: none; }
   .hero-grid { gap: 34px; padding-block: 52px; }
   .hero h1 { font-size: 2.55rem; }
-  .stats { gap: 18px; justify-content: space-between; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 18px; }
   .book-mosaic { gap: 9px; padding: 8px; }
   .section { padding: 60px 0; }
   .featured-book-grid { grid-template-columns: repeat(2, 1fr); }

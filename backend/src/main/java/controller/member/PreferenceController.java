@@ -29,6 +29,15 @@ public class PreferenceController extends HttpServlet {
         }
 
         try {
+            String targetValue = request.getParameter("memberId");
+            if (targetValue != null && !targetValue.isBlank()) {
+                Map<String, Object> result = new LinkedHashMap<>();
+                result.put("success", true);
+                result.put("user", service.findMemberSimilarity(
+                        memberId.longValue(), Long.parseLong(targetValue)));
+                gson.toJson(result, response.getWriter());
+                return;
+            }
             int limit = parseLimit(request.getParameter("limit"));
             Map<String, Object> result = new LinkedHashMap<>();
             result.put("success", true);

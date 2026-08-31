@@ -18,6 +18,7 @@ public class PostDAO {
                     P.post_id,
                     P.member_id,
                     P.tier_list_id,
+                    P.ideal_run_id,
                     M.nickname AS member_nickname,
                     P.category,
                     P.title,
@@ -55,6 +56,7 @@ public class PostDAO {
                     P.post_id,
                     P.member_id,
                     P.tier_list_id,
+                    P.ideal_run_id,
                     M.nickname AS member_nickname,
                     P.category,
                     P.title,
@@ -276,6 +278,8 @@ public class PostDAO {
         post.setMemberId(rs.getLong("member_id"));
         long tierListId = rs.getLong("tier_list_id");
         post.setTierListId(rs.wasNull() ? null : tierListId);
+        long idealRunId = rs.getLong("ideal_run_id");
+        post.setIdealRunId(rs.wasNull() ? null : idealRunId);
         post.setMemberNickname(rs.getString("member_nickname"));
         post.setCategory(rs.getString("category"));
         post.setTitle(rs.getString("title"));

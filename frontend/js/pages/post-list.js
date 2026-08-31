@@ -14,6 +14,7 @@ const categoryNames = {
     RECOMMEND: "추천",
     REVIEW: "리뷰",
     TIER: "티어리스트",
+    WORLDCUP: "이상형월드컵",
     AUTHOR: "작가"
 };
 
@@ -25,6 +26,11 @@ const filterState = {
 };
 
 let allPosts = [];
+const postPagination = window.BookMateListPagination.create({
+    root: document.querySelector("#post-pagination"),
+    pageSize: 15,
+    onRender: renderPosts
+});
 
 /* 3. 게시글 목록 불러오기 */
 async function loadPosts() {
@@ -74,7 +80,7 @@ function applyFilters() {
     posts.sort((a, b) => getTime(b.createdAt) - getTime(a.createdAt));
 
     renderTableHeader();
-    renderPosts(posts);
+    postPagination.setItems(posts);
     updateResultMessage(posts);
 }
 
@@ -94,7 +100,7 @@ function renderTableHeader() {
 }
 
 /* 6. 게시글 목록 렌더링 */
-function renderPosts(posts) {
+function renderPosts(posts, startIndex, totalCount) {
     postListElement.replaceChildren();
 
     if (!Array.isArray(posts) || posts.length === 0) {
@@ -107,13 +113,13 @@ function renderPosts(posts) {
     posts.forEach((post, index) => {
         const row = document.createElement("tr");
 
-        renderRealtimeRow(row, post, index);
+        renderRealtimeRow(row, post, startIndex + index);
 
         fragment.append(row);
     });
 
     postListElement.append(fragment);
-    postStatusElement.textContent = `게시글 ${posts.length}개를 표시하고 있습니다.`;
+    postStatusElement.textContent = `게시글 ${totalCount}개를 표시하고 있습니다.`;
 }
 
 /* 7. 실시간 게시글 행 */

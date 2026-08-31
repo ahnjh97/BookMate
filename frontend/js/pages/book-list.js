@@ -264,14 +264,9 @@ function updatePagination() {
             if (page === currentPage) return;
             currentPage = page;
             loadBooks();
-            scrollToBookResults();
         });
         pageNumbersElement.append(button);
     }
-}
-
-function scrollToBookResults() {
-    document.querySelector(".book-results-panel").scrollIntoView({behavior: "smooth", block: "start"});
 }
 
 categoryButtons.forEach((button) => {
@@ -302,14 +297,12 @@ previousPageButton.addEventListener("click", () => {
     if (currentPage <= 1) return;
     currentPage -= 1;
     loadBooks();
-    scrollToBookResults();
 });
 
 nextPageButton.addEventListener("click", () => {
     if (!hasMorePages) return;
     currentPage += 1;
     loadBooks();
-    scrollToBookResults();
 });
 
 document.querySelector("#book-reset-button")?.addEventListener("click", () => {
