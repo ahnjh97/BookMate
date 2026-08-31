@@ -9,5 +9,19 @@ export const ENDPOINTS = {
     // auth
     AUTH_SESSION: "/api/auth",   // GET(세션확인)/POST(로그인)/DELETE(로그아웃) 공용 — AuthController
     AUTH_SIGNUP: "/api/auth/signup", // GET(중복확인)/POST(회원가입) — SignupController
-    // ?? - 추가 예정
+
+    // member
+    MEMBER_ME: "/api/members/me",
+    MEMBER_CHECK_NICKNAME: "/api/members/check-nickname",
+    MEMBER_CHECK_EMAIL: "/api/members/check-email",
+    MEMBER_PASSWORD: "/api/members/password",
+
+    // admin
+    ADMIN_MEMBERS: "/api/admin/members",
+    ADMIN_MEMBERS_LOCK: "/api/admin/members/lock",
+    ADMIN_POSTS: "/api/posts",
+    ADMIN_POSTS_PIN: "/api/admin/posts/pin",
+    ADMIN_POSTS_DELETE: "/api/admin/posts/delete",
+    ADMIN_TIER_TEMPLATES: "/api/admin/tier-templates",
+    ADMIN_WORLDCUP_TEMPLATES: "/api/admin/worldcup-templates",
 };

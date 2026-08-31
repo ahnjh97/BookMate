@@ -41,8 +41,11 @@ function renderAuthMenu(navbarHost, auth) {
     return;
   }
   // 관리자 / 일반회원 메뉴 분리
-  if (auth.role === "ADMIN") {menu.append(createLink("관리자페이지", "/pages/admin/admin.html", "login-link admin-link"));
-  } else { menu.append(createLink("마이페이지", "/pages/member/mypage.html", "login-link"));
+  if (auth.role === "ADMIN") {
+    menu.append(createLink("관리자페이지", "/pages/admin/admin.html", "login-link admin-link"));
+  } else {
+    menu.append(createLink("내 책장", "/pages/member/bookshelf.html", "login-link"));
+    menu.append(createLink("마이페이지", "/pages/member/mypage.html", "login-link"));
   }
   menu.append(createLink("회원정보수정", "/pages/member/edit.html", "login-link account-edit-link"));
   const logout = document.createElement("button");
