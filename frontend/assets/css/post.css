@@ -439,41 +439,106 @@
     font-size: 13px;
 }
 
-/* 8. 게시글 작성 화면 */
+/* 8. 게시글 작성 및 수정 화면 */
+.post-editor-page {
+    width: min(900px, 100%);
+    margin: 0 auto;
+}
+
+.post-editor-back {
+    margin-bottom: 18px;
+}
+
+.post-editor-header {
+    margin-bottom: 28px;
+}
+
+.post-editor-header h1 {
+    margin: 0 0 6px;
+    color: var(--color-text);
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.4;
+    letter-spacing: -0.5px;
+}
+
+.post-editor-header p {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.post-editor-form,
 #post-create-form {
     display: grid;
-    gap: 18px;
+    gap: 24px;
+    padding: 32px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-background);
     text-align: left;
 }
 
-#post-create-form > div {
-    display: grid;
-    gap: 8px;
+.post-editor-form .form-group,
+#post-create-form > .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    min-width: 0;
 }
 
+.post-editor-form label,
 #post-create-form label {
     color: var(--color-text);
+    font-size: 14px;
     font-weight: 700;
 }
 
+.form-required {
+    margin-left: 2px;
+    color: var(--color-primary);
+}
+
+.post-editor-form input,
+.post-editor-form select,
+.post-editor-form textarea,
 #post-create-form input,
 #post-create-form select,
 #post-create-form textarea {
     width: 100%;
-    min-height: 44px;
-    padding: 10px 12px;
+    box-sizing: border-box;
+    padding: 11px 13px;
     border: 1px solid var(--color-border);
     border-radius: 8px;
     color: var(--color-text);
     background: var(--color-background);
     font: inherit;
+    font-size: 14px;
 }
 
+.post-editor-form input,
+.post-editor-form select,
+#post-create-form input,
+#post-create-form select {
+    min-height: 46px;
+}
+
+.post-editor-form textarea,
 #post-create-form textarea {
-    min-height: 240px;
+    min-height: 320px;
+    line-height: 1.7;
     resize: vertical;
 }
 
+.post-editor-form input::placeholder,
+.post-editor-form textarea::placeholder {
+    color: var(--color-muted);
+}
+
+.post-editor-form input:focus,
+.post-editor-form select:focus,
+.post-editor-form textarea:focus,
 #post-create-form input:focus,
 #post-create-form select:focus,
 #post-create-form textarea:focus {
@@ -481,30 +546,42 @@
     outline: 2px solid rgb(15 163 193 / 18%);
 }
 
-#post-create-form > div:last-child {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-}
-
-/* 9. 카테고리와 장르를 같은 행에 배치 */
+.post-editor-form > .form-row,
 #post-create-form > .form-row {
     display: flex;
-    flex-direction: row;
     align-items: flex-end;
     gap: 16px;
 }
 
+.post-editor-form > .form-row > .form-group,
 #post-create-form > .form-row > .form-group {
     display: flex;
     flex: 1;
     flex-direction: column;
+    gap: 9px;
     min-width: 0;
-    margin: 0;
 }
 
-#post-create-form > .form-row > .form-group select {
-    width: 100%;
+.form-help {
+    margin: -2px 0 0;
+    color: var(--color-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.post-editor-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 4px;
+}
+
+.post-editor-message {
+    margin: 14px 0 0;
+    color: var(--color-muted);
+    font-size: 13px;
+    text-align: center;
 }
 
 /* 10. 게시글 상세 */
@@ -1157,9 +1234,25 @@
 
 /* 18. 반응형 */
 @media (max-width: 768px) {
+    .post-editor-form,
+    #post-create-form {
+        padding: 24px 20px;
+    }
+
+    .post-editor-form > .form-row,
     #post-create-form > .form-row {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    .post-editor-form > .form-row > .form-group,
+    #post-create-form > .form-row > .form-group {
+        width: 100%;
+    }
+
+    .post-editor-form textarea,
+    #post-create-form textarea {
+        min-height: 260px;
     }
 }
 

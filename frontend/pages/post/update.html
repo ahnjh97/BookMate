@@ -5,28 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>게시글 수정 | BookMate</title>
 
-    <link rel="stylesheet" href="/assets/css/style.css">
-    <link rel="stylesheet" href="/assets/css/post.css">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260831-2">
+    <link rel="stylesheet" href="/assets/css/post.css?v=20260831-10">
 </head>
 
 <body>
 <header class="site-header" data-navbar></header>
 
-<main class="page-main">
-    <section class="page-content" id="post-update-page" hidden>
-        <h1>게시글 수정</h1>
+<main class="post-page-main">
+    <section
+            id="post-update-page"
+            class="post-page-content post-editor-page"
+            hidden
+    >
+        <!-- 1. 페이지 이동 -->
+        <div class="post-editor-back">
+            <a
+                    id="post-update-cancel-link"
+                    class="back-navigation"
+                    href="/pages/post/list.html"
+            >
+                ← 게시글로 돌아가기
+            </a>
+        </div>
 
-        <form id="post-update-form">
+        <!-- 2. 수정 페이지 제목 -->
+        <header class="post-editor-header">
+            <h1>게시글 수정</h1>
+            <p>작성한 게시글의 내용을 수정할 수 있습니다.</p>
+        </header>
+
+        <!-- 3. 게시글 수정 폼 -->
+        <form id="post-update-form" class="post-editor-form">
             <div class="form-row">
                 <div class="form-group">
-                    <label for="category">카테고리</label>
+                    <label for="category">
+                        카테고리
+                        <span class="form-required">*</span>
+                    </label>
 
                     <select id="category" required>
-                        <option value="">선택하세요</option>
+                        <option value="">카테고리를 선택해주세요.</option>
                         <option value="FREE">자유</option>
                         <option value="RECOMMEND">추천</option>
                         <option value="REVIEW">리뷰</option>
                         <option value="TIER">티어</option>
+                        <option value="AUTHOR">작가</option>
                     </select>
                 </div>
 
@@ -46,27 +70,68 @@
                 </div>
             </div>
 
-            <div>
-                <label for="title">제목</label>
-                <input id="title" type="text" maxlength="200" required>
+            <div class="form-group">
+                <label for="title">
+                    제목
+                    <span class="form-required">*</span>
+                </label>
+
+                <input
+                        id="title"
+                        type="text"
+                        maxlength="200"
+                        placeholder="제목을 입력해주세요."
+                        required
+                >
             </div>
 
-            <div>
-                <label for="content">내용</label>
-                <textarea id="content" maxlength="4000" rows="15" required></textarea>
+            <div class="form-group">
+                <label for="content">
+                    내용
+                    <span class="form-required">*</span>
+                </label>
+
+                <textarea
+                        id="content"
+                        maxlength="4000"
+                        rows="15"
+                        placeholder="내용을 입력해주세요."
+                        required
+                ></textarea>
+
+                <p class="form-help">
+                    최대 4,000자까지 입력할 수 있습니다.
+                </p>
             </div>
 
-            <div>
-                <button class="button button-primary" type="submit">수정 완료</button>
-                <a id="post-update-cancel-link" class="button" href="/pages/post/list.html">취소</a>
+            <!-- 4. 수정 버튼 -->
+            <div class="post-editor-actions">
+                <a
+                        class="button button-outline"
+                        href="/pages/post/list.html"
+                >
+                    취소
+                </a>
+
+                <button
+                        class="button button-primary"
+                        type="submit"
+                >
+                    수정 완료
+                </button>
             </div>
         </form>
 
-        <p id="message"></p>
+        <!-- 5. 처리 결과 -->
+        <p
+                id="message"
+                class="post-editor-message"
+                aria-live="polite"
+        ></p>
     </section>
 </main>
 
-<script type="module" src="/js/components/navbar.js" defer></script>
-<script src="/js/pages/post-update.js" defer></script>
+<script src="/js/components/navbar.js" charset="UTF-8" defer></script>
+<script src="/js/pages/post-update.js?v=20260831-3" charset="UTF-8" defer></script>
 </body>
 </html>

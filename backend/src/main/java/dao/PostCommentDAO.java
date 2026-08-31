@@ -176,7 +176,39 @@ public class PostCommentDAO {
         return null;
     }
 
-    /* 7. 댓글 조회 결과를 DTO로 변환 */
+    /* 7. 관리자 댓글 전체 목록 조회 */
+    public List<PostCommentDTO> selectAdminCommentList(Connection conn) throws SQLException {
+        String sql = """
+            SELECT
+                C.comment_id,
+                C.post_id,
+                C.member_id,
+                C.parent_comment_id,
+                M.nickname AS member_nickname,
+                C.content,
+                C.status,
+                C.created_at,
+                C.updated_at
+            FROM POST_COMMENT C
+            JOIN MEMBER M
+              ON C.member_id = M.member_id
+            ORDER BY C.comment_id DESC
+            """;
+
+        List<PostCommentDTO> commentList = new ArrayList<>();
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                commentList.add(mapCommentRow(rs));
+            }
+        }
+
+        return commentList;
+    }
+
+    /* 8. 댓글 조회 결과를 DTO로 변환 */
     private PostCommentDTO mapCommentRow(ResultSet rs) throws SQLException {
         PostCommentDTO comment = new PostCommentDTO();
 

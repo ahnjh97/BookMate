@@ -231,6 +231,11 @@
   background: var(--color-danger);
   box-shadow: 0 4px 10px rgb(220 53 69 / 18%);
 }
+.admin-comment-content {
+  max-width: 360px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
 .admin-state-activate {
   border-color: #38a9b8;
   color: #147988;

@@ -14,6 +14,7 @@ let selectedPostFilter = "public";
 const deleteStates = new Map();
 let memberPagination;
 let postPagination;
+let commentPagination;
 let bookPagination;
 let tierPagination;
 let worldcupPagination;
@@ -28,6 +29,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initializePostFilters();
   await loadMembers();
   await loadPosts(1);
+  await loadComments();
   await loadBookRequests();
   await loadTierTemplates();
   await loadWorldcupTemplates();
@@ -45,6 +47,11 @@ function initializePagination() {
     pageSize: 10,
     onRender: renderPosts,
     onPageChange: loadPosts,
+  });
+  commentPagination = BookMateListPagination.create({
+    root: document.getElementById("comment-pagination"),
+    pageSize: 5,
+    onRender: renderComments,
   });
   bookPagination = BookMateListPagination.create({
     root: document.getElementById("book-pagination"),
@@ -718,6 +725,81 @@ async function changePostPin(postId, pinned) {
   } catch (error) {
     console.error("게시글 고정 상태 변경 실패:", error);
     showMessage("게시글 고정 상태 변경 중 오류가 발생했습니다.");
+  }
+}
+
+async function loadComments() {
+  const tbody = document.getElementById("comment-table-body");
+  if (!tbody) return;
+
+  try {
+    const response = await fetch("/api/admin/comments", {
+      credentials: "include",
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      handleApiError(response.status, data.message);
+      return;
+    }
+    commentPagination.setItems(data.comments || []);
+  } catch (error) {
+    console.error("관리자 댓글 목록 조회 실패:", error);
+    showMessage("댓글 목록을 불러오지 못했습니다.");
+  }
+}
+
+function renderComments(comments) {
+  const tbody = document.getElementById("comment-table-body");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+  if (comments.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="admin-empty">등록된 댓글이 없습니다.</td></tr>`;
+    return;
+  }
+
+  comments.forEach(comment => {
+    const row = document.createElement("tr");
+    const active = comment.status === "ACTIVE";
+    row.innerHTML = `
+      <td>${comment.commentId}</td>
+      <td>${comment.postId}</td>
+      <td>${escapeHtml(comment.memberNickname)}</td>
+      <td class="admin-comment-content">${escapeHtml(comment.content)}</td>
+      <td><span class="admin-badge ${getStatusBadgeClass(comment.status)}">${escapeHtml(getStatusLabel(comment.status))}</span></td>
+      <td>${formatValue(comment.createdAt)}</td>
+      <td>${active
+        ? `<button type="button" class="admin-action-button admin-action-danger" data-comment-delete="${comment.commentId}">삭제</button>`
+        : "처리 완료"}
+      </td>
+    `;
+    row.querySelector("[data-comment-delete]")?.addEventListener("click", () => {
+      deleteCommentByAdmin(comment.commentId);
+    });
+    tbody.appendChild(row);
+  });
+}
+
+async function deleteCommentByAdmin(commentId) {
+  if (!confirm(`댓글 ${commentId}번을 삭제하시겠습니까?`)) return;
+
+  try {
+    const response = await fetch("/api/admin/comments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ commentId }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      handleApiError(response.status, data.message);
+      return;
+    }
+    showAdminToast(data.message || "댓글을 삭제했습니다.");
+    await loadComments();
+  } catch (error) {
+    console.error("관리자 댓글 삭제 실패:", error);
+    showMessage("댓글을 삭제하지 못했습니다.");
   }
 }
 
