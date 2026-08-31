@@ -286,8 +286,8 @@
 }
 
 .bookshelf-activity-grid .taste-match-details {
-  right: auto;
-  left: calc(100% + 8px);
+  right: calc(100% + 8px);
+  left: auto;
 }
 
 .bookshelf-activity-grid > .bookshelf-section {

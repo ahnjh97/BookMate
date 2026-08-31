@@ -35,7 +35,7 @@ async function initializeUpdatePage() {
 
     try {
         const [sessionResponse, postResponse] = await Promise.all([
-            fetch("/api/auth/session", { cache: "no-store" }),
+            fetch("/api/auth", { cache: "no-store" }),
             fetch(`/api/posts/detail?postId=${encodeURIComponent(postId)}`)
         ]);
 

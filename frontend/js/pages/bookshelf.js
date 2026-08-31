@@ -1,6 +1,7 @@
 const statusElement = document.querySelector("#bookshelf-status");
 const contentElement = document.querySelector("#bookshelf-content");
 let viewingOwnBookshelf = false;
+let viewedMemberId = null;
 
 window.BookMateBookshelf = { renderActivity: renderBookshelfActivity };
 
@@ -26,6 +27,7 @@ async function initializeBookshelf() {
       }
       viewingOwnBookshelf = auth.loggedIn && Number(auth.memberId) === memberId;
     }
+    viewedMemberId = memberId;
 
     const response = await fetch(`/api/members/bookshelf?memberId=${memberId}`, { cache: "no-store" });
     const result = await response.json();
@@ -112,7 +114,7 @@ function renderBookshelf(bookshelf) {
 
 function renderBookshelfActivity(root, bookshelf) {
   renderCounts(root, bookshelf.counts || {});
-  renderBooks(root, bookshelf.favoriteBooks || [], bookshelf.counts?.ratingAverage || 0);
+  renderBooks(root, bookshelf.favoriteBooks || [], bookshelf.favoriteBooksTotal || 0, bookshelf.counts?.ratingAverage || 0);
   renderTierLists(root, bookshelf.tierLists || []);
   renderWorldcups(root, bookshelf.worldcupResults || []);
 }
@@ -130,39 +132,55 @@ function renderCounts(root, counts) {
   `).join("");
 }
 
-function renderBooks(root, books, ratingAverage) {
+function renderBooks(root, books, initialTotal, ratingAverage) {
   const container = root.querySelector("[data-bookshelf-books]");
   if (!container) return;
   const filterButtons = root.querySelectorAll("[data-rating-filter]");
   const countElement = root.querySelector("[data-rating-count]");
-  const sortedBooks = [...books].sort((left, right) => {
-    const scoreDifference = Number(right.score) - Number(left.score);
-    if (scoreDifference !== 0) return scoreDifference;
-    return String(left.title || "").localeCompare(String(right.title || ""), "ko");
-  });
-
-  function applyRatingFilter(selectedValue = "all") {
-    const filteredBooks = selectedValue === "all"
-      ? sortedBooks
-      : sortedBooks.filter(book => Number(book.score) === Number(selectedValue));
-    const emptyText = selectedValue === "all"
-      ? "후기를 남긴 책이 아직 없습니다."
-      : `${selectedValue}점을 준 책이 없습니다.`;
-    if (countElement) {
-      const averageLabel = `평균 ${Number(ratingAverage).toFixed(2)}`;
-      countElement.textContent = selectedValue === "all"
-        ? `${filteredBooks.length.toLocaleString()}권 | ${averageLabel}`
-        : `${filteredBooks.length.toLocaleString()}권 | 전체 ${averageLabel}`;
-    }
-
-    renderPaginated(container, filteredBooks, 10, "후기 도서", (pageBooks) => pageBooks.map((book) => `
+  let selectedScore = "all";
+  container.innerHTML = `
+    <div class="bookshelf-books-page" data-page-items></div>
+    <nav class="list-pagination bookshelf-list-pagination" aria-label="후기 도서 페이지 이동">
+      <button class="button button-outline" type="button" data-pagination-prev>이전</button>
+      <div class="list-page-numbers" data-pagination-numbers aria-live="polite"></div>
+      <button class="button button-outline" type="button" data-pagination-next>다음</button>
+    </nav>`;
+  const pageItems = container.querySelector("[data-page-items]");
+  const pagination = window.BookMateListPagination.create({
+    root: container.querySelector(".bookshelf-list-pagination"),
+    pageSize: 10,
+    onRender: pageBooks => {
+      pageItems.innerHTML = pageBooks.length ? pageBooks.map((book) => `
       <a class="bookshelf-book" href="/pages/book/detail.html?id=${book.bookId}">
         <img src="${escapeHtml(book.imageUrl || "")}" alt="${escapeHtml(book.title)} 표지" loading="lazy">
         <strong>${escapeHtml(book.title)}</strong>
         <span>${escapeHtml(book.authorName)}</span>
         <small>★ ${Number(book.score).toFixed(1)}</small>
-      </a>
-    `).join(""), emptyText, "bookshelf-books-page");
+      </a>`).join("") : emptyMessage(selectedScore === "all" ? "후기를 남긴 책이 아직 없습니다." : `${selectedScore}점을 준 책이 없습니다.`);
+    },
+    onPageChange: page => loadRatingBooks(page),
+  });
+
+  function updateCount(totalCount) {
+    if (!countElement) return;
+    const averageLabel = `평균 ${Number(ratingAverage).toFixed(2)}`;
+    countElement.textContent = selectedScore === "all"
+      ? `${Number(totalCount).toLocaleString()}권 | ${averageLabel}`
+      : `${Number(totalCount).toLocaleString()}권 | 전체 ${averageLabel}`;
+  }
+
+  async function loadRatingBooks(page = 1) {
+    const params = new URLSearchParams({ memberId: String(viewedMemberId), page: String(page), size: "10" });
+    if (selectedScore !== "all") params.set("score", selectedScore);
+    try {
+      const response = await fetch(`/api/members/bookshelf/ratings?${params}`, { cache: "no-store" });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.message || "후기 도서를 불러오지 못했습니다.");
+      pagination.setPage(result.data.books, result.data.page, result.data.totalCount);
+      updateCount(result.data.totalCount);
+    } catch (error) {
+      pageItems.innerHTML = emptyMessage(error.message || "후기 도서를 불러오지 못했습니다.");
+    }
   }
 
   filterButtons.forEach(button => {
@@ -172,10 +190,12 @@ function renderBooks(root, books, ratingAverage) {
         item.classList.toggle("is-active", active);
         item.setAttribute("aria-pressed", String(active));
       });
-      applyRatingFilter(button.dataset.ratingFilter);
+      selectedScore = button.dataset.ratingFilter;
+      loadRatingBooks(1);
     });
   });
-  applyRatingFilter();
+  pagination.setPage(books, 1, initialTotal);
+  updateCount(initialTotal);
 }
 
 function renderTierLists(root, lists) {

@@ -65,14 +65,18 @@ function statBook(item, grade, listCount) {
     const valueCount = counts[value] || 0, valuePercentage = listCount ? Math.round(valueCount / listCount * 100) : 0;
     return `<div class="stats-breakdown-row"><b>${value}</b><span><i style="width:${valuePercentage}%"></i></span><small>${valueCount}명 · ${valuePercentage}%</small></div>`;
   }).join("");
-  book.innerHTML = `<img src="${escapeHtml(item.imageUrl || "")}" alt="${
+  book.innerHTML = `<img src="${escapeHtml(statsThumbnailUrl(item.imageUrl))}" alt="${
     escapeHtml(item.title)
-  }" loading="lazy" decoding="async" draggable="false"><span>${escapeHtml(item.title)}</span><small class="stats-summary">${
+  }" loading="eager" decoding="async" fetchpriority="low" draggable="false"><span>${escapeHtml(item.title)}</span><small class="stats-summary">${
     escapeHtml(summary)
   }</small><div class="stats-breakdown" role="tooltip"><strong>${escapeHtml(item.title)}</strong><p>${
     escapeHtml(item.authorName)
   }</p>${rows}</div>`;
   return book;
+}
+function statsThumbnailUrl(imageUrl) {
+  const url = String(imageUrl || "");
+  return url.replace("/fit-in/600x0/", "/fit-in/160x0/");
 }
 function escapeHtml(value) {
   return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll(

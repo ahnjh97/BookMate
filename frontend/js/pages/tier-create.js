@@ -8,16 +8,48 @@ const picker = document.getElementById("book-picker"),
   authorError = document.getElementById("template-author-error"),
   filterLabel = document.getElementById("template-filter-label"),
   suggestions = document.getElementById("tier-search-suggestions");
-let books = [], activeKeyword = "";
+let books = [], activeKeyword = "", searchSequence = 0, searchTimer;
+let currentPage = 1, hasMoreBooks = false, loadingMoreBooks = false;
 const selected = new Set();
-async function loadBooks() {
+async function loadBooks(keyword = "", append = false) {
+  if (append && (loadingMoreBooks || !hasMoreBooks || keyword)) return;
+  if (append) loadingMoreBooks = true;
+  const sequence = ++searchSequence;
   try {
-    const response = await fetch("/api/books?size=100&sort=title"), data = await response.json();
-    books = data.data?.books || [];
-    updateTypeFilter();
+    const params = new URLSearchParams({ size: keyword ? "24" : "100", sort: "title" });
+    if (keyword) params.set("keyword", keyword);
+    params.set("page", append ? String(currentPage + 1) : "1");
+    const response = await fetch(`/api/books?${params}`), data = await response.json();
+    if (!response.ok || !data.success) throw new Error(data.message);
+    if (sequence !== searchSequence) return;
+    const fetchedBooks = data.data?.books || [];
+    books = append
+      ? [...new Map([...books, ...fetchedBooks].map(book => [book.bookId, book])).values()]
+      : fetchedBooks;
+    if (!keyword) {
+      currentPage = append ? currentPage + 1 : 1;
+      hasMoreBooks = Boolean(data.data?.hasMore);
+    }
+    if (keyword) renderBooks();
+    else if (append) {
+      const previousScrollTop = picker.scrollTop;
+      syncGenreOptions();
+      renderBooks();
+      picker.scrollTop = previousScrollTop;
+    } else updateTypeFilter();
   } catch (error) {
+    if (sequence !== searchSequence) return;
     message.textContent = "책 목록을 불러오지 못했습니다.";
+  } finally {
+    if (append) loadingMoreBooks = false;
   }
+}
+function syncGenreOptions() {
+  if (category.value !== "장르") return;
+  const selectedGenre = filter.value;
+  const genres = [...new Set(books.map(book => book.genre).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ko"));
+  filter.replaceChildren(...genres.map(genre => new Option(genre, genre)));
+  if (genres.includes(selectedGenre)) filter.value = selectedGenre;
 }
 function updateTypeFilter() {
   const type = category.value;
@@ -103,13 +135,15 @@ function renderBooks() {
   });
   if (!picker.children.length) picker.innerHTML = "<p class=\"tier-status\">조건에 맞는 책이 없습니다.</p>";
 }
-function showSuggestions() {
+async function showSuggestions() {
   const q = search.value.trim().toLowerCase();
   suggestions.replaceChildren();
   if (!q) {
     closeSuggestions();
+    await loadBooks();
     return;
   }
+  await loadBooks(q);
   books.filter(book => book.title.toLowerCase().includes(q)).slice(0, 8).forEach(book => {
     const button = document.createElement("button");
     button.type = "button";
@@ -132,10 +166,10 @@ function closeSuggestions() {
   suggestions.replaceChildren();
   search.setAttribute("aria-expanded", "false");
 }
-function applySearch() {
+async function applySearch() {
   activeKeyword = search.value.trim();
   closeSuggestions();
-  renderBooks();
+  await loadBooks(activeKeyword);
 }
 function updateCount() {
   document.getElementById("selection-count").textContent = `선택된 책 수 : ${selected.size}권`;
@@ -153,7 +187,10 @@ authorFilter.addEventListener("blur", validateAuthor);
 authorFilter.addEventListener("keydown", event => {
   if (event.key === "Escape") closeAuthorOptions();
 });
-search.addEventListener("input", showSuggestions);
+search.addEventListener("input", () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(showSuggestions, 250);
+});
 search.addEventListener("keydown", event => {
   if (event.key === "Enter") {
     event.preventDefault();
@@ -162,6 +199,9 @@ search.addEventListener("keydown", event => {
   if (event.key === "Escape") closeSuggestions();
 });
 document.getElementById("book-search-button").addEventListener("click", applySearch);
+picker.addEventListener("scroll", () => {
+  if (picker.scrollTop + picker.clientHeight >= picker.scrollHeight - 80) loadBooks("", true);
+});
 document.getElementById("selection-reset-button").addEventListener("click", () => {
   selected.clear();
   updateCount();

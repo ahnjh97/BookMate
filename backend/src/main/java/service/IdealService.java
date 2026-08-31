@@ -3,6 +3,7 @@ package service;
 import java.sql.*;
 import java.util.*;
 import util.DBUtil;
+import util.BookImageUrlUtil;
 
 public class IdealService {
   public record Match(
@@ -21,7 +22,10 @@ public class IdealService {
     String sql =
         """
         WITH RATING_COUNT AS (
-          SELECT book_id, COUNT(*) rating_count FROM RATING GROUP BY book_id
+          SELECT R.book_id, COUNT(*) rating_count
+            FROM RATING R
+           WHERE EXISTS (SELECT 1 FROM IDEAL_TEMPLATE_ITEM X WHERE X.book_id=R.book_id)
+           GROUP BY R.book_id
         ), COVER_BOOK AS (
           SELECT I.template_id, B.image_url,
                  ROW_NUMBER() OVER (
@@ -81,7 +85,7 @@ public class IdealService {
           List<String> coverImages = new ArrayList<>();
           for (int index = 1; index <= 2; index++) {
             String imageUrl = rs.getString("cover_image_" + index);
-            if (imageUrl != null && !imageUrl.isBlank()) coverImages.add(imageUrl);
+            if (imageUrl != null && !imageUrl.isBlank()) coverImages.add(BookImageUrlUtil.thumbnail(imageUrl));
           }
           template.put("coverImages", coverImages);
           template.put("participated", "Y".equals(rs.getString("participated")));
@@ -124,7 +128,7 @@ public class IdealService {
           b.put("bookId", rs.getLong(1));
           b.put("title", rs.getString(2));
           b.put("authorName", rs.getString(3));
-          b.put("imageUrl", rs.getString(4));
+          b.put("imageUrl", BookImageUrlUtil.thumbnail(rs.getString(4)));
           books.add(b);
         }
       }
@@ -195,9 +199,11 @@ public class IdealService {
             p.setLong(2, book);
             p.setInt(3, order++);
             p.setLong(4, book);
-            if (p.executeUpdate() != 1)
-              throw new IllegalArgumentException("사용할 수 없는 책이 포함되어 있습니다.");
+            p.addBatch();
           }
+          int[] inserted = p.executeBatch();
+          if (Arrays.stream(inserted).anyMatch(count -> count == 0))
+            throw new IllegalArgumentException("사용할 수 없는 책이 포함되어 있습니다.");
         }
         c.commit();
         return id;
@@ -468,7 +474,7 @@ public class IdealService {
         "title",
         rs.getString(i + 1),
         "imageUrl",
-        Objects.toString(rs.getString(i + 2), ""));
+        Objects.toString(BookImageUrlUtil.thumbnail(rs.getString(i + 2)), ""));
   }
 
   public Map<String, Object> stats(long templateId) {
@@ -495,7 +501,7 @@ public class IdealService {
           x.put("bookId", rs.getLong(1));
           x.put("title", rs.getString(2));
           x.put("authorName", rs.getString(3));
-          x.put("imageUrl", rs.getString(4));
+          x.put("imageUrl", BookImageUrlUtil.compactThumbnail(rs.getString(4)));
           x.put("appearances", app);
           x.put("championships", champ);
           x.put("finals", rs.getInt(7));

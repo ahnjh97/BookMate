@@ -97,7 +97,7 @@ async function save() {
   }
 }
 function card(b, i) {
-  const imageUrl = (b.imageUrl || "").replace("-240.webp", "-520.webp");
+  const imageUrl = b.imageUrl || "";
   return `<article class="versus-card" role="button" tabindex="0" data-index="${i}">${
     imageUrl ? `<img src="${esc(imageUrl)}" alt="" decoding="async">` : ""
   }<h2>${esc(b.title)}</h2><p>${esc(b.authorName)}</p></article>`;

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>커뮤니티 | BookMate</title>
     <link rel="stylesheet" href="/assets/css/style.css?v=20260830-4">
-    <link rel="stylesheet" href="/assets/css/post.css?v=20260830-3">
+    <link rel="stylesheet" href="/assets/css/post.css?v=20260831-6">
 </head>
 
 <body>
@@ -30,7 +30,6 @@
                     <button type="button" data-category="REVIEW">리뷰</button>
                     <button type="button" data-category="TIER">티어리스트</button>
                     <button type="button" data-category="WORLDCUP">이상형월드컵</button>
-                    <button type="button" data-category="AUTHOR">작가</button>
                 </div>
             </div>
 
@@ -56,7 +55,16 @@
                 <input id="post-keyword" type="search" placeholder="게시글 제목 또는 작성자 검색">
                 <button class="button button-primary" type="submit">검색</button>
             </form>
-            <a class="button button-primary" href="/pages/post/create.html">게시글 작성</a>
+            <div class="post-toolbar-actions">
+                <label class="post-sort-control" for="post-sort"><span class="sr-only">게시글 정렬</span>
+                    <select id="post-sort">
+                        <option value="latest">등록일순</option>
+                        <option value="likes">좋아요순</option>
+                        <option value="views">조회순</option>
+                    </select>
+                </label>
+                <a class="button button-primary" href="/pages/post/create.html">게시글 작성</a>
+            </div>
         </div>
 
         <p id="post-result-message" class="post-result-message"></p>
@@ -64,6 +72,16 @@
         <!-- 게시글 목록 -->
         <div class="post-table-wrap">
             <table class="post-table">
+                <colgroup>
+                    <col class="post-col-category">
+                    <col class="post-col-title">
+                    <col class="post-col-genre">
+                    <col class="post-col-writer">
+                    <col class="post-col-date">
+                    <col class="post-col-count">
+                    <col class="post-col-count">
+                    <col class="post-col-count">
+                </colgroup>
                 <thead id="post-table-head"></thead>
                 <tbody id="post-list"></tbody>
             </table>
@@ -80,7 +98,7 @@
 </main>
 
 <script src="/js/components/navbar.js" charset="UTF-8" defer></script>
-<script src="/js/components/list-pagination.js?v=20260831-1" defer></script>
-<script src="/js/pages/post-list.js?v=20260831-2" charset="UTF-8" defer></script>
+<script src="/js/components/list-pagination.js?v=20260831-2" defer></script>
+<script src="/js/pages/post-list.js?v=20260831-8" charset="UTF-8" defer></script>
 </body>
 </html>

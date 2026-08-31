@@ -8,18 +8,54 @@ const selectionCount = document.querySelector("#worldcup-selection-count");
 const selected = new Set();
 let books = [];
 let activeKeyword = "";
+let searchSequence = 0;
+let currentPage = 1;
+let hasMoreBooks = false;
+let loadingMoreBooks = false;
 
-async function loadBooks() {
+async function loadBooks(keyword = "", append = false) {
+  if (append && (loadingMoreBooks || !hasMoreBooks || keyword)) return;
+  if (append) loadingMoreBooks = true;
+  const sequence = ++searchSequence;
   try {
-    const response = await fetch("/api/books?size=100&sort=title");
+    const params = new URLSearchParams({ size: keyword ? "24" : "100", sort: "title" });
+    if (keyword) params.set("keyword", keyword);
+    params.set("page", append ? String(currentPage + 1) : "1");
+    const response = await fetch(`/api/books?${params}`);
     const data = await response.json();
     if (!response.ok || !data.success) throw new Error(data.message);
-    books = data.data?.books || [];
-    updateTypeFilter();
+    if (sequence !== searchSequence) return;
+    const fetchedBooks = data.data?.books || [];
+    books = append
+      ? [...new Map([...books, ...fetchedBooks].map(book => [book.bookId, book])).values()]
+      : fetchedBooks;
+    if (!keyword) {
+      currentPage = append ? currentPage + 1 : 1;
+      hasMoreBooks = Boolean(data.data?.hasMore);
+    }
+    if (keyword) renderBooks();
+    else if (append) {
+      const previousScrollTop = picker.scrollTop;
+      syncGenreOptions();
+      renderBooks();
+      picker.scrollTop = previousScrollTop;
+    } else updateTypeFilter();
   } catch (error) {
+    if (sequence !== searchSequence) return;
     console.error(error);
     message.textContent = "책 목록을 불러오지 못했습니다.";
+  } finally {
+    if (append) loadingMoreBooks = false;
   }
+}
+
+function syncGenreOptions() {
+  if (category.value !== "장르") return;
+  const selectedGenre = filter.value;
+  const genres = [...new Set(books.map(book => book.genre).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, "ko"));
+  filter.replaceChildren(...genres.map(genre => new Option(genre, genre)));
+  if (genres.includes(selectedGenre)) filter.value = selectedGenre;
 }
 
 function updateTypeFilter() {
@@ -72,9 +108,9 @@ function renderBooks() {
   });
 }
 
-function applySearch() {
+async function applySearch() {
   activeKeyword = searchInput.value.trim();
-  renderBooks();
+  await loadBooks(activeKeyword);
 }
 
 function updateCount() {
@@ -91,9 +127,12 @@ searchInput.addEventListener("keydown", event => {
 searchInput.addEventListener("input", () => {
   if (searchInput.value.trim()) return;
   activeKeyword = "";
-  renderBooks();
+  loadBooks();
 });
 document.querySelector("#worldcup-book-search-button").addEventListener("click", applySearch);
+picker.addEventListener("scroll", () => {
+  if (picker.scrollTop + picker.clientHeight >= picker.scrollHeight - 80) loadBooks("", true);
+});
 document.querySelector("#worldcup-selection-reset-button").addEventListener("click", () => {
   selected.clear();
   message.textContent = "";

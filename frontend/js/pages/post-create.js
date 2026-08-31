@@ -14,7 +14,7 @@ let isRedirecting = false;
 /* 1. 로그인 여부 확인 */
 async function checkLogin() {
     try {
-        const response = await fetch("/api/auth/session", { cache: "no-store" });
+        const response = await fetch("/api/auth", { cache: "no-store" });
         const auth = response.ok ? await response.json() : { loggedIn: false };
 
         if (auth.loggedIn) {

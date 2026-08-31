@@ -5,6 +5,7 @@ const postStatusElement = document.querySelector("#post-status");
 const postResultMessageElement = document.querySelector("#post-result-message");
 const postSearchForm = document.querySelector("#post-search-form");
 const postKeywordInput = document.querySelector("#post-keyword");
+const postSortSelect = document.querySelector("#post-sort");
 const categoryButtons = document.querySelectorAll("[data-category]");
 const genreButtons = document.querySelectorAll("[data-genre]");
 
@@ -14,86 +15,100 @@ const categoryNames = {
     RECOMMEND: "추천",
     REVIEW: "리뷰",
     TIER: "티어리스트",
-    WORLDCUP: "이상형월드컵",
-    AUTHOR: "작가"
+    WORLDCUP: "이상형월드컵"
 };
 
 /* 2. 현재 필터 상태 */
 const filterState = {
     category: "",
     genre: "",
-    keyword: ""
+    keyword: "",
+    sort: "latest"
 };
 
-let allPosts = [];
+let postRequestController = null;
+let postRequestSequence = 0;
+
 const postPagination = window.BookMateListPagination.create({
     root: document.querySelector("#post-pagination"),
-    pageSize: 15,
-    onRender: renderPosts
+    pageSize: 10,
+    onRender: renderPosts,
+    onPageChange: loadPosts
 });
 
 /* 3. 게시글 목록 불러오기 */
-async function loadPosts() {
+async function loadPosts(page = 1) {
+    if (postRequestController) {
+        postRequestController.abort();
+    }
+
+    postRequestController = new AbortController();
+    const requestController = postRequestController;
+    const requestSequence = ++postRequestSequence;
+    const requestFilter = { ...filterState };
+
+    postStatusElement.hidden = false;
     postStatusElement.textContent = "게시글을 불러오는 중입니다.";
     postListElement.replaceChildren();
 
     try {
-        const response = await fetch("/api/posts");
+        const params = new URLSearchParams({ page: String(page), size: "10" });
+        if (requestFilter.category) params.set("category", requestFilter.category);
+        if (requestFilter.genre) params.set("genre", requestFilter.genre);
+        if (requestFilter.keyword) params.set("keyword", requestFilter.keyword);
+        params.set("sort", requestFilter.sort);
+
+        const response = await fetch(`/api/posts?${params}`, {
+            signal: requestController.signal
+        });
         const result = await response.json();
+
+        if (requestSequence !== postRequestSequence) {
+            return;
+        }
 
         if (!response.ok || !result.success) {
             throw new Error(result.message || "게시글을 불러오지 못했습니다.");
         }
 
-        allPosts = Array.isArray(result.posts) ? result.posts : [];
-
-        applyFilters();
+        const posts = Array.isArray(result.posts) ? result.posts : [];
+        const totalCount = Number(result.totalCount);
+        renderTableHeader();
+        if (Number.isFinite(totalCount)) {
+            postPagination.setPage(posts, Number(result.page) || page, totalCount);
+            updateResultMessage(totalCount, requestFilter);
+        } else {
+            // 구버전 API 응답도 화면이 깨지지 않도록 전체 배열 방식으로 처리합니다.
+            postPagination.setItems(posts);
+            updateResultMessage(posts.length, requestFilter);
+        }
     } catch (error) {
+        if (error.name === "AbortError") {
+            return;
+        }
+
         console.error(error);
+        postStatusElement.hidden = false;
         postStatusElement.textContent = error.message || "게시글을 불러오지 못했습니다.";
     }
 }
 
 /* 4. 전체 필터 적용 */
 function applyFilters() {
-    let posts = [...allPosts];
-
-    if (filterState.category) {
-        posts = posts.filter(post => post.category === filterState.category);
-    }
-
-    if (filterState.genre) {
-        posts = posts.filter(post => post.genre === filterState.genre);
-    }
-
-    if (filterState.keyword) {
-        const keyword = filterState.keyword.toLowerCase();
-
-        posts = posts.filter(post => {
-            const title = String(post.title || "").toLowerCase();
-            const writer = String(post.memberNickname || "").toLowerCase();
-
-            return title.includes(keyword) || writer.includes(keyword);
-        });
-    }
-
-    posts.sort((a, b) => getTime(b.createdAt) - getTime(a.createdAt));
-
-    renderTableHeader();
-    postPagination.setItems(posts);
-    updateResultMessage(posts);
+    loadPosts(1);
 }
 
 /* 5. 표 제목 변경 */
 function renderTableHeader() {
     postTableHead.innerHTML = `
         <tr>
-            <th>순위</th>
             <th>카테고리</th>
             <th>제목</th>
             <th>장르</th>
             <th>작성자</th>
             <th>작성일</th>
+            <th>댓글</th>
+            <th>좋아요</th>
             <th>조회수</th>
         </tr>
     `;
@@ -104,6 +119,7 @@ function renderPosts(posts, startIndex, totalCount) {
     postListElement.replaceChildren();
 
     if (!Array.isArray(posts) || posts.length === 0) {
+        postStatusElement.hidden = false;
         postStatusElement.textContent = "조건에 맞는 게시글이 없습니다.";
         return;
     }
@@ -119,12 +135,12 @@ function renderPosts(posts, startIndex, totalCount) {
     });
 
     postListElement.append(fragment);
-    postStatusElement.textContent = `게시글 ${totalCount}개를 표시하고 있습니다.`;
+    postStatusElement.textContent = "";
+    postStatusElement.hidden = true;
 }
 
 /* 7. 실시간 게시글 행 */
 function renderRealtimeRow(row, post, index) {
-    const numberCell = createCell("post-number", index + 1);
     const categoryCell = createCell(
         "post-category",
         categoryNames[post.category] || post.category || "-"
@@ -134,15 +150,18 @@ function renderRealtimeRow(row, post, index) {
     const genreCell = createCell("post-genre", post.genre || "-");
     const writerCell = createCell("post-writer", post.memberNickname || "알 수 없음");
     const dateCell = createCell("post-date", formatDate(post.createdAt));
+    const commentCell = createCell("post-comments-count", post.commentCount ?? 0);
+    const likeCell = createCell("post-likes", post.likeCount ?? 0);
     const viewCell = createCell("post-views", post.viewCount ?? 0);
 
     row.append(
-        numberCell,
         categoryCell,
         titleCell,
         genreCell,
         writerCell,
         dateCell,
+        commentCell,
+        likeCell,
         viewCell
     );
 }
@@ -173,26 +192,26 @@ function createTitleCell(post) {
 }
 
 /* 13. 검색 및 필터 결과 안내 */
-function updateResultMessage(posts) {
+function updateResultMessage(totalCount, appliedFilter = filterState) {
     const messages = [];
 
-    if (filterState.category) {
-        messages.push(categoryNames[filterState.category] || filterState.category);
+    if (appliedFilter.category) {
+        messages.push(categoryNames[appliedFilter.category] || appliedFilter.category);
     }
 
-    if (filterState.genre) {
-        messages.push(filterState.genre);
+    if (appliedFilter.genre) {
+        messages.push(appliedFilter.genre);
     }
 
-    if (filterState.keyword) {
-        messages.push(`"${filterState.keyword}" 검색`);
+    if (appliedFilter.keyword) {
+        messages.push(`"${appliedFilter.keyword}" 검색`);
     }
 
     if (messages.length === 0) {
         messages.push("전체 게시글");
     }
 
-    postResultMessageElement.textContent = `${messages.join(" · ")} — ${posts.length}개`;
+    postResultMessageElement.textContent = `${messages.join(" | ")} | ${totalCount}개`;
 }
 
 /* 16. 게시글 카테고리 변경 */
@@ -233,6 +252,11 @@ postKeywordInput.addEventListener("input", () => {
     filterState.keyword = "";
 
     applyFilters();
+});
+
+postSortSelect.addEventListener("change", () => {
+    filterState.sort = postSortSelect.value;
+    loadPosts(1);
 });
 
 document.querySelector("#community-reset-button").addEventListener("click", () => {

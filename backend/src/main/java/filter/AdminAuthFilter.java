@@ -6,6 +6,7 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import util.SessionUtil;
 
 import java.io.IOException;
 import java.util.Map;
@@ -31,8 +32,7 @@ public class AdminAuthFilter implements Filter {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        HttpSession session =
-                request.getSession(false);
+        HttpSession session = request.getSession(false);
 
         if (session == null) {
             sendError(
@@ -43,12 +43,7 @@ public class AdminAuthFilter implements Filter {
             return;
         }
 
-        Object roleAttribute =
-                session.getAttribute("loginMemberRole");
-
-        String role = roleAttribute == null
-                ? null
-                : roleAttribute.toString();
+        String role = SessionUtil.role(request);
 
         if (!"ADMIN".equals(role)) {
             sendError(

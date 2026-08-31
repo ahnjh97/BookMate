@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.*;
 import util.DBUtil;
+import util.BookImageUrlUtil;
 
 public class TierService {
   public List<Map<String, Object>> findTemplates(String keyword, boolean includePending) {
@@ -15,7 +16,10 @@ public class TierService {
     String sql =
         """
         WITH RATING_COUNT AS (
-          SELECT book_id, COUNT(*) rating_count FROM RATING GROUP BY book_id
+          SELECT R.book_id, COUNT(*) rating_count
+            FROM RATING R
+           WHERE EXISTS (SELECT 1 FROM TIER_TEMPLATE_ITEM X WHERE X.book_id=R.book_id)
+           GROUP BY R.book_id
         ), COVER_BOOK AS (
           SELECT I.template_id, B.image_url,
                  ROW_NUMBER() OVER (
@@ -114,7 +118,7 @@ public class TierService {
             item.put("bookId", rs.getLong("book_id"));
             item.put("title", rs.getString("title"));
             item.put("authorName", rs.getString("author_name"));
-            item.put("imageUrl", rs.getString("image_url"));
+            item.put("imageUrl", BookImageUrlUtil.thumbnail(rs.getString("image_url")));
             item.put("genre", rs.getString("genre"));
             items.add(item);
           }
@@ -167,9 +171,11 @@ public class TierService {
             statement.setLong(1, templateId);
             statement.setInt(2, order++);
             statement.setLong(3, bookId);
-            if (statement.executeUpdate() != 1)
-              throw new IllegalArgumentException("선택한 책 중 사용할 수 없는 항목이 있습니다.");
+            statement.addBatch();
           }
+          int[] inserted = statement.executeBatch();
+          if (Arrays.stream(inserted).anyMatch(count -> count == 0))
+            throw new IllegalArgumentException("선택한 책 중 사용할 수 없는 항목이 있습니다.");
         }
         connection.commit();
         return templateId;
@@ -294,7 +300,7 @@ public class TierService {
             item.put("grade", rs.getString("tier_grade"));
             item.put("sortOrder", rs.getInt("sort_order"));
             item.put("title", rs.getString("title"));
-            item.put("imageUrl", rs.getString("image_url"));
+            item.put("imageUrl", BookImageUrlUtil.thumbnail(rs.getString("image_url")));
             item.put("authorName", rs.getString("author_name"));
             items.add(item);
           }
@@ -513,7 +519,7 @@ public class TierService {
                       value.put("bookId", bookId);
                       value.put("title", rs.getString("title"));
                       value.put("authorName", rs.getString("author_name"));
-                      value.put("imageUrl", rs.getString("image_url"));
+                      value.put("imageUrl", BookImageUrlUtil.compactThumbnail(rs.getString("image_url")));
                     } catch (SQLException e) {
                       throw new RuntimeException(e);
                     }
@@ -562,7 +568,7 @@ public class TierService {
     List<String> coverImages = new ArrayList<>();
     for (int index = 1; index <= 2; index++) {
       String imageUrl = rs.getString("cover_image_" + index);
-      if (imageUrl != null && !imageUrl.isBlank()) coverImages.add(imageUrl);
+      if (imageUrl != null && !imageUrl.isBlank()) coverImages.add(BookImageUrlUtil.thumbnail(imageUrl));
     }
     item.put("coverImages", coverImages);
     item.put("participated", "Y".equals(rs.getString("participated")));

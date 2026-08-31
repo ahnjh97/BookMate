@@ -53,12 +53,8 @@ public class PostAdminDeleteController
             return;
         }
 
-        /*
-         * 로그인 기능에서 사용하는 세션 속성명이 다르면
-         * loginMemberRole을 실제 이름으로 바꿔야 합니다.
-         */
         Object roleAttribute =
-                session.getAttribute("loginMemberRole");
+                session.getAttribute("loginRole");
 
         String loginMemberRole =
                 roleAttribute == null

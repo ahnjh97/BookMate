@@ -4,11 +4,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import util.DBUtil;
+import util.BookImageUrlUtil;
 
 public class BookshelfService {
     public Map<String, Object> findBookshelf(long memberId) {
@@ -18,7 +20,9 @@ public class BookshelfService {
             Map<String, Object> bookshelf = loadMember(connection, memberId);
             if (bookshelf == null) return null;
             bookshelf.put("counts", loadCounts(connection, memberId));
-            bookshelf.put("favoriteBooks", loadFavoriteBooks(connection, memberId));
+            Map<String, Object> ratingPage = loadRatingPage(connection, memberId, null, 1, 10);
+            bookshelf.put("favoriteBooks", ratingPage.get("books"));
+            bookshelf.put("favoriteBooksTotal", ratingPage.get("totalCount"));
             bookshelf.put("tierLists", loadTierLists(connection, memberId));
             bookshelf.put("worldcupResults", loadWorldcupResults(connection, memberId));
             return bookshelf;
@@ -67,8 +71,29 @@ public class BookshelfService {
         }
     }
 
-    private List<Map<String, Object>> loadFavoriteBooks(Connection connection, long memberId)
-            throws SQLException {
+    public Map<String, Object> findRatingPage(long memberId, Integer score, int page, int size) {
+        if (memberId <= 0) throw new IllegalArgumentException("회원 번호가 올바르지 않습니다.");
+        if (score != null && (score < 1 || score > 5)) throw new IllegalArgumentException("별점은 1점부터 5점까지 선택할 수 있습니다.");
+        int safeSize = Math.min(Math.max(size, 1), 50);
+        try (Connection connection = DBUtil.getConnection()) {
+            return loadRatingPage(connection, memberId, score, Math.max(page, 1), safeSize);
+        } catch (SQLException exception) {
+            throw new RuntimeException("후기를 남긴 책을 불러오지 못했습니다.", exception);
+        }
+    }
+
+    private Map<String, Object> loadRatingPage(Connection connection, long memberId, Integer score,
+                                                int page, int size) throws SQLException {
+        String countSql = "SELECT COUNT(*) FROM RATING R JOIN BOOK B ON B.book_id=R.book_id WHERE R.member_id=? AND B.status='APPROVED' AND R.comment_text IS NOT NULL AND TRIM(R.comment_text) IS NOT NULL AND (? IS NULL OR R.score=?)";
+        int totalCount;
+        try (PreparedStatement statement = connection.prepareStatement(countSql)) {
+            statement.setLong(1, memberId);
+            if (score == null) { statement.setNull(2, Types.NUMERIC); statement.setNull(3, Types.NUMERIC); }
+            else { statement.setInt(2, score); statement.setInt(3, score); }
+            try (ResultSet rs = statement.executeQuery()) { rs.next(); totalCount = rs.getInt(1); }
+        }
+        int totalPages = Math.max(1, (int) Math.ceil(totalCount / (double) size));
+        int safePage = Math.min(page, totalPages);
         String sql = """
                 SELECT R.book_id,R.score,R.comment_text,B.title,B.image_url,A.author_name
                   FROM RATING R
@@ -76,11 +101,17 @@ public class BookshelfService {
                   JOIN AUTHOR A ON A.author_id=B.author_id
                  WHERE R.member_id=? AND B.status='APPROVED'
                    AND R.comment_text IS NOT NULL AND TRIM(R.comment_text) IS NOT NULL
-                 ORDER BY R.rating_id DESC
+                   AND (? IS NULL OR R.score=?)
+                 ORDER BY R.score DESC,B.title ASC,B.book_id ASC
+                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
                 """;
         List<Map<String, Object>> books = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, memberId);
+            if (score == null) { statement.setNull(2, Types.NUMERIC); statement.setNull(3, Types.NUMERIC); }
+            else { statement.setInt(2, score); statement.setInt(3, score); }
+            statement.setInt(4, (safePage - 1) * size);
+            statement.setInt(5, size);
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
                     Map<String, Object> book = new LinkedHashMap<>();
@@ -88,13 +119,19 @@ public class BookshelfService {
                     book.put("score", resultSet.getInt("score"));
                     book.put("comment", resultSet.getString("comment_text"));
                     book.put("title", resultSet.getString("title"));
-                    book.put("imageUrl", resultSet.getString("image_url"));
+                    book.put("imageUrl", BookImageUrlUtil.thumbnail(resultSet.getString("image_url")));
                     book.put("authorName", resultSet.getString("author_name"));
                     books.add(book);
                 }
             }
         }
-        return books;
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("books", books);
+        result.put("page", safePage);
+        result.put("pageSize", size);
+        result.put("totalCount", totalCount);
+        result.put("totalPages", totalPages);
+        return result;
     }
 
     private List<Map<String, Object>> loadTierLists(
@@ -144,7 +181,7 @@ public class BookshelfService {
                     result.put("templateTitle", resultSet.getString("template_title"));
                     result.put("winnerBookId", resultSet.getLong("book_id"));
                     result.put("winnerTitle", resultSet.getString("winner_title"));
-                    result.put("winnerImageUrl", resultSet.getString("image_url"));
+                    result.put("winnerImageUrl", BookImageUrlUtil.thumbnail(resultSet.getString("image_url")));
                     results.add(result);
                 }
             }

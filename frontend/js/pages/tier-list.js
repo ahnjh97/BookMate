@@ -59,7 +59,7 @@ function createCoverCollage(images) {
   const safeImages = Array.isArray(images) ? images.filter(Boolean).slice(0, 2) : [];
   if (!safeImages.length) return `<span>BOOKMATE</span>`;
   return `<div class="template-collage collage-${safeImages.length}">${safeImages.map(image =>
-    `<img src="${escapeHtml(image)}" alt="" loading="lazy" decoding="async">`
+    `<img src="${escapeHtml(image)}" alt="" loading="eager" decoding="async">`
   ).join("")}</div>`;
 }
 participationButtons.forEach(button =>

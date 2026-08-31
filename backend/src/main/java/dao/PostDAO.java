@@ -24,6 +24,8 @@ public class PostDAO {
                     P.title,
                     P.genre,
                     P.view_count,
+                    (SELECT COUNT(*) FROM POST_LIKE L WHERE L.post_id=P.post_id) AS like_count,
+                    (SELECT COUNT(*) FROM POST_COMMENT C WHERE C.post_id=P.post_id AND C.status='ACTIVE') AS comment_count,
                     P.is_pinned,
                     P.status,
                     P.created_at,
@@ -49,6 +51,70 @@ public class PostDAO {
         return postList;
     }
 
+    public List<PostDTO> selectPostPage(Connection conn, String category, String genre, String keyword, String sort,
+                                        int offset, int limit) throws SQLException {
+        String orderBy = switch (sort) {
+            case "likes" -> "P.is_pinned DESC,like_count DESC,P.created_at DESC,P.post_id DESC";
+            case "views" -> "P.is_pinned DESC,P.view_count DESC,P.created_at DESC,P.post_id DESC";
+            default -> "P.is_pinned DESC,P.created_at DESC,P.post_id DESC";
+        };
+        String sql = """
+                SELECT P.post_id,P.member_id,P.tier_list_id,P.ideal_run_id,M.nickname member_nickname,
+                       P.category,P.title,P.genre,P.view_count,P.is_pinned,P.status,P.created_at,P.updated_at,
+                       (SELECT COUNT(*) FROM POST_LIKE L WHERE L.post_id=P.post_id) like_count,
+                       (SELECT COUNT(*) FROM POST_COMMENT C WHERE C.post_id=P.post_id AND C.status='ACTIVE') comment_count
+                  FROM POST P JOIN MEMBER M ON M.member_id=P.member_id
+                 WHERE P.status='ACTIVE'
+                   AND (? IS NULL OR P.category=?)
+                   AND (? IS NULL OR P.genre=?)
+                   AND (? IS NULL OR LOWER(P.title) LIKE ? OR LOWER(M.nickname) LIKE ?)
+                 ORDER BY %s
+                 OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+                """.formatted(orderBy);
+        List<PostDTO> posts = new ArrayList<>();
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
+            bindFilters(statement, category, genre, keyword);
+            statement.setInt(8, offset);
+            statement.setInt(9, limit);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) posts.add(mapPostListRow(rs));
+            }
+        }
+        return posts;
+    }
+
+    public int countPosts(Connection conn, String category, String genre, String keyword) throws SQLException {
+        String sql = """
+                SELECT COUNT(*) FROM POST P JOIN MEMBER M ON M.member_id=P.member_id
+                 WHERE P.status='ACTIVE'
+                   AND (? IS NULL OR P.category=?)
+                   AND (? IS NULL OR P.genre=?)
+                   AND (? IS NULL OR LOWER(P.title) LIKE ? OR LOWER(M.nickname) LIKE ?)
+                """;
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
+            bindFilters(statement, category, genre, keyword);
+            try (ResultSet rs = statement.executeQuery()) { rs.next(); return rs.getInt(1); }
+        }
+    }
+
+    private void bindFilters(PreparedStatement statement, String category, String genre, String keyword) throws SQLException {
+        String safeCategory = blankToNull(category);
+        String safeGenre = blankToNull(genre);
+        String safeKeyword = blankToNull(keyword);
+        String pattern = safeKeyword == null ? null : "%" + safeKeyword.toLowerCase() + "%";
+        statement.setString(1, safeCategory);
+        statement.setString(2, safeCategory);
+        statement.setString(3, safeGenre);
+        statement.setString(4, safeGenre);
+        statement.setString(5, safeKeyword);
+        statement.setString(6, pattern);
+        statement.setString(7, pattern);
+    }
+
+    private String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
+
     /* 게시글 상세 조회 */
     public PostDTO selectPostById(Connection conn, long postId) throws SQLException {
         String sql = """
@@ -63,6 +129,8 @@ public class PostDAO {
                     P.content,
                     P.genre,
                     P.view_count,
+                    (SELECT COUNT(*) FROM POST_LIKE L WHERE L.post_id=P.post_id) AS like_count,
+                    (SELECT COUNT(*) FROM POST_COMMENT C WHERE C.post_id=P.post_id AND C.status='ACTIVE') AS comment_count,
                     P.is_pinned,
                     P.status,
                     P.created_at,
@@ -285,6 +353,8 @@ public class PostDAO {
         post.setTitle(rs.getString("title"));
         post.setGenre(rs.getString("genre"));
         post.setViewCount(rs.getInt("view_count"));
+        post.setLikeCount(rs.getInt("like_count"));
+        post.setCommentCount(rs.getInt("comment_count"));
         post.setIsPinned(rs.getString("is_pinned"));
         post.setStatus(rs.getString("status"));
         post.setCreatedAt(rs.getTimestamp("created_at"));

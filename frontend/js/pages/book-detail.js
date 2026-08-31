@@ -7,8 +7,11 @@ const genreElement = document.querySelector("#book-genre");
 const publisherElement = document.querySelector("#book-publisher");
 const publishedDateElement = document.querySelector("#book-published-date");
 const averageRatingElement = document.querySelector("#book-average-rating");
+const ratingDistributionElement = document.querySelector("#book-rating-distribution");
+const ratingDistributionTriggerElement = document.querySelector(".book-rating-distribution-trigger");
 const ratingCountElement = document.querySelector("#book-rating-count");
 const descriptionElement = document.querySelector("#book-description");
+const sourceLinkElement = document.querySelector("#book-source-link");
 const detailContentElement = document.querySelector(".book-detail-content");
 const ratingBookContextElement = document.querySelector("#rating-book-context");
 const ratingBookTitleElement = document.querySelector("#rating-book-title");
@@ -100,8 +103,11 @@ function renderBook(book) {
   publisherElement.textContent = book.publisher || "출판사 미정";
   publishedDateElement.textContent = formatPublishedDate(book.publishedDate);
   averageRatingElement.textContent = `★ ${Number(book.averageRating).toFixed(2)}`;
+  renderRatingDistribution(book.ratingDistribution || {}, Number(book.ratingCount || 0));
   ratingCountElement.textContent = `${book.ratingCount}명 참여`;
   descriptionElement.textContent = book.description || "등록된 책 소개가 없습니다.";
+  sourceLinkElement.hidden = !book.sourceUrl;
+  if (book.sourceUrl) sourceLinkElement.href = book.sourceUrl;
   ratingBookTitleElement.textContent = book.title;
   ratingBookAuthorElement.textContent = book.authorName;
   ratingBookDescriptionElement.textContent = book.description || "등록된 책 소개가 없습니다.";
@@ -110,6 +116,34 @@ function renderBook(book) {
   statusElement.hidden = true;
   detailElement.hidden = false;
 }
+
+function renderRatingDistribution(distribution, totalCount) {
+  ratingDistributionElement.replaceChildren();
+  const heading = document.createElement("strong");
+  heading.textContent = `별점 분포 | 총 ${totalCount}명`;
+  ratingDistributionElement.append(heading);
+  for (let score = 5; score >= 1; score--) {
+    const count = Number(distribution[score] ?? distribution[String(score)] ?? 0);
+    const ratio = totalCount > 0 ? Math.min(100, Math.max(0, count / totalCount * 100)) : 0;
+    const row = document.createElement("div");
+    row.className = "book-rating-distribution-row";
+    row.innerHTML = `<span>${score}점</span><i><b style="width:${ratio.toFixed(1)}%"></b></i><em>${count}명 (${ratio.toFixed(1)}%)</em>`;
+    ratingDistributionElement.append(row);
+  }
+}
+
+function setRatingDistributionOpen(isOpen) {
+  ratingDistributionTriggerElement.classList.toggle("is-open", isOpen);
+  ratingDistributionElement.setAttribute("aria-hidden", String(!isOpen));
+}
+
+ratingDistributionTriggerElement.addEventListener("mouseenter", () => {
+  setRatingDistributionOpen(true);
+});
+
+ratingDistributionTriggerElement.addEventListener("mouseleave", () => {
+  setRatingDistributionOpen(false);
+});
 
 function showError(message) {
   detailElement.hidden = true;
@@ -245,11 +279,7 @@ function renderPublicRatings(data) {
   delete readerRatingsStatusElement.dataset.state;
   readerRatingsListElement.replaceChildren();
 
-  if (data.ratings.length === 0) {
-    readerRatingsStatusElement.textContent = "아직 등록된 평가가 없습니다. 첫 평가를 남겨보세요.";
-  } else {
-    data.ratings.forEach((rating) => readerRatingsListElement.append(createRatingCard(rating)));
-  }
+  data.ratings.forEach((rating) => readerRatingsListElement.append(createRatingCard(rating)));
   renderRatingsPagination(data.page, data.totalPages);
 }
 

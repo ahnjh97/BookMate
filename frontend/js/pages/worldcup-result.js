@@ -20,7 +20,7 @@ async function load() {
     }
     const winner = x.matches.find(m => m.roundSize === 2).winner;
     document.querySelector("#winner").innerHTML = `<p>🏆 최종 우승</p><a href="/pages/book/detail.html?id=${winner.bookId}">${
-      winner.imageUrl ? `<img src="${esc(winner.imageUrl.replace("-240.webp", "-520.webp"))}" alt="" decoding="async">` : ""
+      winner.imageUrl ? `<img src="${esc(winner.imageUrl)}" alt="" decoding="async">` : ""
     }<h2>${esc(winner.title)}</h2></a>`;
     const sizes = [];
     for (let s = 2; s <= x.bracketSize; s *= 2) sizes.push(s);

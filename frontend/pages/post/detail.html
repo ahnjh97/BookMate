@@ -7,7 +7,7 @@
     <title>게시글 | BookMate</title>
 
     <link rel="stylesheet" href="/assets/css/style.css?v=20260831-2">
-    <link rel="stylesheet" href="/assets/css/post.css?v=20260831-8">
+    <link rel="stylesheet" href="/assets/css/post.css?v=20260831-9">
 </head>
 
 <body>
@@ -69,6 +69,18 @@
                 <button id="post-report-button" class="button" type="button">신고</button>
             </div>
         </div>
+
+        <section class="post-comments" aria-labelledby="post-comments-heading">
+            <div class="post-comments-heading">
+                <h2 id="post-comments-heading">댓글 <span id="post-comment-count">0</span></h2>
+            </div>
+            <form id="post-comment-form" class="post-comment-form">
+                <textarea id="post-comment-content" maxlength="1000" rows="3" placeholder="댓글을 입력해 주세요." required></textarea>
+                <div><small id="post-comment-length">0 / 1000</small><button class="button button-teal" type="submit">댓글 등록</button></div>
+            </form>
+            <p id="post-comment-message" class="post-comment-message" role="status"></p>
+            <div id="post-comment-list" class="post-comment-list"></div>
+        </section>
     </article>
 
     <p id="post-detail-status" class="post-detail-status" aria-live="polite">
@@ -78,6 +90,6 @@
 
 <script src="/js/components/navbar.js" charset="UTF-8" defer></script>
 <script src="/js/components/flash-toast.js?v=20260831-1" defer></script>
-<script src="/js/pages/post-detail.js?v=20260831-3" charset="UTF-8" defer></script>
+<script src="/js/pages/post-detail.js?v=20260831-5" charset="UTF-8" defer></script>
 </body>
 </html>

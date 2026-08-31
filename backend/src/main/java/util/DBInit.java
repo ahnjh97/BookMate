@@ -9,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.Types;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,7 +53,6 @@ public class DBInit {
                 System.out.printf("유저 %,d명 적재됨%n", queryCount(conn,
                         "SELECT COUNT(*) FROM MEMBER WHERE role='USER' AND login_id <> 'bookmate_system'"));
                 importBooks(conn, PROJECT_ROOT.resolve("db/books.csv"));
-                useLocalBookImages(conn);
                 System.out.printf("책 %,d권 적재됨%n", queryCount(conn, "SELECT COUNT(*) FROM BOOK"));
                 importRatings(conn, PROJECT_ROOT.resolve("db/ratings.csv"));
                 System.out.printf("평점·후기 %,d개 적재됨%n", queryCount(conn, "SELECT COUNT(*) FROM RATING"));
@@ -278,6 +278,45 @@ public class DBInit {
             statement.setLong(5, requiredLong(row, "right_book_id"));
             statement.setLong(6, requiredLong(row, "winner_book_id"));
         });
+        batchImport(conn, "posts.csv", """
+                INSERT INTO POST(
+                    post_id,member_id,tier_list_id,ideal_run_id,category,title,content,
+                    genre,tag,view_count,is_pinned,status,created_at
+                ) VALUES(SEQ_POST.NEXTVAL,?,?,?,?,?,?,?,?,?,?,?,SYSDATE-?)
+                """, (statement, row, index) -> {
+            requireOrderedId(row, "post_id", index + 1);
+            statement.setLong(1, requiredMemberId(memberIds, row));
+            setNullableLong(statement, 2, row.get("tier_list_id"));
+            setNullableLong(statement, 3, row.get("ideal_run_id"));
+            statement.setString(4, required(row, "category"));
+            statement.setString(5, required(row, "title"));
+            statement.setString(6, required(row, "content"));
+            statement.setString(7, emptyToNull(row.get("genre")));
+            statement.setString(8, emptyToNull(row.get("tag")));
+            statement.setInt(9, requiredInt(row, "view_count"));
+            statement.setString(10, required(row, "is_pinned"));
+            statement.setString(11, required(row, "status"));
+            statement.setInt(12, requiredInt(row, "created_days_ago"));
+        });
+        batchImport(conn, "post-comments.csv", """
+                INSERT INTO POST_COMMENT(comment_id,post_id,member_id,parent_comment_id,content,created_at)
+                VALUES(SEQ_POST_COMMENT.NEXTVAL,?,?,?,?,SYSDATE-?)
+                """, (statement, row, index) -> {
+            requireOrderedId(row, "comment_id", index + 1);
+            statement.setLong(1, requiredLong(row, "post_id"));
+            statement.setLong(2, requiredMemberId(memberIds, row));
+            setNullableLong(statement, 3, row.get("parent_comment_id"));
+            statement.setString(4, required(row, "content"));
+            statement.setInt(5, requiredInt(row, "created_days_ago"));
+        });
+        batchImport(conn, "post-likes.csv", """
+                INSERT INTO POST_LIKE(post_like_id,post_id,member_id,created_at)
+                VALUES(SEQ_POST_LIKE.NEXTVAL,?,?,SYSDATE-?)
+                """, (statement, row, index) -> {
+            statement.setLong(1, requiredLong(row, "post_id"));
+            statement.setLong(2, requiredMemberId(memberIds, row));
+            statement.setInt(3, requiredInt(row, "created_days_ago"));
+        });
     }
 
     private static void batchImport(Connection conn, String fileName, String sql,
@@ -311,6 +350,9 @@ public class DBInit {
             case "tier-result-items.csv" -> "티어리스트 결과 항목";
             case "ideal-results.csv" -> "이상형 월드컵 결과";
             case "ideal-result-matches.csv" -> "이상형 월드컵 경기 결과";
+            case "posts.csv" -> "커뮤니티 게시글";
+            case "post-comments.csv" -> "게시글 댓글";
+            case "post-likes.csv" -> "게시글 좋아요";
             default -> fileName;
         };
     }
@@ -341,6 +383,15 @@ public class DBInit {
         return Integer.parseInt(required(row, key));
     }
 
+    private static void setNullableLong(PreparedStatement statement, int index, String value)
+            throws Exception {
+        if (value == null || value.isBlank()) {
+            statement.setNull(index, Types.NUMERIC);
+            return;
+        }
+        statement.setLong(index, Long.parseLong(value.trim()));
+    }
+
     private static void requireOrderedId(Map<String, String> row, String key, int expected) {
         long actual = requiredLong(row, key);
         if (actual != expected) {
@@ -351,14 +402,6 @@ public class DBInit {
     @FunctionalInterface
     private interface CsvBinder {
         void bind(PreparedStatement statement, Map<String, String> row, int index) throws Exception;
-    }
-
-    private static void useLocalBookImages(Connection conn) throws Exception {
-        try (Statement statement = conn.createStatement()) {
-            statement.executeUpdate(
-                    "UPDATE BOOK SET image_url = '/assets/images/books/' || book_id || '-240.webp'"
-            );
-        }
     }
 
     private static List<Map<String, String>> readCsv(Path path) throws Exception {
@@ -439,14 +482,27 @@ public class DBInit {
         assertCount(conn, "TIER_ITEM", csvSize("tier-result-items.csv"));
         assertCount(conn, "IDEAL_RUN", csvSize("ideal-results.csv"));
         assertCount(conn, "IDEAL_MATCH", csvSize("ideal-result-matches.csv"));
+        assertCount(conn, "POST", csvSize("posts.csv"));
+        assertCount(conn, "POST_COMMENT", csvSize("post-comments.csv"));
+        assertCount(conn, "POST_LIKE", csvSize("post-likes.csv"));
+        assertQueryCount(conn,
+                "SELECT COUNT(*) FROM POST P JOIN TIER_LIST T ON T.tier_list_id=P.tier_list_id"
+                        + " WHERE P.member_id<>T.member_id",
+                0,
+                "티어리스트 공유 게시글 작성자");
+        assertQueryCount(conn,
+                "SELECT COUNT(*) FROM POST P JOIN IDEAL_RUN R ON R.run_id=P.ideal_run_id"
+                        + " WHERE P.member_id<>R.member_id",
+                0,
+                "월드컵 공유 게시글 작성자");
         assertQueryCount(conn, "SELECT COUNT(*) FROM BOOK WHERE published_date IS NULL", 0,
                 "출간일 누락 도서");
         assertQueryCount(conn, "SELECT COUNT(*) FROM BOOK WHERE LENGTH(description) > 120", 0,
                 "간략 설명 길이 초과 도서");
         assertQueryCount(conn,
-                "SELECT COUNT(*) FROM BOOK WHERE image_url LIKE '/assets/images/books/%-240.webp'",
-                1000,
-                "로컬 WebP 표지");
+                "SELECT COUNT(*) FROM BOOK WHERE image_url IS NULL OR image_url NOT LIKE 'http%'",
+                0,
+                "외부 표지 URL 누락 도서");
         assertQueryCount(conn, "SELECT COUNT(*) FROM TIER_TEMPLATE WHERE category='장르'", 3,
                 "장르 티어 템플릿");
         assertQueryCount(conn, "SELECT COUNT(*) FROM TIER_TEMPLATE WHERE category='작가'", 3,

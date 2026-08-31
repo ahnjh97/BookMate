@@ -172,10 +172,87 @@
 
 .book-rating-summary {
   display: flex;
-  align-items: baseline;
+  position: relative;
+  align-items: center;
   justify-content: flex-start;
-  gap: 8px;
+  padding: 4px 0;
   text-align: left;
+}
+
+.book-rating-distribution-trigger {
+  position: relative;
+}
+
+.book-rating-overview {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.book-rating-distribution {
+  visibility: hidden;
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 310px;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: rgb(255 255 255 / 98%);
+  box-shadow: 0 12px 30px rgb(16 24 40 / 14%);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s ease;
+}
+
+.book-rating-distribution-trigger:hover .book-rating-distribution,
+.book-rating-distribution-trigger.is-open .book-rating-distribution {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.book-rating-distribution > strong {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--color-text);
+  font-size: 0.86rem;
+}
+
+.book-rating-distribution-row {
+  display: grid;
+  grid-template-columns: 28px minmax(90px, 1fr) 82px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 7px;
+  font-size: 0.76rem;
+}
+
+.book-rating-distribution-row span,
+.book-rating-distribution-row em {
+  color: var(--color-muted);
+  font-style: normal;
+  white-space: nowrap;
+}
+
+.book-rating-distribution-row em {
+  text-align: right;
+}
+
+.book-rating-distribution-row i {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--color-border);
+}
+
+.book-rating-distribution-row b {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-warning);
 }
 
 .book-detail-rating strong {
@@ -186,6 +263,23 @@
 .book-detail-rating span {
   color: var(--color-muted);
   font-size: 0.88rem;
+}
+
+.book-detail-rating .book-rating-distribution {
+  border-color: rgb(15 163 193 / 28%);
+  background: #fff;
+  box-shadow: 0 14px 34px rgb(15 23 42 / 20%);
+}
+
+.book-detail-rating .book-rating-distribution > strong {
+  color: var(--color-text);
+  font-size: 0.86rem;
+}
+
+.book-detail-rating .book-rating-distribution-row span,
+.book-detail-rating .book-rating-distribution-row em {
+  color: #475467;
+  font-size: 0.76rem;
 }
 
 .book-rating-actions {
@@ -430,6 +524,18 @@
 
 .book-detail-description {
   margin-top: 26px;
+}
+
+.book-source-link {
+  display: inline-block;
+  margin-top: 12px;
+  color: var(--color-primary-dark);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.book-source-link[hidden] {
+  display: none;
 }
 
 .book-detail-description h2 {

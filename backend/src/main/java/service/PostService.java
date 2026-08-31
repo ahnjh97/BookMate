@@ -2,6 +2,7 @@ package service;
 
 import dao.PostDAO;
 import dto.PostDTO;
+import dto.PostPageDTO;
 import util.DBUtil;
 
 import java.sql.Connection;
@@ -22,6 +23,25 @@ public class PostService {
             return postDAO.selectPostList(conn);
         } catch (SQLException e) {
             throw new RuntimeException("게시글 목록을 불러오지 못했습니다.", e);
+        }
+    }
+
+    public PostPageDTO getPostPage(String category, String genre, String keyword, String sort, int page, int pageSize) {
+        int safeSize = Math.min(Math.max(pageSize, 1), 50);
+        int safePage = Math.max(page, 1);
+        try (Connection conn = DBUtil.getConnection()) {
+            int totalCount = postDAO.countPosts(conn, category, genre, keyword);
+            int totalPages = Math.max(1, (int) Math.ceil(totalCount / (double) safeSize));
+            safePage = Math.min(safePage, totalPages);
+            String safeSort = switch (sort == null ? "" : sort) {
+                case "likes", "views" -> sort;
+                default -> "latest";
+            };
+            List<PostDTO> posts = postDAO.selectPostPage(conn, category, genre, keyword, safeSort,
+                    (safePage - 1) * safeSize, safeSize);
+            return new PostPageDTO(posts, safePage, safeSize, totalCount, totalPages);
+        } catch (SQLException exception) {
+            throw new RuntimeException("게시글 목록을 불러오지 못했습니다.", exception);
         }
     }
 
@@ -281,7 +301,7 @@ public class PostService {
         }
 
         return switch (category) {
-            case "NOTICE", "FREE", "RECOMMEND", "REVIEW", "TIER", "AUTHOR" -> true;
+            case "NOTICE", "FREE", "RECOMMEND", "REVIEW", "TIER", "WORLDCUP" -> true;
             default -> false;
         };
     }

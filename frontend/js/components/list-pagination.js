@@ -7,13 +7,15 @@
     const pageSize = Math.max(1, Number(options.pageSize) || 1);
     let items = [];
     let currentPage = 1;
+    let serverTotalCount = null;
 
     if (!root || !previousButton || !nextButton || !numbersElement) {
       throw new Error("페이지 이동 요소가 올바르게 구성되지 않았습니다.");
     }
 
     function render() {
-      const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+      const totalCount = serverTotalCount == null ? items.length : serverTotalCount;
+      const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
       currentPage = Math.min(currentPage, totalPages);
       const startIndex = (currentPage - 1) * pageSize;
 
@@ -33,15 +35,21 @@
         numbersElement.append(button);
       }
 
-      options.onRender(items.slice(startIndex, startIndex + pageSize), startIndex, items.length);
-      root.hidden = items.length === 0;
+      const renderedItems = serverTotalCount == null ? items.slice(startIndex, startIndex + pageSize) : items;
+      options.onRender(renderedItems, startIndex, totalCount);
+      root.hidden = totalCount === 0;
     }
 
     function moveTo(page) {
-      const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+      const totalCount = serverTotalCount == null ? items.length : serverTotalCount;
+      const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
       const nextPage = Math.min(Math.max(1, page), totalPages);
       if (nextPage === currentPage) return;
       currentPage = nextPage;
+      if (serverTotalCount != null && typeof options.onPageChange === "function") {
+        options.onPageChange(currentPage);
+        return;
+      }
       render();
     }
 
@@ -51,7 +59,14 @@
     return {
       setItems(nextItems) {
         items = Array.isArray(nextItems) ? nextItems : [];
+        serverTotalCount = null;
         currentPage = 1;
+        render();
+      },
+      setPage(nextItems, nextPage, totalCount) {
+        items = Array.isArray(nextItems) ? nextItems : [];
+        serverTotalCount = Math.max(0, Number(totalCount) || 0);
+        currentPage = Math.max(1, Number(nextPage) || 1);
         render();
       },
     };

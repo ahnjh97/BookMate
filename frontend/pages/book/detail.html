@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>책 상세 | BookMate</title>
   <link rel="stylesheet" href="/assets/css/style.css?v=20260830-6">
-  <link rel="stylesheet" href="/assets/css/book-detail.css?v=20260831-1">
+  <link rel="stylesheet" href="/assets/css/book-detail.css?v=20260831-3">
 </head>
 <body>
   <header class="site-header" data-navbar></header>
@@ -45,9 +45,12 @@
           </dl>
           <section class="book-detail-rating" aria-labelledby="book-rating-heading">
             <h2 id="book-rating-heading">독자 평점</h2>
-            <div class="book-rating-summary">
-              <strong id="book-average-rating"></strong>
-              <span id="book-rating-count"></span>
+            <div class="book-rating-summary book-rating-distribution-trigger">
+              <div class="book-rating-overview">
+                <strong id="book-average-rating"></strong>
+                <span id="book-rating-count"></span>
+              </div>
+              <div id="book-rating-distribution" class="book-rating-distribution" aria-hidden="true"></div>
             </div>
             <div class="book-rating-actions">
               <p id="my-rating-summary" class="my-rating-summary" hidden></p>
@@ -60,6 +63,9 @@
           <section class="book-detail-description" aria-labelledby="book-description-heading">
             <h2 id="book-description-heading">책 소개</h2>
             <p id="book-description"></p>
+            <a id="book-source-link" class="book-source-link" target="_blank" rel="noopener noreferrer" hidden>
+              알라딘에서 도서 정보 보기
+            </a>
           </section>
         </div>
 
@@ -145,6 +151,6 @@
   </main>
   <script src="/js/components/navbar.js" defer></script>
   <script src="/js/components/list-pagination.js?v=20260831-1" defer></script>
-  <script src="/js/pages/book-detail.js?v=20260831-2" defer></script>
+  <script src="/js/pages/book-detail.js?v=20260831-6" defer></script>
 </body>
 </html>

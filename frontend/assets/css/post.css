@@ -69,16 +69,16 @@
   font-size: 13px;
 }
 
-.post-status:not(:empty) + .post-table-wrapper {
+.post-status:not(:empty) + .post-table-wrap {
   margin-top: 0;
 }
 
 /* Figma의 둥근 테두리형 커뮤니티 목록 표입니다. */
-.post-table-wrapper {
+.post-table-wrap {
   overflow-x: auto;
   border: 1px solid var(--color-border);
   border-radius: 10px;
-  background: var(--color-background);
+  background: #fff;
 }
 
 .post-table {
@@ -87,10 +87,17 @@
   table-layout: fixed;
 }
 
+.post-col-category { width: 9%; }
+.post-col-title { width: 40%; }
+.post-col-genre { width: 7%; }
+.post-col-writer { width: 14%; }
+.post-col-date { width: 12%; }
+.post-col-count { width: 6%; }
+
 .post-table th,
 .post-table td {
   height: 52px;
-  padding: 0 20px;
+  padding: 0 10px;
   border-bottom: 1px solid var(--color-border);
   color: var(--color-text);
   text-align: center;
@@ -118,7 +125,7 @@
 }
 
 .post-table .post-title {
-  min-width: 360px;
+  min-width: 0;
   text-align: left;
 }
 
@@ -157,13 +164,6 @@
   outline: none;
 }
 
-.post-number {
-  width: 82px;
-  color: var(--color-muted);
-  font-size: 14px;
-  font-weight: 700;
-}
-
 /* 카테고리와 장르를 같은 행에 배치 */
 #post-create-form > .form-row {
   display: flex;
@@ -191,25 +191,31 @@
     align-items: stretch;
   }
 }
-/* 인기글 상위 3개의 순위를 브랜드 색상으로 강조합니다. */
-.post-table tbody tr:nth-child(-n+3) .post-number {
-  color: var(--color-primary);
-}
-
 .post-writer {
-  width: 150px;
+  overflow: hidden;
   color: var(--color-muted);
   font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .post-date {
-  width: 120px;
+  color: var(--color-muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.post-views {
   color: var(--color-muted);
   font-size: 13px;
 }
 
-.post-views {
-  width: 92px;
+.post-likes {
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+.post-comments-count {
   color: var(--color-muted);
   font-size: 13px;
 }
@@ -267,6 +273,24 @@
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 20px;
+}
+
+.post-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+
+.post-sort-control select {
+  min-height: 44px;
+  padding: 0 34px 0 13px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text);
+  background: var(--color-background);
+  font: inherit;
+  font-weight: 700;
 }
 
 .post-search-form {
@@ -552,14 +576,38 @@
   border-top: 1px solid var(--color-border);
 }
 
+.post-comments { margin-top: 30px; padding-top: 26px; border-top: 1px solid var(--color-border); }
+.post-comments-heading h2 { margin: 0 0 16px; font-size: 1.25rem; }
+.post-comments-heading h2 span { color: var(--color-primary); }
+.post-comment-form,.post-comment-inline-form { display: grid; gap: 10px; }
+.post-comment-form textarea,.post-comment-inline-form textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--color-border); border-radius: 9px; resize: vertical; font: inherit; }
+.post-comment-form textarea:focus,.post-comment-inline-form textarea:focus { border-color: var(--color-primary); outline: 2px solid rgb(15 163 193 / 18%); }
+.post-comment-form > div,.post-comment-inline-form > div { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.post-comment-form small { margin-right: auto; color: var(--color-muted); }
+.post-comment-message { min-height: 20px; margin: 8px 0 0; color: #b42318; font-size: .86rem; }
+.post-comment-list { margin-top: 8px; }
+.post-comment { padding: 18px 4px; border-bottom: 1px solid var(--color-border); }
+.post-comment.is-reply { margin-left: 34px; padding-left: 18px; border-left: 3px solid var(--color-primary-soft); }
+.post-comment-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.post-comment-heading strong { font-size: .94rem; }
+.post-comment-heading time { color: var(--color-muted); font-size: .78rem; }
+.post-comment-content { margin: 9px 0 0; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.post-comment.is-deleted .post-comment-content { color: var(--color-muted); font-style: italic; }
+.post-comment-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+.post-comment-actions button { padding: 0; border: 0; color: var(--color-muted); background: transparent; font: inherit; font-size: .78rem; cursor: pointer; }
+.post-comment-actions button:hover { color: var(--color-primary-dark); }
+.post-comment-inline-form { margin-top: 12px; }
+.post-comment-inline-form .button { min-height: 36px; padding-inline: 14px; }
+.post-comments-empty { padding: 28px 0; color: var(--color-muted); text-align: center; }
+
 @media (max-width: 700px) {
   .post-list-toolbar {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .post-list-toolbar > .button {
-    align-self: flex-end;
+  .post-toolbar-actions {
+    justify-content: flex-end;
   }
 
   .post-page-main {

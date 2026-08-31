@@ -13,7 +13,7 @@
       markCurrentPage(host, currentPath);
     });
 
-    const authResponse = await fetch("/api/auth/session", { cache: "no-store" });
+    const authResponse = await fetch("/api/auth", { cache: "no-store" });
     const auth = authResponse.ok ? await authResponse.json() : { loggedIn: false };
     navbarHosts.forEach((host) => renderAuthMenu(host, auth));
     document.dispatchEvent(new CustomEvent("bookmate:navbar-ready", { detail: auth }));
@@ -45,7 +45,7 @@ function renderAuthMenu(navbarHost, auth) {
   logout.textContent = "로그아웃";
   logout.addEventListener("click", async () => {
     logout.disabled = true;
-    await fetch("/api/auth/session", { method: "DELETE" });
+    await fetch("/api/auth", { method: "DELETE" });
     window.location.href = "/";
   });
   menu.append(logout);

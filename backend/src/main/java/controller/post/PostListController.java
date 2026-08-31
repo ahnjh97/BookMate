@@ -43,6 +43,17 @@ public class PostListController extends HttpServlet {
         setJsonResponse(response);
 
         try {
+            String rawPage = request.getParameter("page");
+            if (rawPage != null) {
+                var page = postService.getPostPage(request.getParameter("category"), request.getParameter("genre"),
+                        request.getParameter("keyword"), request.getParameter("sort"), parsePositive(rawPage, 1),
+                        parsePositive(request.getParameter("size"), 10));
+                response.setStatus(HttpServletResponse.SC_OK);
+                gson.toJson(Map.of("success", true, "posts", page.posts(), "page", page.page(),
+                        "pageSize", page.pageSize(), "totalCount", page.totalCount(), "totalPages", page.totalPages()),
+                        response.getWriter());
+                return;
+            }
             List<PostDTO> postList =
                     postService.getPostList();
 
@@ -59,6 +70,7 @@ public class PostListController extends HttpServlet {
             );
 
         } catch (RuntimeException e) {
+            e.printStackTrace();
             response.setStatus(
                     HttpServletResponse
                             .SC_INTERNAL_SERVER_ERROR
@@ -73,6 +85,11 @@ public class PostListController extends HttpServlet {
                     response.getWriter()
             );
         }
+    }
+
+    private int parsePositive(String value, int fallback) {
+        try { int parsed = Integer.parseInt(value); return parsed > 0 ? parsed : fallback; }
+        catch (RuntimeException exception) { return fallback; }
     }
 
     private void setJsonResponse(
