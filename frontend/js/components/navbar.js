@@ -1,3 +1,5 @@
+import { authApi } from "/js/api/authApi.js";
+
 (async function loadNavbar() {
   const navbarHosts = document.querySelectorAll("[data-navbar]");
   if (navbarHosts.length === 0) return;
@@ -13,8 +15,12 @@
       markCurrentPage(host, currentPath);
     });
 
-    const authResponse = await fetch("/api/auth/session", { cache: "no-store" });
-    const auth = authResponse.ok ? await authResponse.json() : { loggedIn: false };
+    let auth;
+    try {
+        auth = await authApi.checkSession();
+    } catch {
+        auth = { loggedIn: false };
+    }
     navbarHosts.forEach((host) => renderAuthMenu(host, auth));
     document.dispatchEvent(new CustomEvent("bookmate:navbar-ready", { detail: auth }));
   } catch (error) {
@@ -35,17 +41,19 @@ function renderAuthMenu(navbarHost, auth) {
     return;
   }
   // 관리자 / 일반회원 메뉴 분리
-  if (auth.role === "ADMIN") {menu.append(createLink("관리자페이지", "/pages/admin/admin.html", "login-link admin-link"));
-  } else { menu.append(createLink("내 책장", "/pages/member/bookshelf.html", "login-link"));
+  if (auth.role === "ADMIN") {
+    menu.append(createLink("관리자페이지", "/pages/admin/admin.html", "login-link admin-link"));
+  } else {
+    menu.append(createLink("내 책장", "/pages/member/bookshelf.html", "login-link"));
+    menu.append(createLink("마이페이지", "/pages/member/mypage.html", "login-link"));
   }
-  menu.append(createLink("회원정보수정", "/pages/member/edit.html", "login-link account-edit-link"));
   const logout = document.createElement("button");
   logout.type = "button";
   logout.className = "button button-small button-primary";
   logout.textContent = "로그아웃";
   logout.addEventListener("click", async () => {
     logout.disabled = true;
-    await fetch("/api/auth/session", { method: "DELETE" });
+    await authApi.logout();
     window.location.href = "/";
   });
   menu.append(logout);
