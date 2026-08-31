@@ -281,7 +281,7 @@ public class PostService {
         }
 
         return switch (category) {
-            case "NOTICE", "FREE", "RECOMMEND", "REVIEW", "TIER", "AUTHOR" -> true;
+            case "NOTICE", "FREE", "RECOMMEND", "REVIEW", "TIER", "WORLDCUP", "AUTHOR" -> true;
             default -> false;
         };
     }

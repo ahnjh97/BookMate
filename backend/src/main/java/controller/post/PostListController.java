@@ -59,9 +59,10 @@ public class PostListController extends HttpServlet {
             );
 
         } catch (RuntimeException e) {
+            e.printStackTrace();
+
             response.setStatus(
-                    HttpServletResponse
-                            .SC_INTERNAL_SERVER_ERROR
+                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR
             );
 
             gson.toJson(

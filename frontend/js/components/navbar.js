@@ -47,7 +47,6 @@ function renderAuthMenu(navbarHost, auth) {
     menu.append(createLink("내 책장", "/pages/member/bookshelf.html", "login-link"));
     menu.append(createLink("마이페이지", "/pages/member/mypage.html", "login-link"));
   }
-  menu.append(createLink("회원정보수정", "/pages/member/edit.html", "login-link account-edit-link"));
   const logout = document.createElement("button");
   logout.type = "button";
   logout.className = "button button-small button-primary";
