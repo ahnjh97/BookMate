@@ -35,6 +35,15 @@ const readerRatingsStatusElement = document.querySelector("#reader-ratings-statu
 const readerRatingsListElement = document.querySelector("#reader-ratings-list");
 const readerRatingsPaginationElement = document.querySelector("#reader-ratings-pagination");
 const readerRatingFilterButtons = document.querySelectorAll("[data-reader-score]");
+const readerRatingsPagination = window.BookMateListPagination.create({
+  root: readerRatingsPaginationElement,
+  pageSize: 4,
+  onRender: renderReaderRatingPage,
+  onPageChange: async (page) => {
+    const bookId = getBookId();
+    if (bookId) await loadPublicRatings(bookId, page);
+  },
+});
 const bookCommunityElement = document.querySelector("#book-community");
 const bookTemplatesHeadingElement = document.querySelector("#book-tier-templates-heading");
 const bookTierTemplatesStatusElement = document.querySelector("#book-tier-templates-status");
@@ -99,7 +108,9 @@ function renderBook(book) {
   renderCover(book);
   titleElement.textContent = book.title;
   authorElement.textContent = book.authorName;
-  genreElement.textContent = book.genre;
+  const genreGroup = window.BookMateGenre.groupOf(book.genre);
+  genreElement.textContent = genreGroup;
+  genreElement.dataset.genre = genreGroup;
   publisherElement.textContent = book.publisher || "출판사 미정";
   publishedDateElement.textContent = formatPublishedDate(book.publishedDate);
   averageRatingElement.textContent = `★ ${Number(book.averageRating).toFixed(2)}`;
@@ -265,7 +276,7 @@ async function loadPublicRatings(bookId, page = 1) {
     renderPublicRatings(result.data);
   } catch (error) {
     readerRatingsListElement.replaceChildren();
-    readerRatingsPaginationElement.replaceChildren();
+    readerRatingsPagination.setPage([], 1, 0);
     readerRatingsStatusElement.textContent = error.message || "독자 평가를 불러오지 못했습니다.";
     readerRatingsStatusElement.dataset.state = "error";
   }
@@ -277,10 +288,12 @@ function renderPublicRatings(data) {
     : `${currentReaderScore}점 평가 ${data.totalCount}개`;
   readerRatingsStatusElement.textContent = "";
   delete readerRatingsStatusElement.dataset.state;
-  readerRatingsListElement.replaceChildren();
+  readerRatingsPagination.setPage(data.ratings, data.page, data.totalCount);
+}
 
-  data.ratings.forEach((rating) => readerRatingsListElement.append(createRatingCard(rating)));
-  renderRatingsPagination(data.page, data.totalPages);
+function renderReaderRatingPage(ratings) {
+  readerRatingsListElement.replaceChildren();
+  ratings.forEach((rating) => readerRatingsListElement.append(createRatingCard(rating)));
 }
 
 readerRatingFilterButtons.forEach(button => {
@@ -424,38 +437,6 @@ async function deleteMyRating(rating, cardElement, controlElement, toastElement)
     showCardToast(toastElement, message, "error");
     buttons.forEach((button) => { button.disabled = false; });
   }
-}
-
-function renderRatingsPagination(page, totalPages) {
-  readerRatingsPaginationElement.replaceChildren();
-  if (totalPages <= 1) return;
-
-  readerRatingsPaginationElement.append(createPageButton("이전", page - 1, page === 1));
-  const start = Math.max(1, page - 2);
-  const end = Math.min(totalPages, start + 4);
-  for (let number = Math.max(1, end - 4); number <= end; number += 1) {
-    const button = createPageButton(String(number), number, false);
-    if (number === page) {
-      button.setAttribute("aria-current", "page");
-      button.disabled = true;
-    }
-    readerRatingsPaginationElement.append(button);
-  }
-  readerRatingsPaginationElement.append(createPageButton("다음", page + 1, page === totalPages));
-}
-
-function createPageButton(label, page, disabled) {
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = "reader-rating-page-button";
-  button.textContent = label;
-  button.disabled = disabled;
-  button.addEventListener("click", async () => {
-    const bookId = getBookId();
-    if (!bookId) return;
-    await loadPublicRatings(bookId, page);
-  });
-  return button;
 }
 
 async function loadMyRating(bookId) {

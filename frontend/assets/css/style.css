@@ -675,6 +675,11 @@ button {
   -webkit-mask-image: url("/assets/icons/community.svg");
 }
 
+.page-title-icon-admin {
+  mask-image: url("/assets/icons/admin-shield.svg");
+  -webkit-mask-image: url("/assets/icons/admin-shield.svg");
+}
+
 .choice-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -705,6 +710,15 @@ button {
   color: #53606d;
   background: #edf0f3;
 }
+
+.genre-badge[data-genre="소설"] { --genre-badge-color: rgb(20 126 120 / 92%); }
+.genre-badge[data-genre="판타지"] { --genre-badge-color: rgb(105 76 190 / 92%); }
+.genre-badge[data-genre="SF"] { --genre-badge-color: rgb(28 111 189 / 92%); }
+.genre-badge[data-genre="추리"] { --genre-badge-color: rgb(184 94 28 / 92%); }
+.genre-badge[data-genre="인문/사회"] { --genre-badge-color: rgb(51 126 84 / 92%); }
+.genre-badge[data-genre="자기계발"] { --genre-badge-color: rgb(202 128 18 / 93%); }
+.genre-badge[data-genre="과학/IT"] { --genre-badge-color: rgb(21 137 162 / 92%); }
+.genre-badge[data-genre="기타"] { --genre-badge-color: rgb(91 98 112 / 92%); }
 
 .list-pagination {
   display: flex;
@@ -867,6 +881,57 @@ button {
 .page-title-button:focus-visible {
   filter: brightness(.9);
   outline: none;
+}
+
+/* 목록 페이지 공용 검색창 */
+.list-search-form.list-search-form {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  width: min(460px, 100%);
+  flex: none;
+  gap: 10px;
+  margin: 0;
+}
+
+.list-search-form.list-search-form input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 13px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  background: var(--color-background);
+  font: inherit;
+  font-size: 15px;
+}
+
+.list-search-form.list-search-form input::placeholder {
+  color: var(--color-muted);
+}
+
+.list-search-form.list-search-form input:focus {
+  border-color: var(--color-primary);
+  outline: 2px solid rgb(15 163 193 / 18%);
+}
+
+/* 목록 페이지 공용 검색 결과 제목 */
+.list-search-result-heading.list-search-result-heading {
+  display: flex;
+  min-height: 37px;
+  align-items: baseline;
+  margin: 0;
+  color: var(--color-text);
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.list-search-result-heading.list-search-result-heading strong {
+  margin-right: 4px;
+  color: var(--color-primary);
+  font-size: 21px;
+  font-weight: 900;
 }
 
 @media (max-width: 560px) {

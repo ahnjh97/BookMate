@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>책 상세 | BookMate</title>
-  <link rel="stylesheet" href="/assets/css/style.css?v=20260830-6">
-  <link rel="stylesheet" href="/assets/css/book-detail.css?v=20260831-3">
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260831-8">
+  <link rel="stylesheet" href="/assets/css/book-detail.css?v=20260831-4">
 </head>
 <body>
   <header class="site-header" data-navbar></header>
@@ -30,7 +30,7 @@
         </div>
 
         <div class="book-detail-content">
-          <p id="book-genre" class="book-detail-genre"></p>
+          <p id="book-genre" class="book-detail-genre genre-badge"></p>
           <h1 id="book-title"></h1>
           <p id="book-author" class="book-detail-author"></p>
           <dl class="book-detail-meta">
@@ -87,7 +87,11 @@
             </div>
             <p id="reader-ratings-status" class="reader-ratings-status" role="status" aria-live="polite"></p>
             <div id="reader-ratings-list" class="reader-ratings-list"></div>
-            <nav id="reader-ratings-pagination" class="reader-ratings-pagination" aria-label="독자 평가 페이지"></nav>
+            <nav id="reader-ratings-pagination" class="list-pagination" aria-label="독자 평가 페이지">
+              <button class="button button-outline" type="button" data-pagination-prev>이전</button>
+              <div class="list-page-numbers" data-pagination-numbers aria-live="polite"></div>
+              <button class="button button-outline" type="button" data-pagination-next>다음</button>
+            </nav>
           </section>
 
           <section class="book-tier-templates" aria-labelledby="book-tier-templates-heading">
@@ -151,6 +155,7 @@
   </main>
   <script src="/js/components/navbar.js" defer></script>
   <script src="/js/components/list-pagination.js?v=20260831-1" defer></script>
-  <script src="/js/pages/book-detail.js?v=20260831-6" defer></script>
+  <script src="/js/components/book-genre.js?v=20260831-1" defer></script>
+  <script src="/js/pages/book-detail.js?v=20260831-9" defer></script>
 </body>
 </html>

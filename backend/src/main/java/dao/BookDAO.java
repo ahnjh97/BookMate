@@ -114,7 +114,16 @@ public class BookDAO {
                   LEFT JOIN RATING R ON R.book_id = B.book_id
                  WHERE B.status = 'APPROVED'
                    AND (? IS NULL OR LOWER(B.title) LIKE ? OR LOWER(A.author_name) LIKE ?)
-                   AND (? IS NULL OR B.genre = ?)
+                   AND (? IS NULL OR CASE
+                       WHEN B.genre IN ('소설','고전','로맨스','역사소설') THEN '소설'
+                       WHEN B.genre = '판타지' THEN '판타지'
+                       WHEN B.genre IN ('SF','디스토피아') THEN 'SF'
+                       WHEN B.genre IN ('추리','스릴러') THEN '추리'
+                       WHEN B.genre IN ('역사','철학','전기') THEN '인문/사회'
+                       WHEN B.genre = '자기계발' THEN '자기계발'
+                       WHEN B.genre IN ('과학','IT') THEN '과학/IT'
+                       ELSE '기타'
+                   END = ?)
                    AND (? IS NULL OR B.author_id = ?)
                  GROUP BY B.book_id, B.author_id, A.author_name, B.title, B.genre,
                           B.publisher, B.published_date, B.description, B.image_url, B.source_url, B.status
@@ -158,7 +167,16 @@ public class BookDAO {
                   JOIN AUTHOR A ON A.author_id = B.author_id
                  WHERE B.status = 'APPROVED'
                    AND (? IS NULL OR LOWER(B.title) LIKE ? OR LOWER(A.author_name) LIKE ?)
-                   AND (? IS NULL OR B.genre = ?)
+                   AND (? IS NULL OR CASE
+                       WHEN B.genre IN ('소설','고전','로맨스','역사소설') THEN '소설'
+                       WHEN B.genre = '판타지' THEN '판타지'
+                       WHEN B.genre IN ('SF','디스토피아') THEN 'SF'
+                       WHEN B.genre IN ('추리','스릴러') THEN '추리'
+                       WHEN B.genre IN ('역사','철학','전기') THEN '인문/사회'
+                       WHEN B.genre = '자기계발' THEN '자기계발'
+                       WHEN B.genre IN ('과학','IT') THEN '과학/IT'
+                       ELSE '기타'
+                   END = ?)
                    AND (? IS NULL OR B.author_id = ?)
                 """;
         String normalizedKeyword = normalize(keyword);

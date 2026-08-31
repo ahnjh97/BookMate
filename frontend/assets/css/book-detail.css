@@ -112,8 +112,8 @@
   margin: 0 0 8px;
   padding: 4px 9px;
   border-radius: 999px;
-  color: var(--color-primary);
-  background: rgb(15 163 193 / 10%);
+  color: #fff;
+  background: var(--genre-badge-color, rgb(8 120 143 / 90%));
   font-size: 0.82rem;
   font-weight: 700;
 }
@@ -761,41 +761,9 @@
   color: var(--color-muted);
   font-style: italic;
 }
-.reader-ratings-pagination {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 7px;
+.reader-ratings .list-pagination {
   margin-top: auto;
   padding-top: 20px;
-}
-.reader-rating-page-button {
-  min-width: 38px;
-  min-height: 38px;
-  padding: 0 11px;
-  border: 1px solid var(--color-border);
-  border-radius: 7px;
-  color: var(--color-text);
-  background: var(--color-background);
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.88rem;
-  font-weight: 700;
-}
-.reader-rating-page-button:hover:not(:disabled),
-.reader-rating-page-button:focus-visible {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-  outline: none;
-}
-.reader-rating-page-button[aria-current="page"] {
-  border-color: var(--color-primary);
-  color: #fff;
-  background: var(--color-primary);
-}
-.reader-rating-page-button:disabled {
-  cursor: default;
-  opacity: 0.55;
 }
 
 @media (max-width: 700px) {

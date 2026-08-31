@@ -33,7 +33,7 @@ keywordInput.addEventListener("input", () => {
         closeSuggestions();
         searchFilterHeading.hidden = true;
         currentPage = 1;
-        loadBooks();
+        loadBooks(true);
         return;
     }
 
@@ -135,7 +135,7 @@ function showSearchResults(keyword) {
     selectedSearchKeywordElement.textContent = `'${keyword}'`;
 }
 
-async function loadBooks() {
+async function loadBooks(preserveScroll = false) {
     const params = new URLSearchParams();
     if (keywordInput.value.trim()) params.set("keyword", keywordInput.value.trim());
     if (selectedGenre) params.set("genre", selectedGenre);
@@ -143,8 +143,6 @@ async function loadBooks() {
     params.set("sort", sortSelect.value);
     params.set("page", currentPage);
     params.set("size", 21);
-
-    listElement.replaceChildren();
 
     try {
         const query = params.toString();
@@ -157,8 +155,13 @@ async function loadBooks() {
         hasMorePages = Boolean(result.data.hasMore);
         totalPages = Number(result.data.totalPages || 0);
         totalCountElement.textContent = `총 ${Number(result.data.totalCount || 0).toLocaleString("ko-KR")}권`;
+        const scrollPosition = preserveScroll ? window.scrollY : null;
+        listElement.replaceChildren();
         renderBooks(books);
         updatePagination();
+        if (scrollPosition !== null) {
+            window.requestAnimationFrame(() => window.scrollTo({ top: scrollPosition, behavior: "instant" }));
+        }
     } catch (error) {
         console.error(error);
         hasMorePages = false;
@@ -188,9 +191,10 @@ function renderBooks(books) {
         cover.className = "book-card-cover";
 
         const coverGenre = document.createElement("span");
-        coverGenre.className = "book-cover-genre";
-        coverGenre.textContent = book.genre || "도서";
-        coverGenre.dataset.genre = book.genre || "도서";
+        coverGenre.className = "book-cover-genre genre-badge";
+        const genreGroup = window.BookMateGenre.groupOf(book.genre);
+        coverGenre.textContent = genreGroup;
+        coverGenre.dataset.genre = genreGroup;
 
         const image = document.createElement("img");
         image.src = book.imageUrl || "";
@@ -264,7 +268,7 @@ function updatePagination() {
         button.addEventListener("click", () => {
             if (page === currentPage) return;
             currentPage = page;
-            loadBooks();
+            loadBooks(true);
         });
         pageNumbersElement.append(button);
     }
@@ -275,7 +279,7 @@ categoryButtons.forEach((button) => {
         selectedGenre = button.dataset.genre;
         currentPage = 1;
         updateActiveCategory();
-        loadBooks();
+        loadBooks(true);
     });
 });
 
@@ -286,24 +290,24 @@ searchForm.addEventListener("submit", (event) => {
     if (keyword) showSearchResults(keyword);
     else searchFilterHeading.hidden = true;
     currentPage = 1;
-    loadBooks();
+    loadBooks(true);
 });
 
 sortSelect.addEventListener("change", () => {
     currentPage = 1;
-    loadBooks();
+    loadBooks(true);
 });
 
 previousPageButton.addEventListener("click", () => {
     if (currentPage <= 1) return;
     currentPage -= 1;
-    loadBooks();
+    loadBooks(true);
 });
 
 nextPageButton.addEventListener("click", () => {
     if (!hasMorePages) return;
     currentPage += 1;
-    loadBooks();
+    loadBooks(true);
 });
 
 document.querySelector("#book-reset-button")?.addEventListener("click", () => {
@@ -318,7 +322,7 @@ document.querySelector("#book-reset-button")?.addEventListener("click", () => {
     closeSuggestions();
     updateActiveCategory();
     window.history.replaceState({}, "", "/pages/book/list.html");
-    loadBooks();
+    loadBooks(true);
 });
 
 if (selectedAuthorId) {

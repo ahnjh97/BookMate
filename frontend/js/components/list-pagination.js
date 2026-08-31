@@ -8,6 +8,7 @@
     let items = [];
     let currentPage = 1;
     let serverTotalCount = null;
+    let serverTotalPages = null;
 
     if (!root || !previousButton || !nextButton || !numbersElement) {
       throw new Error("페이지 이동 요소가 올바르게 구성되지 않았습니다.");
@@ -15,7 +16,9 @@
 
     function render() {
       const totalCount = serverTotalCount == null ? items.length : serverTotalCount;
-      const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+      const totalPages = serverTotalPages == null
+        ? Math.max(1, Math.ceil(totalCount / pageSize))
+        : serverTotalPages;
       currentPage = Math.min(currentPage, totalPages);
       const startIndex = (currentPage - 1) * pageSize;
 
@@ -42,7 +45,9 @@
 
     function moveTo(page) {
       const totalCount = serverTotalCount == null ? items.length : serverTotalCount;
-      const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+      const totalPages = serverTotalPages == null
+        ? Math.max(1, Math.ceil(totalCount / pageSize))
+        : serverTotalPages;
       const nextPage = Math.min(Math.max(1, page), totalPages);
       if (nextPage === currentPage) return;
       currentPage = nextPage;
@@ -60,12 +65,16 @@
       setItems(nextItems) {
         items = Array.isArray(nextItems) ? nextItems : [];
         serverTotalCount = null;
+        serverTotalPages = null;
         currentPage = 1;
         render();
       },
-      setPage(nextItems, nextPage, totalCount) {
+      setPage(nextItems, nextPage, totalCount, totalPages) {
         items = Array.isArray(nextItems) ? nextItems : [];
         serverTotalCount = Math.max(0, Number(totalCount) || 0);
+        serverTotalPages = Number.isFinite(Number(totalPages))
+          ? Math.max(1, Number(totalPages))
+          : null;
         currentPage = Math.max(1, Number(nextPage) || 1);
         render();
       },
