@@ -73,7 +73,7 @@ public class AdminService {
 
             if ("ADMIN".equals(targetRole)) {
                 throw new IllegalArgumentException(
-                        "관리자 계정은 잠금 또는 잠금 해제할 수 없습니다."
+                        "관리자 계정은 이용 제한 또는 제한 해제할 수 없습니다."
                 );
             }
 

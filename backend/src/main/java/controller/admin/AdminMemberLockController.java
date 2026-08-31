@@ -107,7 +107,7 @@ public class AdminMemberLockController extends HttpServlet {
             sendError(
                     response,
                     HttpServletResponse.SC_BAD_REQUEST,
-                    "잠금 여부가 필요합니다."
+                    "이용 제한 여부가 필요합니다."
             );
             return;
         }
@@ -129,8 +129,8 @@ public class AdminMemberLockController extends HttpServlet {
                             "success", true,
                             "message",
                             lockRequest.getLocked()
-                                    ? "회원이 잠금 처리되었습니다."
-                                    : "회원 잠금이 해제되었습니다.",
+                                    ? "회원 이용을 제한했습니다."
+                                    : "회원 이용 제한을 해제했습니다.",
                             "memberId", lockRequest.getMemberId()
                     ),
                     response.getWriter()

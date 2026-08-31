@@ -22,7 +22,7 @@
     <!-- 관리자 페이지 전용 CSS -->
     <link
             rel="stylesheet"
-            href="/assets/css/admin.css?v=20260831-16"
+            href="/assets/css/admin.css?v=20260901-4"
     >
 </head>
 <body class="admin-page">
@@ -43,6 +43,14 @@
                 <span class="page-title-icon page-title-icon-admin" aria-hidden="true"></span>관리자 페이지
             </h1>
         </header>
+        <nav class="choice-tabs admin-management-tabs" aria-label="관리 항목 선택">
+            <button type="button" class="is-active" data-admin-section="members" aria-pressed="true">회원 관리</button>
+            <button type="button" data-admin-section="posts" aria-pressed="false">게시글 관리</button>
+            <button type="button" data-admin-section="comments" aria-pressed="false">댓글 관리</button>
+            <button type="button" data-admin-section="books" aria-pressed="false">책 등록</button>
+            <button type="button" data-admin-section="tiers" aria-pressed="false">티어리스트 템플릿</button>
+            <button type="button" data-admin-section="worldcups" aria-pressed="false">이상형월드컵 템플릿</button>
+        </nav>
         <!-- =====================================
              관리자 메시지
              admin.js의 showMessage()와 연결
@@ -51,11 +59,11 @@
         <!-- =====================================
              회원 관리
              ===================================== -->
-        <section class="admin-section">
+        <section class="admin-section" data-admin-panel="members">
             <div class="admin-section-header">
                 <div>
                     <h2>회원 관리</h2>
-                    <p>회원 정보와 계정 상태를 확인하고 잠금 또는 잠금 해제를 할 수 있습니다.</p>
+                    <p>회원 정보와 계정 상태를 확인하고 이용 제한 또는 제한 해제를 할 수 있습니다.</p>
                 </div>
                 <div class="choice-tabs admin-member-tabs" role="group" aria-label="회원 유형">
                     <button type="button" class="is-active" data-member-filter="active" aria-pressed="true">정상 회원</button>
@@ -95,7 +103,7 @@
         <!-- =====================================
              게시글 관리
              ===================================== -->
-        <section class="admin-section">
+        <section class="admin-section" data-admin-panel="posts" hidden>
             <div class="admin-section-header">
                 <div>
                     <h2>게시글 관리</h2>
@@ -160,10 +168,10 @@
 
         </section>
 
-        <section class="admin-section">
+        <section class="admin-section" data-admin-panel="books" hidden>
             <div class="admin-section-header">
                 <div>
-                    <h2>책 등록 신청 검토</h2>
+                    <h2>책 등록 검토</h2>
                     <p>회원이 신청한 도서 정보를 확인하고 등록 여부를 결정합니다.</p>
                 </div>
             </div>
@@ -189,8 +197,8 @@
             </div>
         </section>
 
-        <section class="admin-section">
-            <div class="admin-section-header"><div><h2>티어 템플릿 검토</h2><p>회원이 신청한 책 구성을 확인하고 공개 여부를 결정합니다.</p></div></div>
+        <section class="admin-section" data-admin-panel="tiers" hidden>
+            <div class="admin-section-header"><div><h2>티어리스트 템플릿 검토</h2><p>회원이 신청한 책 구성을 확인하고 공개 여부를 결정합니다.</p></div></div>
             <div class="admin-table-wrapper">
                 <table class="admin-table">
                     <thead>
@@ -221,7 +229,7 @@
             </div>
         </section>
 
-        <section class="admin-section">
+        <section class="admin-section" data-admin-panel="worldcups" hidden>
             <div class="admin-section-header"><div><h2>이상형월드컵 템플릿 검토</h2><p>회원이 신청한 월드컵 구성을 확인하고 공개 여부를 결정합니다.</p></div></div>
             <div class="admin-table-wrapper">
                 <table class="admin-table">
@@ -245,7 +253,7 @@
             </div>
         </section>
 
-        <section class="admin-section">
+        <section class="admin-section" data-admin-panel="comments" hidden>
             <div class="admin-section-header">
                 <div>
                     <h2>댓글 관리</h2>
@@ -296,7 +304,7 @@
 <!-- =========================================
      관리자 페이지 JavaScript
      ========================================= -->
-<script type="module" src="/js/pages/admin.js?v=20260831-23" defer>
+<script type="module" src="/js/pages/admin.js?v=20260901-3" defer>
 </script>
 
 </body>

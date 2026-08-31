@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const allowed = await checkAdminAccess();
   if (!allowed) return;
 
+  initializeManagementTabs();
   initializePagination();
   initializeDeleteControls();
   initializeMemberFilters();
@@ -35,6 +36,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadWorldcupTemplates();
 
 });
+
+function initializeManagementTabs() {
+  const buttons = [...document.querySelectorAll("[data-admin-section]")];
+  const panels = [...document.querySelectorAll("[data-admin-panel]")];
+
+  buttons.forEach(button => {
+    button.addEventListener("click", () => {
+      const selectedSection = button.dataset.adminSection;
+      buttons.forEach(item => {
+        const active = item === button;
+        item.classList.toggle("is-active", active);
+        item.setAttribute("aria-pressed", String(active));
+      });
+      panels.forEach(panel => {
+        panel.hidden = panel.dataset.adminPanel !== selectedSection;
+      });
+      if (selectedSection !== "posts") cancelDeleteMode("post");
+    });
+  });
+}
 
 function initializePagination() {
   memberPagination = BookMateListPagination.create({
@@ -50,22 +71,22 @@ function initializePagination() {
   });
   commentPagination = BookMateListPagination.create({
     root: document.getElementById("comment-pagination"),
-    pageSize: 5,
+    pageSize: 10,
     onRender: renderComments,
   });
   bookPagination = BookMateListPagination.create({
     root: document.getElementById("book-pagination"),
-    pageSize: 5,
+    pageSize: 10,
     onRender: renderBookRequests,
   });
   tierPagination = BookMateListPagination.create({
     root: document.getElementById("tier-pagination"),
-    pageSize: 5,
+    pageSize: 10,
     onRender: renderTierTemplates,
   });
   worldcupPagination = BookMateListPagination.create({
     root: document.getElementById("worldcup-pagination"),
-    pageSize: 5,
+    pageSize: 10,
     onRender: renderWorldcupTemplates,
   });
 }
@@ -463,7 +484,7 @@ function renderMembers(members) {
                     class="admin-action-button ${locked ? "admin-state-release" : "admin-state-activate"}"
                     onclick="changeMemberLock(${member.memberId}, ${!locked})"
                 >
-                    ${locked ? "잠금 해제" : "회원 잠금"}
+                    ${locked ? "제한 해제" : "이용 제한"}
                 </button>
             `;
     }
@@ -489,7 +510,7 @@ function renderMembers(members) {
 
 /*
  * =========================================
- * 회원 잠금 / 잠금 해제
+ * 회원 이용 제한 / 제한 해제
  * POST /api/admin/members/lock
  * =========================================
  */
@@ -497,16 +518,16 @@ async function changeMemberLock(memberId, locked) {
   const targetMember = memberMap.get(Number(memberId));
 
   if (targetMember && targetMember.role === "ADMIN") {
-    showMessage("관리자 계정은 잠금 또는 잠금 해제할 수 없습니다.");
+    showMessage("관리자 계정은 이용 제한 또는 제한 해제할 수 없습니다.");
     return;
   }
 
   if (Number(memberId) === loginAdminMemberId) {
-    showMessage("관리자는 자신의 계정을 잠글 수 없습니다.");
+    showMessage("관리자는 자신의 계정 이용을 제한할 수 없습니다.");
     return;
   }
 
-  const actionName = locked ? "잠금" : "잠금 해제";
+  const actionName = locked ? "이용 제한" : "제한 해제";
   const confirmed = confirm(`회원 ${memberId}번을 ${actionName}하시겠습니까?`);
 
   if (!confirmed) return;
@@ -881,7 +902,7 @@ function getStatusLabel(status) {
     PENDING: "미승인",
     APPROVED: "승인 완료",
     REJECTED: "반려",
-    ACTIVE: "정상",
+    ACTIVE: "공개",
     DELETED: "삭제",
     HIDDEN: "숨김",
     INACTIVE: "비활성",

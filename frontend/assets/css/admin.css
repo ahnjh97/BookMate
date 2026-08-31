@@ -4,7 +4,21 @@
   background: var(--color-surface);
 }
 .admin-page-heading {
-  margin: 0;
+  margin: 0 0 22px;
+}
+
+.admin-management-tabs {
+  gap: 8px;
+  margin: 0 0 20px;
+}
+
+.admin-management-tabs button {
+  min-height: 40px;
+  padding-inline: 16px;
+}
+
+.admin-section[hidden] {
+  display: none;
 }
 .admin-section-header p {
   margin: 0;
@@ -155,9 +169,13 @@
   color: #8a5a00;
   background: #fff3cd;
 }
-.admin-status-approved, .admin-status-active {
-  color: #247a50;
-  background: #e1f5e9;
+.admin-status-approved {
+  color: #087b96;
+  background: #dff6fb;
+}
+.admin-status-active {
+  color: #087b96;
+  background: #dff6fb;
 }
 .admin-status-rejected, .admin-status-deleted, .admin-status-hidden {
   color: #b42318;
