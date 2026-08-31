@@ -2,6 +2,45 @@
 
 정적 HTML/CSS/JavaScript, Jakarta Servlet, JDBC, 로컬 Oracle로 구성된 CRUD 미니프로젝트입니다. 개발 환경에서는 내장 Tomcat 백엔드를 `8080`에서 실행하고, `DevProxyServer`가 프론트엔드를 `5501`에서 제공하면서 `/api/*` 요청을 백엔드로 전달합니다.
 
+## 디렉토리 구조
+
+```Shell
+bookmate/
+├── .env                           # 환경변수: DB 등 민감정보 통합 관리 (gitignore 대상)
+├── .env.example                   # 팀 공유용 템플릿
+├── .gitattributes                 # Windows/Mac 줄바꿈 통일: * text=auto eol=lf
+├── .gitignore
+├── README.md                      # 프로젝트 개요, 필수 환경(JDK버전 등) 명시
+├── docker-compose.yml             # .env 참조
+│
+├── backend/                       # Java + JDBC, 4계층 구조(controller-service-dao-dto)
+│   └── ...
+├── frontend/                      # HTML + CSS + 바닐라 JavaScript
+│   └── ...
+│
+├── db/                           # Oracle DB 컨테이너 정의
+│   ├── schema.sql                # 테이블 생성(DDL) — 순서대로 한 파일에 다 넣어도 무방
+│   └── seed.sql                  # 관리자 계정 등 초기 데이터
+│
+├── scripts/                       # 개발 및 로컬 실행 자동화 스크립트
+│   ├── start.sh / start.bat       # BookMate 백엔드 실행 (내장 Tomcat) - Main.java를 Maven exec 플러그인으로 직접 구동
+│   ├── db-init.sh / db-init.bat   # DB 완전 초기화 (schema.sql, seed.sql 재실행)
+│   ├── proxy.sh / proxy.bat       # DevProxyServer 컴파일 및 실행
+│   ├── DevProxyServer.java        # 로컬 개발용 리버스 프록시
+│   └── docker/                    # Oracle DBMS 로컬 세팅을 Docker 컨테이너로 대체하는 경우 사용
+│       ├── start.sh / start.bat   # DB 컨테이너 실행
+│       └── reset.sh / reset.bat   # DB 컨테이너·볼륨 초기화
+│
+└── docs/
+    ├── README.md                   # 산출물 인덱스(노션/Figma 링크 모음)
+    ├── requirements.md             # 요구사항정의서 + IA/유저플로우
+    ├── screen_spec.md              # 화면정의서(Figma 링크+설명)
+    ├── erd.mmd                     # ERD(텍스트로 관리하는 다이어그램)
+    ├── table_spec.md               # 테이블정의서 + DB 네이밍규칙
+    ├── interface_spec.md           # 인터페이스정의서
+    └── coding_convention.md        # 코딩컨벤션
+```
+
 ## 실행 구조
 
 ```text
@@ -16,7 +55,8 @@ DevProxyServer
                                 Service → DAO → JDBC → 로컬 Oracle
 ```
 
-로컬 개발의 기본 접속 주소는 `http://localhost:5501`입니다. 내장 Tomcat은 백엔드와 직접 확인용 정적 파일을 `8080`에서 제공하지만, 일반적인 화면 개발과 테스트는 프록시를 통해 진행합니다. Docker와 외부 Tomcat은 사용하지 않습니다.
+로컬 개발의 기본 접속 주소 `http://localhost:5501`
+내장 Tomcat은 백엔드와 직접 확인용 정적 파일을 `8080`에서 제공하지만, 일반적인 화면 개발과 테스트는 프록시를 통해 진행
 
 ## 필수 환경
 
@@ -40,10 +80,8 @@ DB_PASSWORD=book
 
 ### DB 초기화
 
-DB 초기화는 기존 BookMate 테이블과 데이터를 삭제한 뒤 `db/schema.sql`로 스키마를 만들고 `db` 폴더의 CSV를 다시 적재합니다. 필요한 데이터가 있으면 먼저 백업하세요.
-
+DB 초기화는 기존 BookMate 테이블과 데이터를 삭제한 뒤 `db/schema.sql`, `db/seed.sql`을 다시 실행합니다. 필요한 데이터가 있으면 먼저 백업하세요.
 IntelliJ에서는 `util.DBInit`을 실행합니다. 프로젝트 루트와 `backend` 작업 디렉터리를 모두 지원합니다.
-
 터미널에서는 다음 스크립트를 사용할 수 있습니다.
 
 ```bat
@@ -77,6 +115,7 @@ bash scripts/db-init.sh
 ```powershell
 ./scripts/generate-book-seed.ps1
 ```
+
 
 ## 애플리케이션 실행
 

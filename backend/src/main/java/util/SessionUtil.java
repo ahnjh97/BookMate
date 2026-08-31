@@ -36,6 +36,10 @@ public final class SessionUtil {
         return value instanceof Number number ? number.longValue() : null;
     }
 
+    public static Long getLoginMemberId(HttpServletRequest request) {
+        return memberId(request);
+    }
+
     public static String role(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         Object value = session == null ? null : session.getAttribute(ROLE);

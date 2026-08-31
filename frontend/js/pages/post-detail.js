@@ -20,12 +20,25 @@ const hideButton = document.querySelector("#post-hide-button");
 const deleteButton = document.querySelector("#post-delete-button");
 const likeButton = document.querySelector("#post-like-button");
 const reportButton = document.querySelector("#post-report-button");
+
 const commentForm = document.querySelector("#post-comment-form");
-const commentContent = document.querySelector("#post-comment-content");
-const commentLength = document.querySelector("#post-comment-length");
-const commentCount = document.querySelector("#post-comment-count");
-const commentMessage = document.querySelector("#post-comment-message");
-const commentList = document.querySelector("#post-comment-list");
+const commentContentElement = document.querySelector("#post-comment-content");
+const commentSubmitButton = document.querySelector("#post-comment-submit");
+const commentLengthElement = document.querySelector("#post-comment-length");
+const commentLoginMessageElement = document.querySelector("#post-comment-login-message");
+const commentStatusElement = document.querySelector("#post-comment-status");
+const commentListElement = document.querySelector("#post-comment-list");
+const commentCountElement = document.querySelector("#post-comment-count");
+
+const reportModal = document.querySelector("#report-modal");
+const reportForm = document.querySelector("#report-form");
+const reportReasonTypeElement = document.querySelector("#report-reason-type");
+const reportReasonDetailElement = document.querySelector("#report-reason-detail");
+const reportDetailGroup = document.querySelector("#report-detail-group");
+const reportDetailLengthElement = document.querySelector("#report-detail-length");
+const reportSubmitButton = document.querySelector("#report-submit-button");
+const reportCloseButtons = document.querySelectorAll("[data-report-close]");
+const reportModalCloseButton = document.querySelector("#report-modal-close");
 
 const categoryNames = {
     NOTICE: "공지",
@@ -33,11 +46,14 @@ const categoryNames = {
     RECOMMEND: "추천",
     REVIEW: "리뷰",
     TIER: "티어리스트",
-    WORLDCUP: "이상형월드컵"
+    WORLDCUP: "이상형월드컵",
+    AUTHOR: "작가"
 };
 
 let currentPost = null;
 let currentMember = null;
+let currentReportTargetType = null;
+let currentReportTargetId = null;
 
 /* 1. 게시글 상세 조회 */
 async function loadPostDetail() {
@@ -52,7 +68,7 @@ async function loadPostDetail() {
     try {
         const [postResponse, sessionResponse] = await Promise.all([
             fetch(`/api/posts/detail?postId=${encodeURIComponent(postId)}`),
-            fetch("/api/auth", { cache: "no-store" })
+            fetch("/api/auth/session", { cache: "no-store" })
         ]);
 
         const postResult = await postResponse.json();
@@ -70,13 +86,33 @@ async function loadPostDetail() {
         currentPost = postResult.post;
         currentMember = sessionResult;
 
-        renderPost(currentPost, postResult.likeCount);
-        renderTierList(postResult.tierList);
-        renderWorldcupResult(postResult.worldcupResult);
-        renderActions(currentPost, currentMember, postResult.tierList, postResult.worldcupResult, postResult.liked);
+        renderPost(
+            currentPost,
+            postResult.likeCount
+        );
+
+        renderTierList(
+            postResult.tierList
+        );
+
+        renderWorldcupResult(
+            postResult.worldcupResult
+        );
+
+        renderActions(
+            currentPost,
+            currentMember,
+            postResult.tierList,
+            postResult.worldcupResult,
+            postResult.liked
+        );
+
+        renderCommentForm(currentMember);
+
         await loadComments();
     } catch (error) {
         console.error(error);
+
         showError(
             error.message ||
             "게시글을 불러오지 못했습니다."
@@ -84,83 +120,171 @@ async function loadPostDetail() {
     }
 }
 
-function renderWorldcupResult(result) {
-    worldcupWinnerElement.replaceChildren();
-    worldcupResultElement.hidden = !result;
-    detailElement.classList.toggle("has-worldcup-result", Boolean(result));
-    if (!result) return;
-    worldcupHeadingElement.textContent = `${result.title} 결과`;
-    const finalMatch = (result.matches || []).find(match => match.roundSize === 2);
-    if (!finalMatch) return;
-    const winner = finalMatch.winner;
-    const link = document.createElement("a");
-    link.className = "post-worldcup-winner";
-    link.href = `/pages/worldcup/result.html?id=${encodeURIComponent(result.runId)}`;
-    link.innerHTML = `${winner.imageUrl ? `<img src="${escapeHtml(winner.imageUrl)}" alt="">` : ""}`
-        + `<span><small class="post-worldcup-winner-label">최종 우승</small><strong>${escapeHtml(winner.title)}</strong>`
-        + `<b>전체 대진표 보기</b></span>`;
-    worldcupWinnerElement.append(link);
-}
-
+/* 2. 티어리스트 결과 출력 */
 function renderTierList(tierList) {
     tierBoardElement.replaceChildren();
+
     tierListElement.hidden = !tierList;
-    detailElement.classList.toggle("has-tier-list", Boolean(tierList));
-    if (!tierList) return;
+
+    detailElement.classList.toggle(
+        "has-tier-list",
+        Boolean(tierList)
+    );
+
+    if (!tierList) {
+        return;
+    }
+
     ["S", "A", "B", "C", "D"].forEach(grade => {
         const row = document.createElement("div");
         row.className = "post-tier-row";
+
         const label = document.createElement("strong");
         label.textContent = grade;
+
         const books = document.createElement("div");
         books.className = "post-tier-books";
-        (tierList.items || []).filter(item => item.grade === grade).forEach(item => {
-            const link = document.createElement("a");
-            link.className = "post-tier-book";
-            link.href = `/pages/book/detail.html?id=${encodeURIComponent(item.bookId)}`;
-            link.title = `${item.title} - ${item.authorName}`;
-            link.dataset.tooltip = `${item.title} - ${item.authorName}`;
-            const image = document.createElement("img");
-            image.src = item.imageUrl || "";
-            image.alt = `${item.title} 표지`;
-            const title = document.createElement("span");
-            title.textContent = item.title;
-            link.append(image, title);
-            books.append(link);
-        });
-        row.append(label, books);
+
+        (tierList.items || [])
+            .filter(item => item.grade === grade)
+            .forEach(item => {
+                const link = document.createElement("a");
+                link.className = "post-tier-book";
+                link.href =
+                    `/pages/book/detail.html?id=${encodeURIComponent(item.bookId)}`;
+                link.title =
+                    `${item.title} - ${item.authorName}`;
+                link.dataset.tooltip =
+                    `${item.title} - ${item.authorName}`;
+
+                const image = document.createElement("img");
+                image.src = item.imageUrl || "";
+                image.alt = `${item.title} 표지`;
+
+                const title = document.createElement("span");
+                title.textContent = item.title;
+
+                link.append(
+                    image,
+                    title
+                );
+
+                books.append(link);
+            });
+
+        row.append(
+            label,
+            books
+        );
+
         tierBoardElement.append(row);
     });
 }
 
-/* 2. 게시글 내용 출력 */
-function renderPost(post, likeCount) {
-    document.title = `${post.title} | BookMate`;
+/* 3. 이상형월드컵 결과 출력 */
+function renderWorldcupResult(result) {
+    worldcupWinnerElement.replaceChildren();
+    worldcupResultElement.hidden = !result;
 
-    titleElement.textContent = post.title;
+    detailElement.classList.toggle(
+        "has-worldcup-result",
+        Boolean(result)
+    );
+
+    if (!result) {
+        return;
+    }
+
+    worldcupHeadingElement.textContent =
+        `${result.title} 결과`;
+
+    const finalMatch = (result.matches || [])
+        .find(match => match.roundSize === 2);
+
+    if (!finalMatch || !finalMatch.winner) {
+        return;
+    }
+
+    const winner = finalMatch.winner;
+
+    const link = document.createElement("a");
+    link.className = "post-worldcup-winner";
+    link.href =
+        `/pages/worldcup/result.html?id=${encodeURIComponent(result.runId)}`;
+
+    if (winner.imageUrl) {
+        const image = document.createElement("img");
+        image.src = winner.imageUrl;
+        image.alt = `${winner.title} 표지`;
+        link.append(image);
+    }
+
+    const text = document.createElement("span");
+
+    const label = document.createElement("small");
+    label.className = "post-worldcup-winner-label";
+    label.textContent = "최종 우승";
+
+    const title = document.createElement("strong");
+    title.textContent = winner.title;
+
+    const detail = document.createElement("b");
+    detail.textContent = "전체 대진표 보기";
+
+    text.append(
+        label,
+        title,
+        detail
+    );
+
+    link.append(text);
+    worldcupWinnerElement.append(link);
+}
+
+/* 4. 게시글 내용 출력 */
+function renderPost(post, likeCount) {
+    document.title =
+        `${post.title} | BookMate`;
+
+    titleElement.textContent =
+        post.title;
+
     categoryElement.textContent =
-        categoryNames[post.category] || post.category || "-";
-    genreElement.textContent = post.genre || "장르 없음";
+        categoryNames[post.category] ||
+        post.category ||
+        "-";
+
+    genreElement.textContent =
+        post.genre ||
+        "장르 없음";
+
     writerElement.textContent =
-        post.memberNickname || "알 수 없음";
+        post.memberNickname ||
+        "알 수 없음";
+
     viewCountElement.textContent =
         post.viewCount ?? 0;
+
     likeCountElement.textContent =
-        post.likeCount ?? 0;
+        likeCount ??
+        post.likeCount ??
+        0;
 
     createdAtElement.textContent =
         formatDateTime(post.createdAt);
+
     createdAtElement.dateTime =
         toDateTimeAttribute(post.createdAt);
 
     /* innerHTML을 사용하지 않아 게시글 내용에 포함된 스크립트 실행을 방지 */
-    contentElement.textContent = post.content || "";
+    contentElement.textContent =
+        post.content || "";
 
     statusElement.hidden = true;
     detailElement.hidden = false;
 }
 
-/* 3. 로그인 상태와 작성자에 따라 버튼 표시 */
+/* 5. 로그인 상태와 작성자에 따라 버튼 표시 */
 function renderActions(post, auth, tierList, worldcupResult, liked) {
     writerActions.hidden = true;
     memberActions.hidden = true;
@@ -174,23 +298,717 @@ function renderActions(post, auth, tierList, worldcupResult, liked) {
         auth.loginMemberId
     );
 
-    const postWriterId = Number(post.memberId);
+    const postWriterId =
+        Number(post.memberId);
 
     if (loginMemberId === postWriterId) {
         writerActions.hidden = false;
-        editLink.href = tierList?.templateId
-            ? `/pages/tier/maker.html?id=${encodeURIComponent(tierList.templateId)}`
-            : worldcupResult?.runId
-                ? `/pages/worldcup/result.html?id=${encodeURIComponent(worldcupResult.runId)}`
-                : `/pages/post/update.html?postId=${post.postId}`;
+
+        editLink.href =
+            tierList?.templateId
+                ? `/pages/tier/maker.html?id=${encodeURIComponent(tierList.templateId)}`
+                : worldcupResult?.runId
+                    ? `/pages/worldcup/result.html?id=${encodeURIComponent(worldcupResult.runId)}`
+                    : `/pages/post/update.html?postId=${post.postId}`;
+
         return;
     }
 
     memberActions.hidden = false;
-    likeButton.textContent = liked ? "좋아요 취소" : "좋아요";
+
+    likeButton.textContent =
+        liked
+            ? "좋아요 취소"
+            : "좋아요";
 }
 
-/* 4. 게시글 숨김 */
+/* 6. 댓글 작성 영역 표시 */
+function renderCommentForm(auth) {
+    const loggedIn =
+        Boolean(auth?.loggedIn);
+
+    commentForm.hidden =
+        !loggedIn;
+
+    commentLoginMessageElement.hidden =
+        loggedIn;
+}
+
+/* 7. 댓글 목록 조회 */
+async function loadComments() {
+    if (!currentPost) {
+        return;
+    }
+
+    commentStatusElement.hidden = false;
+    commentStatusElement.textContent =
+        "댓글을 불러오는 중입니다.";
+
+    commentListElement.replaceChildren();
+
+    try {
+        const response = await fetch(
+            `/api/posts/comments?postId=${encodeURIComponent(currentPost.postId)}`
+        );
+
+        const result =
+            await response.json();
+
+        if (!response.ok || !result.success) {
+            throw new Error(
+                result.message ||
+                "댓글을 불러오지 못했습니다."
+            );
+        }
+
+        const comments =
+            Array.isArray(result.comments)
+                ? result.comments
+                : [];
+
+        renderComments(comments);
+    } catch (error) {
+        console.error(error);
+
+        commentStatusElement.hidden = false;
+        commentStatusElement.textContent =
+            error.message ||
+            "댓글을 불러오지 못했습니다.";
+    }
+}
+
+/* 8. 댓글 목록 출력 */
+function renderComments(comments) {
+    commentListElement.replaceChildren();
+
+    commentCountElement.textContent =
+        comments.length;
+
+    if (comments.length === 0) {
+        commentStatusElement.hidden = false;
+        commentStatusElement.textContent =
+            "등록된 댓글이 없습니다.";
+        return;
+    }
+
+    commentStatusElement.hidden = true;
+
+    const fragment =
+        document.createDocumentFragment();
+
+    const loginMemberId = Number(
+        currentMember?.memberId ??
+        currentMember?.loginMemberId
+    );
+
+    comments.forEach(comment => {
+        const item =
+            document.createElement("article");
+
+        item.className =
+            "post-comment-item";
+
+        const header =
+            document.createElement("div");
+
+        header.className =
+            "post-comment-item-header";
+
+        const writer =
+            document.createElement("strong");
+
+        writer.textContent =
+            comment.memberNickname ||
+            "알 수 없음";
+
+        const headerRight =
+            document.createElement("div");
+
+        headerRight.className =
+            "post-comment-item-header-right";
+
+        const date =
+            document.createElement("time");
+
+        date.textContent =
+            formatDateTime(comment.createdAt);
+
+        date.dateTime =
+            toDateTimeAttribute(comment.createdAt);
+
+        headerRight.append(date);
+
+        const commentWriterId =
+            Number(comment.memberId);
+
+        if (currentMember?.loggedIn) {
+            if (loginMemberId === commentWriterId) {
+                const editButton =
+                    document.createElement("button");
+
+                editButton.type = "button";
+                editButton.className =
+                    "post-comment-action-button";
+                editButton.textContent = "수정";
+
+                editButton.addEventListener(
+                    "click",
+                    () => {
+                        startCommentEdit(
+                            item,
+                            comment
+                        );
+                    }
+                );
+
+                const deleteCommentButton =
+                    document.createElement("button");
+
+                deleteCommentButton.type = "button";
+                deleteCommentButton.className =
+                    "post-comment-action-button";
+                deleteCommentButton.textContent = "삭제";
+
+                deleteCommentButton.addEventListener(
+                    "click",
+                    () => {
+                        deleteComment(
+                            comment.commentId
+                        );
+                    }
+                );
+
+                headerRight.append(
+                    editButton,
+                    deleteCommentButton
+                );
+            } else {
+                const reportCommentButton =
+                    document.createElement("button");
+
+                reportCommentButton.type =
+                    "button";
+
+                reportCommentButton.className =
+                    "post-comment-action-button";
+
+                reportCommentButton.textContent =
+                    "신고";
+
+                reportCommentButton.addEventListener(
+                    "click",
+                    () => {
+                        openReportModal(
+                            "COMMENT",
+                            comment.commentId
+                        );
+                    }
+                );
+
+                headerRight.append(
+                    reportCommentButton
+                );
+            }
+        }
+
+        header.append(
+            writer,
+            headerRight
+        );
+
+        const content =
+            document.createElement("p");
+
+        content.className =
+            "post-comment-content";
+
+        content.textContent =
+            comment.content || "";
+
+        item.append(
+            header,
+            content
+        );
+
+        fragment.append(item);
+    });
+
+    commentListElement.append(fragment);
+}
+
+/* 9. 댓글 수정 화면 표시 */
+function startCommentEdit(item, comment) {
+    const existingEditor =
+        document.querySelector(
+            ".post-comment-edit-form"
+        );
+
+    if (existingEditor) {
+        alert("수정 중인 댓글이 있습니다.");
+        return;
+    }
+
+    const contentElement =
+        item.querySelector(
+            ".post-comment-content"
+        );
+
+    contentElement.hidden = true;
+
+    const form =
+        document.createElement("form");
+
+    form.className =
+        "post-comment-edit-form";
+
+    const textarea =
+        document.createElement("textarea");
+
+    textarea.maxLength = 1000;
+    textarea.value =
+        comment.content || "";
+
+    const footer =
+        document.createElement("div");
+
+    footer.className =
+        "post-comment-edit-actions";
+
+    const length =
+        document.createElement("span");
+
+    length.textContent =
+        `${textarea.value.length} / 1000`;
+
+    textarea.addEventListener(
+        "input",
+        () => {
+            length.textContent =
+                `${textarea.value.length} / 1000`;
+        }
+    );
+
+    const buttonGroup =
+        document.createElement("div");
+
+    buttonGroup.className =
+        "post-comment-edit-buttons";
+
+    const cancelButton =
+        document.createElement("button");
+
+    cancelButton.type = "button";
+    cancelButton.className =
+        "button";
+
+    cancelButton.textContent =
+        "취소";
+
+    cancelButton.addEventListener(
+        "click",
+        () => {
+            form.remove();
+            contentElement.hidden = false;
+        }
+    );
+
+    const saveButton =
+        document.createElement("button");
+
+    saveButton.type = "submit";
+    saveButton.className =
+        "button button-primary";
+
+    saveButton.textContent =
+        "수정 완료";
+
+    buttonGroup.append(
+        cancelButton,
+        saveButton
+    );
+
+    footer.append(
+        length,
+        buttonGroup
+    );
+
+    form.append(
+        textarea,
+        footer
+    );
+
+    item.append(form);
+
+    textarea.focus();
+
+    form.addEventListener(
+        "submit",
+        async event => {
+            event.preventDefault();
+
+            const content =
+                textarea.value.trim();
+
+            if (!content) {
+                alert(
+                    "댓글 내용을 입력해주세요."
+                );
+
+                textarea.focus();
+                return;
+            }
+
+            saveButton.disabled = true;
+
+            try {
+                const response =
+                    await fetch(
+                        "/api/posts/comments/update",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type":
+                                    "application/json;charset=UTF-8"
+                            },
+                            body: JSON.stringify({
+                                commentId:
+                                comment.commentId,
+                                content
+                            })
+                        }
+                    );
+
+                const result =
+                    await response.json();
+
+                if (
+                    !response.ok ||
+                    !result.success
+                ) {
+                    throw new Error(
+                        result.message ||
+                        "댓글 수정에 실패했습니다."
+                    );
+                }
+
+                await loadComments();
+            } catch (error) {
+                console.error(error);
+
+                alert(
+                    error.message ||
+                    "댓글 수정 중 오류가 발생했습니다."
+                );
+
+                saveButton.disabled = false;
+            }
+        }
+    );
+}
+
+/* 10. 댓글 삭제 */
+async function deleteComment(commentId) {
+    const confirmed =
+        confirm("댓글을 삭제하시겠습니까?");
+
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            "/api/posts/comments/delete",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type":
+                        "application/json;charset=UTF-8"
+                },
+                body: JSON.stringify({
+                    commentId
+                })
+            }
+        );
+
+        const result =
+            await response.json();
+
+        if (
+            !response.ok ||
+            !result.success
+        ) {
+            throw new Error(
+                result.message ||
+                "댓글 삭제에 실패했습니다."
+            );
+        }
+
+        await loadComments();
+    } catch (error) {
+        console.error(error);
+
+        alert(
+            error.message ||
+            "댓글 삭제 중 오류가 발생했습니다."
+        );
+    }
+}
+
+/* 11. 신고 모달 열기 */
+function openReportModal(targetType, targetId) {
+    currentReportTargetType =
+        targetType;
+
+    currentReportTargetId =
+        targetId;
+
+    reportReasonTypeElement.value = "";
+    reportReasonDetailElement.value = "";
+
+    reportDetailGroup.hidden = true;
+
+    updateReportDetailLength();
+
+    reportModal.hidden = false;
+
+    document.body.classList.add(
+        "report-modal-open"
+    );
+
+    reportReasonTypeElement.focus();
+}
+
+/* 12. 신고 모달 닫기 */
+function closeReportModal() {
+    reportModal.hidden = true;
+
+    document.body.classList.remove(
+        "report-modal-open"
+    );
+
+    currentReportTargetType = null;
+    currentReportTargetId = null;
+
+    reportForm.reset();
+    reportDetailGroup.hidden = true;
+
+    updateReportDetailLength();
+}
+
+/* 13. 신고 모달 닫기 버튼 */
+reportCloseButtons.forEach(button => {
+    button.addEventListener(
+        "click",
+        closeReportModal
+    );
+});
+
+reportModalCloseButton.addEventListener(
+    "click",
+    closeReportModal
+);
+
+/* 14. 신고 사유 변경 */
+reportReasonTypeElement.addEventListener(
+    "change",
+    () => {
+        const isOther =
+            reportReasonTypeElement.value ===
+            "OTHER";
+
+        reportDetailGroup.hidden =
+            !isOther;
+
+        if (!isOther) {
+            reportReasonDetailElement.value =
+                "";
+
+            updateReportDetailLength();
+        }
+    }
+);
+
+/* 15. 신고 상세 글자 수 */
+reportReasonDetailElement.addEventListener(
+    "input",
+    updateReportDetailLength
+);
+
+function updateReportDetailLength() {
+    reportDetailLengthElement.textContent =
+        `${reportReasonDetailElement.value.length} / 1000`;
+}
+
+/* 16. 신고 등록 */
+reportForm.addEventListener(
+    "submit",
+    async event => {
+        event.preventDefault();
+
+        if (
+            !currentReportTargetType ||
+            !currentReportTargetId
+        ) {
+            return;
+        }
+
+        const reasonType =
+            reportReasonTypeElement.value;
+
+        const reasonDetail =
+            reportReasonDetailElement.value.trim();
+
+        if (!reasonType) {
+            alert("신고 사유를 선택해주세요.");
+            reportReasonTypeElement.focus();
+            return;
+        }
+
+        if (
+            reasonType === "OTHER" &&
+            !reasonDetail
+        ) {
+            alert("기타 신고 사유를 입력해주세요.");
+            reportReasonDetailElement.focus();
+            return;
+        }
+
+        const confirmed =
+            confirm("신고를 접수하시겠습니까?");
+
+        if (!confirmed) {
+            return;
+        }
+
+        reportSubmitButton.disabled = true;
+
+        try {
+            const response = await fetch(
+                "/api/reports/create",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json;charset=UTF-8"
+                    },
+                    body: JSON.stringify({
+                        targetType:
+                        currentReportTargetType,
+                        targetId:
+                        currentReportTargetId,
+                        reasonType,
+                        reasonDetail:
+                            reasonDetail || null
+                    })
+                }
+            );
+
+            const result =
+                await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(
+                    result.message ||
+                    "신고 접수에 실패했습니다."
+                );
+            }
+
+            closeReportModal();
+
+            alert("신고가 접수되었습니다.");
+        } catch (error) {
+            console.error(error);
+
+            alert(
+                error.message ||
+                "신고 처리 중 오류가 발생했습니다."
+            );
+        } finally {
+            reportSubmitButton.disabled =
+                false;
+        }
+    }
+);
+
+/* 17. 댓글 등록 */
+commentForm.addEventListener(
+    "submit",
+    async event => {
+        event.preventDefault();
+
+        if (!currentPost) {
+            return;
+        }
+
+        const content =
+            commentContentElement.value.trim();
+
+        if (!content) {
+            alert("댓글 내용을 입력해주세요.");
+            commentContentElement.focus();
+            return;
+        }
+
+        commentSubmitButton.disabled = true;
+
+        try {
+            const response = await fetch(
+                "/api/posts/comments/create",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json;charset=UTF-8"
+                    },
+                    body: JSON.stringify({
+                        postId:
+                        currentPost.postId,
+                        content
+                    })
+                }
+            );
+
+            const result =
+                await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(
+                    result.message ||
+                    "댓글 등록에 실패했습니다."
+                );
+            }
+
+            commentContentElement.value = "";
+
+            updateCommentLength();
+
+            await loadComments();
+        } catch (error) {
+            console.error(error);
+
+            alert(
+                error.message ||
+                "댓글 등록 중 오류가 발생했습니다."
+            );
+        } finally {
+            commentSubmitButton.disabled =
+                false;
+        }
+    }
+);
+
+/* 18. 댓글 글자 수 표시 */
+commentContentElement.addEventListener(
+    "input",
+    updateCommentLength
+);
+
+function updateCommentLength() {
+    commentLengthElement.textContent =
+        `${commentContentElement.value.length} / 1000`;
+}
+
+/* 19. 게시글 숨김 */
 hideButton.addEventListener("click", async () => {
     if (!currentPost) {
         return;
@@ -205,38 +1023,52 @@ hideButton.addEventListener("click", async () => {
     }
 
     try {
-        const response = await fetch("/api/posts/hide", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json;charset=UTF-8"
-            },
-            body: JSON.stringify({
-                postId: currentPost.postId
-            })
-        });
+        const response = await fetch(
+            "/api/posts/hide",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type":
+                        "application/json;charset=UTF-8"
+                },
+                body: JSON.stringify({
+                    postId:
+                    currentPost.postId
+                })
+            }
+        );
 
-        const result = await response.json();
+        const result =
+            await response.json();
 
         if (!response.ok || !result.success) {
-            throw new Error(result.message || "게시글 숨김 처리에 실패했습니다.");
+            throw new Error(
+                result.message ||
+                "게시글 숨김 처리에 실패했습니다."
+            );
         }
 
-        window.location.replace("/pages/post/list.html");
+        window.location.replace(
+            "/pages/post/list.html"
+        );
     } catch (error) {
         console.error(error);
-        alert(error.message || "게시글 숨김 처리 중 오류가 발생했습니다.");
+
+        alert(
+            error.message ||
+            "게시글 숨김 처리 중 오류가 발생했습니다."
+        );
     }
 });
 
-/* 5. 게시글 삭제 */
+/* 20. 게시글 삭제 */
 deleteButton.addEventListener("click", async () => {
     if (!currentPost) {
         return;
     }
 
     const confirmed = confirm(
-        "게시글을 삭제하시겠습니까?\n" +
-        "삭제한 게시글은 목록에서 표시되지 않습니다."
+        "게시글을 삭제하시겠습니까?\n삭제한 게시글은 목록에서 표시되지 않습니다."
     );
 
     if (!confirmed) {
@@ -244,17 +1076,23 @@ deleteButton.addEventListener("click", async () => {
     }
 
     try {
-        const response = await fetch("/api/posts/delete", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json;charset=UTF-8"
-            },
-            body: JSON.stringify({
-                postId: currentPost.postId
-            })
-        });
+        const response = await fetch(
+            "/api/posts/delete",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type":
+                        "application/json;charset=UTF-8"
+                },
+                body: JSON.stringify({
+                    postId:
+                    currentPost.postId
+                })
+            }
+        );
 
-        const result = await response.json();
+        const result =
+            await response.json();
 
         if (!response.ok || !result.success) {
             throw new Error(
@@ -263,214 +1101,98 @@ deleteButton.addEventListener("click", async () => {
             );
         }
 
-        window.location.replace("/pages/post/list.html");
+        window.location.replace(
+            "/pages/post/list.html"
+        );
     } catch (error) {
         console.error(error);
-        alert(error.message || "게시글 삭제 중 오류가 발생했습니다.");
+
+        alert(
+            error.message ||
+            "게시글 삭제 중 오류가 발생했습니다."
+        );
     }
 });
 
-/* 6. 게시글 좋아요 */
+/* 21. 게시글 좋아요 */
 likeButton.addEventListener("click", async () => {
     if (!currentPost) {
         return;
     }
 
     try {
-        const response = await fetch("/api/posts/like", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json;charset=UTF-8"
-            },
-            body: JSON.stringify({
-                postId: currentPost.postId
-            })
-        });
+        const response = await fetch(
+            "/api/posts/like",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type":
+                        "application/json;charset=UTF-8"
+                },
+                body: JSON.stringify({
+                    postId:
+                    currentPost.postId
+                })
+            }
+        );
 
-        const result = await response.json();
+        const result =
+            await response.json();
 
         if (!response.ok || !result.success) {
-            throw new Error(result.message || "좋아요 처리에 실패했습니다.");
+            throw new Error(
+                result.message ||
+                "좋아요 처리에 실패했습니다."
+            );
         }
 
-        likeCountElement.textContent = result.likeCount;
-        likeButton.textContent = result.liked ? "좋아요 취소" : "좋아요";
+        likeCountElement.textContent =
+            result.likeCount;
+
+        likeButton.textContent =
+            result.liked
+                ? "좋아요 취소"
+                : "좋아요";
     } catch (error) {
         console.error(error);
-        alert(error.message || "좋아요 처리 중 오류가 발생했습니다.");
+
+        alert(
+            error.message ||
+            "좋아요 처리 중 오류가 발생했습니다."
+        );
     }
 });
 
-/* 7. 신고 */
+/* 22. 게시글 신고 */
 reportButton.addEventListener("click", () => {
-    alert("신고 기능은 신고 테이블과 API 연결 후 사용할 수 있습니다.");
-});
-
-async function loadComments() {
-    try {
-        const response = await fetch(`/api/posts/comments?postId=${encodeURIComponent(currentPost.postId)}`, { cache: "no-store" });
-        const result = await response.json();
-        if (!response.ok || !result.success) throw new Error(result.message || "댓글을 불러오지 못했습니다.");
-        commentCount.textContent = Number(result.count || 0).toLocaleString();
-        renderComments(result.comments || []);
-        commentMessage.textContent = "";
-    } catch (error) {
-        commentMessage.textContent = error.message || "댓글을 불러오지 못했습니다.";
-    }
-}
-
-function renderComments(comments) {
-    commentList.replaceChildren();
-    if (!comments.length) {
-        const empty = document.createElement("p");
-        empty.className = "post-comments-empty";
-        empty.textContent = "첫 댓글을 남겨보세요.";
-        commentList.append(empty);
+    if (!currentPost) {
         return;
     }
-    comments.forEach(comment => commentList.append(createCommentElement(comment)));
-}
 
-function createCommentElement(comment) {
-    const article = document.createElement("article");
-    article.className = "post-comment";
-    if (comment.parentCommentId) article.classList.add("is-reply");
-    const heading = document.createElement("div");
-    heading.className = "post-comment-heading";
-    const writer = document.createElement("strong");
-    writer.textContent = comment.memberNickname || "회원";
-    const time = document.createElement("time");
-    time.textContent = formatDateTime(comment.updatedAt || comment.createdAt);
-    heading.append(writer, time);
-    const body = document.createElement("p");
-    body.className = "post-comment-content";
-    const active = comment.status === "ACTIVE";
-    body.textContent = active ? comment.content : "삭제된 댓글입니다.";
-    if (!active) article.classList.add("is-deleted");
-    article.append(heading, body);
-    if (active) {
-        const actions = document.createElement("div");
-        actions.className = "post-comment-actions";
-        if (currentMember?.loggedIn) actions.append(commentAction("답글", () => showReplyEditor(article, comment.commentId)));
-        const ownComment = Number(currentMember?.memberId ?? currentMember?.loginMemberId) === Number(comment.memberId);
-        if (ownComment) actions.append(commentAction("수정", () => showCommentEditor(article, comment)));
-        if (ownComment || currentMember?.role === "ADMIN") actions.append(commentAction("삭제", () => deleteComment(comment.commentId)));
-        article.append(actions);
-    }
-    return article;
-}
-
-function commentAction(label, handler) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.textContent = label;
-    button.addEventListener("click", handler);
-    return button;
-}
-
-function showReplyEditor(article, parentCommentId) {
-    document.querySelectorAll(".post-comment-inline-form").forEach(form => form.remove());
-    article.append(inlineCommentForm("답글을 입력해 주세요.", "답글 등록", content =>
-        saveComment({ postId: currentPost.postId, parentCommentId, content }, "POST")));
-}
-
-function showCommentEditor(article, comment) {
-    document.querySelectorAll(".post-comment-inline-form").forEach(form => form.remove());
-    article.append(inlineCommentForm("댓글을 수정해 주세요.", "수정 완료", content =>
-        saveComment({ commentId: comment.commentId, content }, "PUT"), comment.content));
-}
-
-function inlineCommentForm(placeholder, submitLabel, onSubmit, initialValue = "") {
-    const form = document.createElement("form");
-    form.className = "post-comment-inline-form";
-    const textarea = document.createElement("textarea");
-    textarea.maxLength = 1000;
-    textarea.rows = 2;
-    textarea.placeholder = placeholder;
-    textarea.value = initialValue;
-    const actions = document.createElement("div");
-    const cancel = document.createElement("button");
-    cancel.type = "button";
-    cancel.className = "button button-outline";
-    cancel.textContent = "취소";
-    cancel.addEventListener("click", () => form.remove());
-    const submit = document.createElement("button");
-    submit.type = "submit";
-    submit.className = "button button-teal";
-    submit.textContent = submitLabel;
-    actions.append(cancel, submit);
-    form.append(textarea, actions);
-    form.addEventListener("submit", async event => {
-        event.preventDefault();
-        submit.disabled = true;
-        try { await onSubmit(textarea.value); }
-        catch (error) { commentMessage.textContent = error.message; }
-        finally { submit.disabled = false; }
-    });
-    return form;
-}
-
-async function saveComment(payload, method) {
-    const response = await fetch("/api/posts/comments", {
-        method,
-        headers: { "Content-Type": "application/json;charset=UTF-8" },
-        body: JSON.stringify(payload)
-    });
-    const result = await response.json();
-    if (response.status === 401) { requestLogin(); throw new Error(result.message); }
-    if (!response.ok || !result.success) throw new Error(result.message || "댓글을 저장하지 못했습니다.");
-    commentForm.reset();
-    commentLength.textContent = "0 / 1000";
-    await loadComments();
-}
-
-async function deleteComment(commentId) {
-    if (!confirm("댓글을 삭제하시겠습니까?")) return;
-    try { await saveComment({ commentId }, "DELETE"); }
-    catch (error) { commentMessage.textContent = error.message; }
-}
-
-function requestLogin() {
-    if (!confirm("로그인이 필요한 기능입니다.\n로그인 페이지로 이동하시겠습니까?")) return;
-    const returnUrl = `${location.pathname}${location.search}`;
-    location.assign(`/pages/auth/login.html?redirect=${encodeURIComponent(returnUrl)}`);
-}
-
-commentContent.addEventListener("input", () => {
-    commentLength.textContent = `${commentContent.value.length} / 1000`;
+    openReportModal(
+        "POST",
+        currentPost.postId
+    );
 });
 
-commentForm.addEventListener("submit", async event => {
-    event.preventDefault();
-    if (!currentMember?.loggedIn) { requestLogin(); return; }
-    const submit = commentForm.querySelector('[type="submit"]');
-    submit.disabled = true;
-    try {
-        await saveComment({ postId: currentPost.postId, content: commentContent.value }, "POST");
-    } catch (error) {
-        commentMessage.textContent = error.message || "댓글을 등록하지 못했습니다.";
-    } finally {
-        submit.disabled = false;
-    }
-});
-
-/* 8. 오류 출력 */
+/* 23. 오류 출력 */
 function showError(message) {
     detailElement.hidden = true;
     statusElement.hidden = false;
     statusElement.textContent = message;
 }
 
-/* 9. 날짜 출력 형식 */
+/* 24. 날짜 출력 형식 */
 function formatDateTime(value) {
     if (!value) {
         return "-";
     }
 
-    return String(value).substring(0, 19);
+    return String(value)
+        .substring(0, 19);
 }
 
-/* 10. time 태그 날짜 형식 */
+/* 25. time 태그 날짜 형식 */
 function toDateTimeAttribute(value) {
     if (!value) {
         return "";
@@ -481,13 +1203,7 @@ function toDateTimeAttribute(value) {
         .replace(" ", "T");
 }
 
-function escapeHtml(value) {
-    return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;");
-}
-
-/* 11. 게시글 상세 초기 실행 */
+/* 26. 게시글 상세 초기 실행 */
+updateCommentLength();
+updateReportDetailLength();
 loadPostDetail();

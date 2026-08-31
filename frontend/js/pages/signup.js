@@ -1,3 +1,9 @@
+// ============================================
+// 파일: signup.js
+// ============================================
+
+import { memberApi } from "/js/api/memberApi.js";
+
 const signupForm = document.querySelector("#signup-form");
 const idInput = document.querySelector("#login-id");
 const checkButton = document.querySelector("#check-id");
@@ -9,10 +15,9 @@ idInput.addEventListener("input", () => { checkedLoginId = ""; });
 checkButton.addEventListener("click", async () => {
   if (!idInput.reportValidity()) return;
   setMessage("확인 중...", "");
+
   try {
-    const response = await fetch(`/api/auth/signup?loginId=${encodeURIComponent(idInput.value)}`);
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message);
+    const result = await memberApi.checkLoginId(idInput.value);
     if (!result.available) throw new Error("이미 사용 중인 아이디입니다.");
     checkedLoginId = idInput.value;
     setMessage("사용할 수 있는 아이디입니다.", "success");
@@ -30,15 +35,10 @@ signupForm.addEventListener("submit", async (event) => {
   }
   const submit = signupForm.querySelector('[type="submit"]');
   submit.disabled = true;
+
   try {
     const data = Object.fromEntries(new FormData(signupForm));
-    const response = await fetch("/api/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message || "회원가입에 실패했습니다.");
+    await memberApi.signup(data);
     window.location.href = "/pages/auth/login.html";
   } catch (error) {
     setMessage(error.message, "error");

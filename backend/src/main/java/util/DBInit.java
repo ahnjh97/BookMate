@@ -1,3 +1,6 @@
+// util/DBInit.java
+// 필요 환경변수(.env): DB_URL, DB_USER, DB_PASSWORD
+
 package util;
 
 import java.io.PrintStream;

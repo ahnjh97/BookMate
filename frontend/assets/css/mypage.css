@@ -1,244 +1,236 @@
-.similar-members {
-  padding: 22px 24px 24px;
+/* ============================================
+   파일: assets/css/mypage.css (전체, 최종)
+   구조: mypage.html(사이드바 고정) + #mypage-content(fragment 스위칭)
+   ============================================ */
+
+
+/* ---------- 페이지 기본 틀 ---------- */
+
+.mypage-main {
+  min-height: calc(100vh - var(--navbar-height));
+  padding: 44px 24px 80px;
+  background: var(--color-surface);
+}
+
+
+/* ---------- 그리드 뼈대: 사이드바 + 콘텐츠 ---------- */
+/* 모바일 우선. 768px 이상에서만 2단 */
+
+.mypage-shell {
+  display: grid;
+  width: min(1080px, 100%);
+  margin: 0 auto;
+  gap: 24px;
+  grid-template-columns: 1fr;
+  grid-template-areas: "content";
+}
+
+@media (min-width: 768px) {
+  .mypage-shell {
+    gap: 32px;
+    grid-template-columns: 240px minmax(0, 1fr);
+    grid-template-areas: "sidebar content";
+  }
+}
+
+.mypage-sidebar {
+  grid-area: sidebar;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: var(--color-background);
+  box-shadow: 0 3px 14px rgb(16 24 40 / 6%);
+  padding: 20px;
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .mypage-sidebar { display: block; }
+}
+
+#mypage-content {
+  grid-area: content;
+  min-width: 0;
+  display: grid;
+  gap: 24px; /* fragment 안에 카드가 여러 개면 이 gap으로 세로 정렬 */
+}
+
+.mypage-sidebar-group { margin-bottom: 22px; }
+.mypage-sidebar-group:last-child { margin-bottom: 0; }
+
+.mypage-sidebar-label {
+  margin: 0 0 8px;
+  color: var(--color-primary);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.mypage-sidebar a,
+.mypage-sidebar .disabled {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  color: var(--color-text);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.mypage-sidebar a:hover { background: var(--color-primary-soft); }
+.mypage-sidebar a.active {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-dark);
+  font-weight: 800;
+}
+.mypage-sidebar .disabled { color: var(--color-muted); cursor: not-allowed; }
+
+
+/* ---------- fragment 공통 카드 껍데기 ---------- */
+/* profile.html 등 각 fragment가 이 클래스로 자기 카드를 감싸면 통일된 톤 유지 */
+
+#mypage-content .card {
+  padding: 30px;
   border: 1px solid var(--color-border);
   border-radius: 14px;
   background: var(--color-background);
   box-shadow: 0 3px 14px rgb(16 24 40 / 6%);
 }
 
-.similar-members {
-  width: min(370px, 100%);
-  justify-self: start;
-  margin-top: 0;
+@media (max-width: 640px) {
+  #mypage-content .card { padding: 22px; }
 }
 
-.similar-members h2 {
-  margin: 0;
-  letter-spacing: -0.035em;
+
+/* ---------- profile.html fragment 전용 ---------- */
+/* 원본은 좌우 flex(space-between)였으나, 사이드바로 폭이 줄어든
+   콘텐츠 영역에 맞춰 세로 스택으로 재설계 */
+.mypage-user-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 12px;
+    background: var(--color-primary-soft);
+    cursor: pointer;
+    text-align: left;
 }
 
-.similar-members-helper {
-  margin: 10px 0 0;
-  color: var(--color-muted);
+.mypage-user-banner:hover {
+    filter: brightness(0.97);
 }
+
+.mypage-user-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: #fff;
+    font-weight: 800;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.mypage-user-nickname {
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: var(--color-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mypage-profile {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mypage-eyebrow {
+  margin: 0 0 7px;
+  color: var(--color-primary);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.mypage-profile h1 { margin: 0; letter-spacing: -0.035em; }
+
+.mypage-profile p { margin: 0; color: var(--color-muted); }
+
+/* 화면이 충분히 넓을 때(1024px+)만 좌우 배치로 여유 있게 전환 */
+@media (min-width: 1024px) {
+  .mypage-profile {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+
+/* ---------- similar-members(취향매칭) fragment 전용 ---------- */
+/* 원본 3열 고정 → auto-fit으로 변경: 사이드바 유무·화면폭과 무관하게
+   카드 최소너비(220px) 보장하며 유동적으로 열 개수 자동 조절 */
+
+.similar-members h2 { margin: 0; letter-spacing: -0.035em; }
 
 .similar-members-heading {
   display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.similar-members-helper {
-  margin-top: 5px;
-  font-size: 0.86rem;
-}
-
-.similar-members-status {
-  margin: 24px 0 0;
-  color: var(--color-muted);
-}
-
-.similar-members-status:empty {
-  display: none;
-}
-
-.similar-members-status[data-state="error"] {
-  color: var(--color-danger);
-}
-
-.similar-members-list {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.taste-match-card {
-  position: relative;
-  min-width: 0;
-  padding: 14px 15px 14px 30px;
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 3px 12px rgb(16 24 40 / 5%);
-  outline: none;
-  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
-}
-
-.taste-match-card:hover {
-  z-index: 5;
-  border-color: color-mix(in srgb, var(--color-primary) 45%, var(--color-border));
-  box-shadow: 0 10px 24px rgb(16 24 40 / 12%);
-  transform: translateY(-2px);
-}
-
-.taste-match-summary {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
 }
 
-.taste-match-rank {
-  position: absolute;
-  z-index: 2;
-  top: -8px;
-  left: -8px;
-  display: block;
-  width: 34px;
-  height: 40px;
-  filter: drop-shadow(0 3px 4px rgb(16 24 40 / 20%));
+.similar-members-heading > p { margin: 0; color: var(--color-muted); font-size: 0.86rem; }
+
+@media (min-width: 640px) {
+  .similar-members-heading {
+    flex-direction: row;
+    align-items: end;
+    justify-content: space-between;
+    gap: 20px;
+  }
 }
 
-.taste-match-rank svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
+.similar-members-status { margin: 24px 0 0; color: var(--color-muted); }
+.similar-members-status[data-state="error"] { color: var(--color-danger); }
+
+.similar-members-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
 }
 
-.taste-match-rank circle {
-  fill: currentColor;
-  stroke: #fff;
-  stroke-width: 1.5px;
+.taste-match-card {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: linear-gradient(145deg, #fff, var(--color-primary-soft));
 }
 
-.taste-match-rank .medal-ribbon {
-  fill: #5273a5;
-}
+.taste-match-rank { color: var(--color-primary); font-size: 0.76rem; font-weight: 900; }
 
-.taste-match-rank .medal-star {
-  fill: rgb(255 255 255 / 92%);
-}
-
-.taste-match-medal-1 {
-  color: #e9ad20;
-}
-
-.taste-match-medal-2 {
-  color: #9ba7b4;
-}
-
-.taste-match-medal-3 {
-  color: #bd7440;
-}
-
-.taste-match-nickname {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  padding: 0;
-  border: 0;
-  color: var(--color-text);
-  background: none;
-  cursor: pointer;
-  font-family: inherit;
-  font-weight: 700;
-  margin: 0;
+.taste-match-card h3 {
+  margin: 8px 0 2px;
   overflow: hidden;
-  font-size: 0.98rem;
-  text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.taste-match-nickname:hover {
-  color: var(--color-primary-dark);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.taste-match-user {
-  position: relative;
-  min-width: 0;
-}
-
-.bookshelf-visit-prompt {
-  position: absolute;
-  z-index: 8;
-  top: calc(100% + 7px);
-  left: -4px;
-  white-space: nowrap;
-}
-
-.bookshelf-visit-prompt[hidden] {
-  display: none;
-}
-
-.bookshelf-visit-prompt button {
-  display: inline-flex;
-  min-height: 35px;
-  align-items: center;
-  justify-content: center;
-  padding: 0 14px;
-  border: 1px solid var(--color-primary-dark);
-  border-radius: 8px;
-  color: #fff;
-  background: var(--color-primary-dark);
-  box-shadow: 0 6px 16px rgb(11 140 166 / 24%);
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  transition: box-shadow 150ms ease, transform 150ms ease;
-}
-
-.bookshelf-visit-prompt button:hover {
-  background: #087b92;
-  box-shadow: 0 8px 18px rgb(11 140 166 / 30%);
-  transform: translateY(-1px);
-}
-
-.taste-match-result {
-  display: grid;
-  justify-items: end;
-  gap: 0;
-  white-space: nowrap;
-}
-
-.taste-match-result small {
-  color: var(--color-muted);
-  font-size: 0.72rem;
 }
 
 .taste-match-score {
   margin: 0;
   color: var(--color-primary-dark);
-  font-size: 1.16rem;
+  font-size: 1.3rem;
   font-weight: 900;
 }
 
-.taste-match-details {
-  position: absolute;
-  top: -1px;
-  left: calc(100% + 8px);
-  width: min(300px, calc(100vw - 48px));
-  visibility: hidden;
-  padding: 15px;
-  border: 1px solid color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
-  border-radius: 11px;
-  background: #fff;
-  box-shadow: 0 14px 30px rgb(16 24 40 / 16%);
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(-5px);
-  transition: opacity 150ms ease, transform 150ms ease, visibility 150ms ease;
-}
-
-.taste-match-card:hover .taste-match-details {
-  visibility: visible;
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
-}
-
-.taste-match-components {
-  display: grid;
-  gap: 7px;
-  margin: 0;
-}
+.taste-match-components { display: grid; gap: 7px; margin: 18px 0 0; }
 
 .taste-match-components div {
   display: flex;
@@ -249,49 +241,116 @@
 }
 
 .taste-match-components dd,
-.taste-match-components dt {
-  margin: 0;
-}
-
-.taste-match-components dd {
-  color: var(--color-text);
-  font-weight: 800;
-}
+.taste-match-components dt { margin: 0; }
+.taste-match-components dd { color: var(--color-text); font-weight: 800; }
 
 .taste-match-evidence {
-  margin: 12px 0 0;
-  padding-top: 10px;
-  border-top: 1px solid var(--color-border);
+  margin: 16px 0 0;
   color: var(--color-muted);
   font-size: 0.76rem;
   line-height: 1.55;
 }
 
-@media (max-width: 820px) {
-  .similar-members-list {
-    grid-template-columns: minmax(0, 1fr);
-  }
+/* ============================================
+   섹션: 폼 공통(내정보/비밀번호 변경 등 fragment 전반에서 재사용)
+   #mypage-content 안의 .card, .field-group에 적용
+   ============================================ */
 
-  .taste-match-details {
-    top: calc(100% + 7px);
-    right: -1px;
-    left: -1px;
-    width: auto;
-  }
+#mypage-content .card h1 {
+  margin: 4px 0 24px;
+  font-size: 1.3rem;
+  letter-spacing: -0.03em;
+  color: var(--color-text);
 }
 
-@media (max-width: 640px) {
-  .similar-members {
-    width: 100%;
-    padding: 22px;
-  }
+.field-group {
+  margin-bottom: 18px;
+}
 
-  .similar-members-list {
-    grid-template-columns: 1fr;
-  }
+.field-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
 
-  .similar-members-heading {
-    align-items: stretch;
-    flex-direction: column;
-  }
+.field-group input[type="text"],
+.field-group input[type="email"],
+.field-group input[type="password"] {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  box-sizing: border-box;
+}
+
+.field-group input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+
+.field-group input::placeholder {
+  color: var(--color-muted);
+}
+
+/* 저장/변경 버튼 */
+.button-primary {
+  padding: 11px 24px;
+  border: none;
+  border-radius: 8px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.button-primary:hover {
+  background: var(--color-primary-dark);
+}
+
+.button-small {
+  padding: 8px 14px;
+  font-size: 0.82rem;
+}
+
+/* 상태 메시지(성공/실패 공용) */
+.status-msg {
+  margin: 14px 0 0;
+  padding: 10px 13px;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  display: none;
+}
+
+.status-msg.show {
+  display: block;
+}
+
+.status-msg.success {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-dark);
+}
+
+.status-msg.error {
+  background: #fbeaea;
+  color: var(--color-danger);
+}
+
+
+/* ============================================
+   섹션: 비밀번호 변경 fragment 전용
+   ============================================ */
+
+#mypage-content .card:has(#password-save) {
+  max-width: 420px; /* 비밀번호 필드 3개뿐이라 폭 좁게 제한, 다른 fragment엔 영향 없음 */
+}
+
+#password-message {
+  margin-top: 16px;
 }

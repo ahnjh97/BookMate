@@ -7,7 +7,7 @@
     <title>게시글 | BookMate</title>
 
     <link rel="stylesheet" href="/assets/css/style.css?v=20260831-2">
-    <link rel="stylesheet" href="/assets/css/post.css?v=20260831-9">
+    <link rel="stylesheet" href="/assets/css/post.css?v=20260831-8">
 </head>
 
 <body>
@@ -15,8 +15,11 @@
 
 <main class="post-page-main">
     <div class="post-detail-back">
-        <a class="back-navigation" href="/pages/post/list.html">← 커뮤니티 목록으로</a>
+        <a class="back-navigation" href="/pages/post/list.html">
+            ← 커뮤니티 목록으로
+        </a>
     </div>
+
     <article id="post-detail" class="post-detail" hidden>
         <div class="post-detail-category">
             <span id="post-category"></span>
@@ -48,48 +51,284 @@
         </div>
 
         <div id="post-content" class="post-detail-content"></div>
-        <section id="post-tier-list" class="post-tier-list" aria-labelledby="post-tier-list-heading" hidden>
-            <h2 id="post-tier-list-heading">티어리스트 결과</h2>
-            <div id="post-tier-board" class="post-tier-board"></div>
+
+        <section
+                id="post-tier-list"
+                class="post-tier-list"
+                aria-labelledby="post-tier-list-heading"
+                hidden
+        >
+            <h2 id="post-tier-list-heading">
+                티어리스트 결과
+            </h2>
+
+            <div
+                    id="post-tier-board"
+                    class="post-tier-board"
+            ></div>
         </section>
-        <section id="post-worldcup-result" class="post-worldcup-result" aria-labelledby="post-worldcup-heading" hidden>
-            <h2 id="post-worldcup-heading">이상형월드컵 결과</h2>
+
+        <section
+                id="post-worldcup-result"
+                class="post-worldcup-result"
+                aria-labelledby="post-worldcup-heading"
+                hidden
+        >
+            <h2 id="post-worldcup-heading">
+                이상형월드컵 결과
+            </h2>
+
             <div id="post-worldcup-winner"></div>
         </section>
 
         <div class="post-detail-actions">
-            <div id="writer-actions" class="post-action-group" hidden>
-                <a id="post-edit-link" class="button" href="#">수정</a>
-                <button id="post-hide-button" class="button" type="button">숨김</button>
-                <button id="post-delete-button" class="button" type="button">삭제</button>
+            <div
+                    id="writer-actions"
+                    class="post-action-group"
+                    hidden
+            >
+                <a
+                        id="post-edit-link"
+                        class="button"
+                        href="#"
+                >
+                    수정
+                </a>
+
+                <button
+                        id="post-hide-button"
+                        class="button"
+                        type="button"
+                >
+                    숨김
+                </button>
+
+                <button
+                        id="post-delete-button"
+                        class="button"
+                        type="button"
+                >
+                    삭제
+                </button>
             </div>
 
-            <div id="member-actions" class="post-action-group" hidden>
-                <button id="post-like-button" class="button" type="button">좋아요</button>
-                <button id="post-report-button" class="button" type="button">신고</button>
+            <div
+                    id="member-actions"
+                    class="post-action-group"
+                    hidden
+            >
+                <button
+                        id="post-like-button"
+                        class="button"
+                        type="button"
+                >
+                    좋아요
+                </button>
+
+                <button
+                        id="post-report-button"
+                        class="button"
+                        type="button"
+                >
+                    신고
+                </button>
             </div>
         </div>
 
-        <section class="post-comments" aria-labelledby="post-comments-heading">
-            <div class="post-comments-heading">
-                <h2 id="post-comments-heading">댓글 <span id="post-comment-count">0</span></h2>
+        <!-- 댓글 -->
+        <section
+                class="post-comment-section"
+                aria-labelledby="post-comment-heading"
+        >
+            <div class="post-comment-header">
+                <h2 id="post-comment-heading">
+                    댓글
+                    <span id="post-comment-count">0</span>
+                </h2>
             </div>
-            <form id="post-comment-form" class="post-comment-form">
-                <textarea id="post-comment-content" maxlength="1000" rows="3" placeholder="댓글을 입력해 주세요." required></textarea>
-                <div><small id="post-comment-length">0 / 1000</small><button class="button button-teal" type="submit">댓글 등록</button></div>
+
+            <form
+                    id="post-comment-form"
+                    class="post-comment-form"
+                    hidden
+            >
+                <textarea
+                        id="post-comment-content"
+                        maxlength="1000"
+                        placeholder="댓글을 입력해주세요."
+                        aria-label="댓글 내용"
+                ></textarea>
+
+                <div class="post-comment-form-actions">
+                    <span id="post-comment-length">
+                        0 / 1000
+                    </span>
+
+                    <button
+                            id="post-comment-submit"
+                            class="button button-primary"
+                            type="submit"
+                    >
+                        댓글 등록
+                    </button>
+                </div>
             </form>
-            <p id="post-comment-message" class="post-comment-message" role="status"></p>
-            <div id="post-comment-list" class="post-comment-list"></div>
+
+            <p
+                    id="post-comment-login-message"
+                    class="post-comment-login-message"
+                    hidden
+            >
+                댓글을 작성하려면 로그인이 필요합니다.
+            </p>
+
+            <p
+                    id="post-comment-status"
+                    class="post-comment-status"
+                    aria-live="polite"
+            >
+                댓글을 불러오는 중입니다.
+            </p>
+
+            <div
+                    id="post-comment-list"
+                    class="post-comment-list"
+            ></div>
         </section>
     </article>
 
-    <p id="post-detail-status" class="post-detail-status" aria-live="polite">
+    <!-- 신고 모달 -->
+    <div
+            id="report-modal"
+            class="report-modal"
+            hidden
+    >
+        <div
+                class="report-modal-backdrop"
+                data-report-close
+        ></div>
+
+        <section
+                class="report-modal-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="report-modal-title"
+        >
+            <div class="report-modal-header">
+                <h2 id="report-modal-title">
+                    신고하기
+                </h2>
+
+                <button
+                        id="report-modal-close"
+                        class="report-modal-close"
+                        type="button"
+                        aria-label="신고 창 닫기"
+                >
+                    ×
+                </button>
+            </div>
+
+            <form
+                    id="report-form"
+                    class="report-form"
+            >
+                <div class="report-form-group">
+                    <label for="report-reason-type">
+                        신고 사유
+                    </label>
+
+                    <select
+                            id="report-reason-type"
+                            required
+                    >
+                        <option value="">
+                            신고 사유를 선택해주세요.
+                        </option>
+
+                        <option value="SPAM">
+                            스팸 / 도배
+                        </option>
+
+                        <option value="ABUSE">
+                            욕설 / 비방
+                        </option>
+
+                        <option value="INAPPROPRIATE">
+                            부적절한 내용
+                        </option>
+
+                        <option value="OTHER">
+                            기타
+                        </option>
+                    </select>
+                </div>
+
+                <div
+                        id="report-detail-group"
+                        class="report-form-group"
+                        hidden
+                >
+                    <label for="report-reason-detail">
+                        상세 사유
+                    </label>
+
+                    <textarea
+                            id="report-reason-detail"
+                            maxlength="1000"
+                            placeholder="신고 사유를 입력해주세요."
+                    ></textarea>
+
+                    <span id="report-detail-length">
+                        0 / 1000
+                    </span>
+                </div>
+
+                <div class="report-form-actions">
+                    <button
+                            class="button"
+                            type="button"
+                            data-report-close
+                    >
+                        취소
+                    </button>
+
+                    <button
+                            id="report-submit-button"
+                            class="button button-primary"
+                            type="submit"
+                    >
+                        신고 접수
+                    </button>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <p
+            id="post-detail-status"
+            class="post-detail-status"
+            aria-live="polite"
+    >
         게시글을 불러오는 중입니다.
     </p>
 </main>
 
-<script src="/js/components/navbar.js" charset="UTF-8" defer></script>
-<script src="/js/components/flash-toast.js?v=20260831-1" defer></script>
-<script src="/js/pages/post-detail.js?v=20260831-5" charset="UTF-8" defer></script>
+<script
+        src="/js/components/navbar.js"
+        charset="UTF-8"
+        defer
+></script>
+
+<script
+        src="/js/components/flash-toast.js?v=20260831-1"
+        defer
+></script>
+
+<script
+        src="/js/pages/post-detail.js?v=20260831-3"
+        charset="UTF-8"
+        defer
+></script>
 </body>
 </html>
