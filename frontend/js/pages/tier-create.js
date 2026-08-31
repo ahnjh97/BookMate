@@ -10,14 +10,17 @@ const picker = document.getElementById("book-picker"),
   suggestions = document.getElementById("tier-search-suggestions");
 let books = [], activeKeyword = "", searchSequence = 0, searchTimer;
 let currentPage = 1, hasMoreBooks = false, loadingMoreBooks = false;
+let selectedAuthorId = null;
 const selected = new Set();
 async function loadBooks(keyword = "", append = false) {
-  if (append && (loadingMoreBooks || !hasMoreBooks || keyword)) return;
+  if (append && (loadingMoreBooks || !hasMoreBooks)) return;
   if (append) loadingMoreBooks = true;
   const sequence = ++searchSequence;
   try {
-    const params = new URLSearchParams({ size: keyword ? "24" : "100", sort: "title" });
+    const params = new URLSearchParams({ size: "40", sort: "title" });
     if (keyword) params.set("keyword", keyword);
+    if (category.value === "장르" && filter.value) params.set("genre", filter.value);
+    if (category.value === "작가" && selectedAuthorId) params.set("authorId", selectedAuthorId);
     params.set("page", append ? String(currentPage + 1) : "1");
     const response = await fetch(`/api/books?${params}`), data = await response.json();
     if (!response.ok || !data.success) throw new Error(data.message);
@@ -26,30 +29,19 @@ async function loadBooks(keyword = "", append = false) {
     books = append
       ? [...new Map([...books, ...fetchedBooks].map(book => [book.bookId, book])).values()]
       : fetchedBooks;
-    if (!keyword) {
-      currentPage = append ? currentPage + 1 : 1;
-      hasMoreBooks = Boolean(data.data?.hasMore);
-    }
-    if (keyword) renderBooks();
-    else if (append) {
+    currentPage = append ? currentPage + 1 : 1;
+    hasMoreBooks = Boolean(data.data?.hasMore);
+    if (append) {
       const previousScrollTop = picker.scrollTop;
-      syncGenreOptions();
       renderBooks();
       picker.scrollTop = previousScrollTop;
-    } else updateTypeFilter();
+    } else renderBooks();
   } catch (error) {
     if (sequence !== searchSequence) return;
     message.textContent = "책 목록을 불러오지 못했습니다.";
   } finally {
     if (append) loadingMoreBooks = false;
   }
-}
-function syncGenreOptions() {
-  if (category.value !== "장르") return;
-  const selectedGenre = filter.value;
-  const genres = [...new Set(books.map(book => book.genre).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ko"));
-  filter.replaceChildren(...genres.map(genre => new Option(genre, genre)));
-  if (genres.includes(selectedGenre)) filter.value = selectedGenre;
 }
 function updateTypeFilter() {
   const type = category.value;
@@ -59,31 +51,46 @@ function updateTypeFilter() {
   filter.hidden = type !== "장르";
   authorFilter.hidden = type !== "작가";
   authorFilter.value = "";
+  selectedAuthorId = null;
   authorError.hidden = true;
   authorFilter.removeAttribute("aria-invalid");
   if (type === "장르") {
     filterLabel.firstChild.textContent = "장르 선택";
-    [...new Set(books.map(book => book.genre))].sort().forEach(value => filter.add(new Option(value, value)));
+    ["소설", "판타지", "SF", "추리", "인문/사회", "자기계발", "과학/IT"]
+      .forEach(value => filter.add(new Option(value, value)));
   } else if (type === "작가") filterLabel.firstChild.textContent = "작가 선택";
-  renderBooks();
+  loadBooks(activeKeyword);
 }
-function renderAuthorOptions() {
-  const query = authorFilter.value.trim().toLocaleLowerCase("ko"),
-    names = [...new Set(books.map(book => book.authorName).filter(Boolean))].filter(name =>
-      name.toLocaleLowerCase("ko").startsWith(query)
-    ).sort((a, b) => a.localeCompare(b, "ko"));
+async function renderAuthorOptions() {
+  const query = authorFilter.value.trim();
   authorOptions.replaceChildren();
-  names.forEach(name => {
+  if (!query) {
+    closeAuthorOptions();
+    return;
+  }
+  let authors;
+  try {
+    const response = await fetch(`/api/search/suggestions?q=${encodeURIComponent(query)}`);
+    const data = await response.json();
+    if (!response.ok || !data.success || authorFilter.value.trim() !== query) return;
+    authors = data.data.filter(item => item.type === "AUTHOR");
+  } catch (error) {
+    closeAuthorOptions();
+    return;
+  }
+  authors.forEach(author => {
     const option = document.createElement("button");
     option.type = "button";
     option.setAttribute("role", "option");
-    option.textContent = name;
+    option.textContent = author.name;
     option.addEventListener("mousedown", event => {
       event.preventDefault();
-      authorFilter.value = name;
-      validateAuthor();
+      authorFilter.value = author.name;
+      selectedAuthorId = author.id;
+      authorError.hidden = true;
+      authorFilter.removeAttribute("aria-invalid");
       closeAuthorOptions();
-      renderBooks();
+      loadBooks(activeKeyword);
     });
     authorOptions.append(option);
   });
@@ -101,21 +108,13 @@ function validateAuthor() {
     authorFilter.removeAttribute("aria-invalid");
     return true;
   }
-  const value = authorFilter.value.trim(),
-    isValid = [...new Set(books.map(book => book.authorName).filter(Boolean))].some(name => name === value);
+  const isValid = Boolean(selectedAuthorId && authorFilter.value.trim());
   authorError.hidden = isValid;
   authorFilter.toggleAttribute("aria-invalid", !isValid);
   return isValid;
 }
 function filteredBooks() {
-  const q = activeKeyword.toLowerCase(), authorQuery = authorFilter.value.trim().toLocaleLowerCase("ko");
-  return books.filter(book => {
-    const typeMatch = category.value === "자유"
-      || (category.value === "장르"
-        ? book.genre === filter.value
-        : book.authorName.toLocaleLowerCase("ko").startsWith(authorQuery));
-    return typeMatch && (!q || book.title.toLowerCase().includes(q));
-  });
+  return books;
 }
 function renderBooks() {
   picker.replaceChildren();
@@ -128,7 +127,13 @@ function renderBooks() {
       escapeHtml(book.authorName)
     }</small></span><input type="checkbox" value="${book.bookId}" ${selected.has(book.bookId) ? "checked" : ""}>`;
     label.querySelector("input").addEventListener("change", event => {
+      if (event.target.checked && selected.size >= 100) {
+        event.target.checked = false;
+        message.textContent = "책은 최대 100권까지 선택할 수 있습니다.";
+        return;
+      }
       event.target.checked ? selected.add(book.bookId) : selected.delete(book.bookId);
+      message.textContent = "";
       updateCount();
     });
     picker.append(label);
@@ -175,13 +180,12 @@ function updateCount() {
   document.getElementById("selection-count").textContent = `선택된 책 수 : ${selected.size}권`;
 }
 category.addEventListener("change", updateTypeFilter);
-filter.addEventListener("change", renderBooks);
+filter.addEventListener("change", () => loadBooks(activeKeyword));
 authorFilter.addEventListener("focus", renderAuthorOptions);
 authorFilter.addEventListener("click", renderAuthorOptions);
 authorFilter.addEventListener("input", () => {
-  validateAuthor();
+  selectedAuthorId = null;
   renderAuthorOptions();
-  renderBooks();
 });
 authorFilter.addEventListener("blur", validateAuthor);
 authorFilter.addEventListener("keydown", event => {
@@ -200,7 +204,7 @@ search.addEventListener("keydown", event => {
 });
 document.getElementById("book-search-button").addEventListener("click", applySearch);
 picker.addEventListener("scroll", () => {
-  if (picker.scrollTop + picker.clientHeight >= picker.scrollHeight - 80) loadBooks("", true);
+  if (picker.scrollTop + picker.clientHeight >= picker.scrollHeight - 80) loadBooks(activeKeyword, true);
 });
 document.getElementById("selection-reset-button").addEventListener("click", () => {
   selected.clear();
