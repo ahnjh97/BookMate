@@ -8,31 +8,211 @@ import { authApi } from "/js/api/authApi.js";
 
 let loginAdminMemberId = null;
 const memberMap = new Map();
+let allMembers = [];
+let selectedMemberFilter = "active";
+let selectedPostFilter = "public";
+const deleteStates = new Map();
+let memberPagination;
+let postPagination;
+let bookPagination;
+let tierPagination;
+let worldcupPagination;
 
 document.addEventListener("DOMContentLoaded", async () => {
   const allowed = await checkAdminAccess();
   if (!allowed) return;
 
+  initializePagination();
+  initializeDeleteControls();
+  initializeMemberFilters();
+  initializePostFilters();
   await loadMembers();
-  await loadPosts();
+  await loadPosts(1);
+  await loadBookRequests();
   await loadTierTemplates();
   await loadWorldcupTemplates();
 
-  const memberRefreshButton = document.getElementById("member-refresh-button");
-  const postRefreshButton = document.getElementById("post-refresh-button");
-  const tierRefreshButton = document.getElementById("tier-refresh-button");
-  const worldcupRefreshButton = document.getElementById("worldcup-refresh-button");
-
-  if (memberRefreshButton) {
-    memberRefreshButton.addEventListener("click", loadMembers);
-  }
-
-  if (postRefreshButton) {
-    postRefreshButton.addEventListener("click", loadPosts);
-  }
-  if (tierRefreshButton) tierRefreshButton.addEventListener("click", loadTierTemplates);
-  if (worldcupRefreshButton) worldcupRefreshButton.addEventListener("click", loadWorldcupTemplates);
 });
+
+function initializePagination() {
+  memberPagination = BookMateListPagination.create({
+    root: document.getElementById("member-pagination"),
+    pageSize: 10,
+    onRender: renderMembers,
+  });
+  postPagination = BookMateListPagination.create({
+    root: document.getElementById("post-pagination"),
+    pageSize: 10,
+    onRender: renderPosts,
+    onPageChange: loadPosts,
+  });
+  bookPagination = BookMateListPagination.create({
+    root: document.getElementById("book-pagination"),
+    pageSize: 5,
+    onRender: renderBookRequests,
+  });
+  tierPagination = BookMateListPagination.create({
+    root: document.getElementById("tier-pagination"),
+    pageSize: 5,
+    onRender: renderTierTemplates,
+  });
+  worldcupPagination = BookMateListPagination.create({
+    root: document.getElementById("worldcup-pagination"),
+    pageSize: 5,
+    onRender: renderWorldcupTemplates,
+  });
+}
+
+function initializeMemberFilters() {
+  document.querySelectorAll("[data-member-filter]").forEach(button => {
+    button.addEventListener("click", () => {
+      selectedMemberFilter = button.dataset.memberFilter;
+      document.querySelectorAll("[data-member-filter]").forEach(item => {
+        const active = item === button;
+        item.classList.toggle("is-active", active);
+        item.setAttribute("aria-pressed", String(active));
+      });
+      renderFilteredMembers();
+    });
+  });
+}
+
+function renderFilteredMembers() {
+  const filtered = allMembers.filter(member => {
+    if (selectedMemberFilter === "admin") return member.role === "ADMIN";
+    if (selectedMemberFilter === "active") return member.role !== "ADMIN" && member.isLocked !== "Y";
+    if (selectedMemberFilter === "restricted") return member.role !== "ADMIN" && member.isLocked === "Y";
+    return false;
+  });
+  memberPagination.setItems(filtered);
+}
+
+function initializePostFilters() {
+  document.querySelectorAll("[data-post-filter]").forEach(button => {
+    button.addEventListener("click", async () => {
+      selectedPostFilter = button.dataset.postFilter;
+      document.querySelectorAll("[data-post-filter]").forEach(item => {
+        const active = item === button;
+        item.classList.toggle("is-active", active);
+        item.setAttribute("aria-pressed", String(active));
+      });
+      cancelDeleteMode("post");
+      await loadPosts(1);
+    });
+  });
+}
+
+function initializeDeleteControls() {
+  document.querySelectorAll("[data-delete-controls]").forEach(controls => {
+    const type = controls.dataset.deleteControls;
+    const section = controls.closest(".admin-section");
+    const deleteButton = controls.querySelector(".admin-delete-start");
+    const cancelButton = controls.querySelector(".admin-delete-cancel");
+    const state = { active: false, selected: new Set(), section, deleteButton, cancelButton };
+    deleteStates.set(type, state);
+    deleteButton.addEventListener("click", () => handleDeleteButton(type));
+    cancelButton.addEventListener("click", () => cancelDeleteMode(type));
+  });
+}
+
+function prepareSelectableRow(row, type, id, deletable = true) {
+  row.dataset.itemId = String(id);
+  row.dataset.deletable = String(deletable);
+  if (!deletable) row.classList.add("is-not-deletable");
+  const state = deleteStates.get(type);
+  row.classList.toggle("is-selected", Boolean(state?.selected.has(Number(id))));
+  row.setAttribute("aria-selected", String(Boolean(state?.selected.has(Number(id)))));
+  row.addEventListener("click", event => {
+    if (!state?.active || !deletable || event.target.closest("button, a, input, select")) return;
+    const itemId = Number(row.dataset.itemId);
+    if (state.selected.has(itemId)) state.selected.delete(itemId);
+    else state.selected.add(itemId);
+    row.classList.toggle("is-selected", state.selected.has(itemId));
+    row.setAttribute("aria-selected", String(state.selected.has(itemId)));
+    updateDeleteControls(type);
+  });
+}
+
+async function handleDeleteButton(type) {
+  const state = deleteStates.get(type);
+  if (!state.active) {
+    deleteStates.forEach((otherState, otherType) => {
+      if (otherType !== type && otherState.active) cancelDeleteMode(otherType);
+    });
+    state.active = true;
+    state.section.classList.add("is-selection-mode");
+    state.cancelButton.hidden = false;
+    updateDeleteControls(type);
+    showAdminToast("삭제할 항목들을 선택하세요.", "delete");
+    return;
+  }
+  if (state.selected.size === 0) {
+    showAdminToast("삭제할 항목들을 선택하세요.", "delete");
+    return;
+  }
+  if (!confirm(`선택한 ${state.selected.size}개 항목을 삭제하시겠습니까?`)) return;
+
+  state.deleteButton.disabled = true;
+  try {
+    let deletedCount = 0;
+    for (const postId of state.selected) {
+      const response = await fetch("/api/admin/posts/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ postId }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "게시글을 삭제하지 못했습니다.");
+      deletedCount += 1;
+    }
+    cancelDeleteMode(type);
+    showAdminToast(`${deletedCount}개 게시글을 삭제했습니다.`, "success");
+    await loadPosts(1);
+  } catch (error) {
+    console.error("관리자 선택 삭제 실패:", error);
+    showAdminToast(error.message || "선택한 게시글을 삭제하지 못했습니다.", "error");
+    await loadPosts(1);
+  } finally {
+    state.deleteButton.disabled = false;
+  }
+}
+
+function cancelDeleteMode(type) {
+  const state = deleteStates.get(type);
+  state.active = false;
+  state.selected.clear();
+  state.section.classList.remove("is-selection-mode");
+  state.section.querySelectorAll("tbody tr").forEach(row => {
+    row.classList.remove("is-selected");
+    row.setAttribute("aria-selected", "false");
+  });
+  state.cancelButton.hidden = true;
+  updateDeleteControls(type);
+}
+
+function updateDeleteControls(type) {
+  const state = deleteStates.get(type);
+  state.deleteButton.textContent = state.active && state.selected.size
+    ? `선택 항목 삭제 (${state.selected.size})`
+    : state.active ? "선택 항목 삭제" : "삭제 모드";
+}
+
+function showAdminToast(message, state = "success") {
+  document.querySelector(".admin-live-toast")?.remove();
+  const toast = document.createElement("p");
+  toast.className = "flash-toast admin-live-toast";
+  toast.dataset.state = state;
+  toast.setAttribute("role", "status");
+  toast.setAttribute("aria-live", "polite");
+  toast.textContent = message;
+  document.body.append(toast);
+  requestAnimationFrame(() => { toast.dataset.visible = "true"; });
+  window.setTimeout(() => {
+    toast.dataset.visible = "false";
+    window.setTimeout(() => toast.remove(), 250);
+  }, 2400);
+}
 
 async function loadTierTemplates() {
   const tbody = document.getElementById("tier-table-body");
@@ -44,17 +224,25 @@ async function loadTierTemplates() {
       handleApiError(response.status, data.message);
       return;
     }
-    const templates = data.templates || [];
-    tbody.innerHTML = templates.length
+    tierPagination.setItems(data.templates || []);
+  } catch (error) {
+    console.error(error);
+    showMessage("티어 템플릿 신청을 불러오지 못했습니다.");
+  }
+}
+
+function renderTierTemplates(templates) {
+  const tbody = document.getElementById("tier-table-body");
+  tbody.innerHTML = templates.length
       ? ""
       : "<tr><td colspan=\"8\" class=\"admin-empty\">신청된 템플릿이 없습니다.</td></tr>";
     templates.forEach(template => {
       const row = document.createElement("tr");
       const pending = template.status === "PENDING";
-      row.innerHTML = `<td>${template.templateId}</td><td>${escapeHtml(template.creatorNickname)}</td><td>${
-        escapeHtml(template.category)
-      }</td><td>${escapeHtml(template.title)}</td><td>${template.itemCount}권</td><td><span class="admin-badge">${
-        escapeHtml(template.status)
+      row.innerHTML = `<td>${template.templateId}</td><td>${escapeHtml(template.creatorNickname)}</td><td><span class="admin-category-badge ${getCategoryBadgeClass(template.category)}">${
+        escapeHtml(getCategoryLabel(template.category))
+      }</span></td><td>${escapeHtml(template.title)}</td><td>${template.itemCount}권</td><td><span class="admin-badge ${getStatusBadgeClass(template.status)}">${
+        escapeHtml(getStatusLabel(template.status))
       }</span></td><td>${formatValue(template.requestedAt)}</td><td>${
         pending
           ? `<button class="admin-action-button"
@@ -65,10 +253,6 @@ async function loadTierTemplates() {
       }</td>`;
       tbody.append(row);
     });
-  } catch (error) {
-    console.error(error);
-    showMessage("티어 템플릿 신청을 불러오지 못했습니다.");
-  }
 }
 
 async function reviewTierTemplate(templateId, approved) {
@@ -105,26 +289,30 @@ async function loadWorldcupTemplates() {
       handleApiError(response.status, data.message);
       return;
     }
-    const templates = data.templates || [];
-    tbody.innerHTML = templates.length
+    worldcupPagination.setItems(data.templates || []);
+  } catch (error) {
+    console.error(error);
+    showMessage("월드컵 템플릿 신청을 불러오지 못했습니다.");
+  }
+}
+
+function renderWorldcupTemplates(templates) {
+  const tbody = document.getElementById("worldcup-table-body");
+  tbody.innerHTML = templates.length
       ? ""
       : '<tr><td colspan="8" class="admin-empty">신청된 월드컵 템플릿이 없습니다.</td></tr>';
     templates.forEach(template => {
       const row = document.createElement("tr");
       const pending = template.status === "PENDING";
       row.innerHTML = `<td>${template.templateId}</td><td>${escapeHtml(template.creatorNickname)}</td>`
-        + `<td>${escapeHtml(template.category)}</td><td>${escapeHtml(template.title)}</td>`
-        + `<td>${template.itemCount}권</td><td><span class="admin-badge">${escapeHtml(template.status)}</span></td>`
+        + `<td><span class="admin-category-badge ${getCategoryBadgeClass(template.category)}">${escapeHtml(getCategoryLabel(template.category))}</span></td><td>${escapeHtml(template.title)}</td>`
+        + `<td>${template.itemCount}권</td><td><span class="admin-badge ${getStatusBadgeClass(template.status)}">${escapeHtml(getStatusLabel(template.status))}</span></td>`
         + `<td>${formatValue(template.requestedAt)}</td><td>${pending
           ? `<button class="admin-action-button" onclick="reviewWorldcupTemplate(${template.templateId}, true)">승인</button>
              <button class="admin-action-button admin-action-danger" onclick="reviewWorldcupTemplate(${template.templateId}, false)">반려</button>`
           : "처리 완료"}</td>`;
       tbody.append(row);
     });
-  } catch (error) {
-    console.error(error);
-    showMessage("월드컵 템플릿 신청을 불러오지 못했습니다.");
-  }
 }
 
 async function reviewWorldcupTemplate(templateId, approved) {
@@ -210,7 +398,8 @@ async function loadMembers() {
       memberMap.set(Number(member.memberId), member);
     });
 
-    renderMembers(members);
+    allMembers = members;
+    renderFilteredMembers();
   } catch (error) {
     console.error("회원 목록 조회 실패:", error);
     showMessage("회원 목록을 불러오는 중 오류가 발생했습니다.");
@@ -236,7 +425,7 @@ function renderMembers(members) {
     const row = document.createElement("tr");
 
     row.innerHTML = `
-            <td colspan="9" class="admin-empty">
+            <td colspan="8" class="admin-empty">
                 등록된 회원이 없습니다.
             </td>
         `;
@@ -264,7 +453,7 @@ function renderMembers(members) {
       managementHtml = `
                 <button
                     type="button"
-                    class="admin-action-button"
+                    class="admin-action-button ${locked ? "admin-state-release" : "admin-state-activate"}"
                     onclick="changeMemberLock(${member.memberId}, ${!locked})"
                 >
                     ${locked ? "잠금 해제" : "회원 잠금"}
@@ -278,12 +467,11 @@ function renderMembers(members) {
             <td>${escapeHtml(member.nickname)}</td>
             <td>${escapeHtml(member.email)}</td>
             <td>
-                <span class="admin-badge">
-                    ${escapeHtml(member.role)}
+                <span class="admin-badge ${getRoleBadgeClass(member.role)}">
+                    ${escapeHtml(getRoleLabel(member.role))}
                 </span>
             </td>
             <td>${formatValue(member.failCount)}</td>
-            <td>${locked ? "잠금" : "정상"}</td>
             <td>${formatValue(member.createdAt)}</td>
             <td>${managementHtml}</td>
         `;
@@ -350,9 +538,10 @@ async function changeMemberLock(memberId, locked) {
  * GET /api/posts
  * =========================================
  */
-async function loadPosts() {
+async function loadPosts(page = 1) {
   try {
-    const response = await fetch("/api/posts", {
+    const params = new URLSearchParams({ page: String(page), size: "10", filter: selectedPostFilter });
+    const response = await fetch(`/api/admin/posts?${params}`, {
       method: "GET",
       credentials: "include",
     });
@@ -364,10 +553,72 @@ async function loadPosts() {
       return;
     }
 
-    renderPosts(data.posts || []);
+    postPagination.setPage(data.posts || [], data.page || page, data.totalCount || 0);
   } catch (error) {
     console.error("게시글 목록 조회 실패:", error);
     showMessage("게시글 목록을 불러오는 중 오류가 발생했습니다.");
+  }
+}
+
+async function loadBookRequests() {
+  try {
+    const response = await fetch("/api/admin/book-requests", { credentials: "include" });
+    const data = await response.json();
+    if (!response.ok) {
+      handleApiError(response.status, data.message);
+      return;
+    }
+    bookPagination.setItems(data.requests || []);
+  } catch (error) {
+    console.error("책 등록 신청 조회 실패:", error);
+    showMessage("책 등록 신청을 불러오지 못했습니다.");
+  }
+}
+
+function renderBookRequests(requests) {
+  const tbody = document.getElementById("book-table-body");
+  tbody.innerHTML = "";
+  if (requests.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" class="admin-empty">신청된 책이 없습니다.</td></tr>';
+    return;
+  }
+  requests.forEach(request => {
+    const row = document.createElement("tr");
+    const pending = request.status === "PENDING";
+    const genreGroup = window.BookMateGenre.groupOf(request.genre);
+    row.innerHTML = `<td>${request.requestId}</td><td>${escapeHtml(request.requesterNickname)}</td>`
+      + `<td>${escapeHtml(request.title)}</td><td>${escapeHtml(request.authorName)}</td>`
+      + `<td><span class="admin-category-badge genre-badge" data-genre="${escapeHtml(genreGroup)}">${escapeHtml(genreGroup)}</span></td>`
+      + `<td><span class="admin-badge ${getStatusBadgeClass(request.status)}">${escapeHtml(getStatusLabel(request.status))}</span></td>`
+      + `<td>${formatValue(request.requestedAt)}</td><td>${pending
+        ? `<button class="admin-action-button" onclick="reviewBookRequest(${request.requestId}, true)">승인</button>
+           <button class="admin-action-button admin-action-danger" onclick="reviewBookRequest(${request.requestId}, false)">반려</button>`
+        : "처리 완료"}</td>`;
+    tbody.append(row);
+  });
+}
+
+async function reviewBookRequest(requestId, approved) {
+  const reason = approved ? "" : prompt("반려 사유를 입력해 주세요.");
+  if (!approved && !reason) return;
+  if (approved && !confirm(`${requestId}번 책 등록 신청을 승인할까요?`)) return;
+  try {
+    const response = await fetch("/api/admin/book-requests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ requestId, approved, reason }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      handleApiError(response.status, data.message);
+      return;
+    }
+    showMessage(data.message);
+    await loadBookRequests();
+  } catch (error) {
+    console.error("책 등록 신청 검토 실패:", error);
+    showMessage("책 등록 신청 검토 결과를 저장하지 못했습니다.");
   }
 }
 
@@ -390,7 +641,7 @@ function renderPosts(posts) {
     const row = document.createElement("tr");
 
     row.innerHTML = `
-            <td colspan="9" class="admin-empty">
+            <td colspan="8" class="admin-empty">
                 게시글이 없습니다.
             </td>
         `;
@@ -402,32 +653,27 @@ function renderPosts(posts) {
   posts.forEach(post => {
     const row = document.createElement("tr");
     const pinned = post.isPinned === "Y";
+    const active = post.status === "ACTIVE";
+    const hidden = post.status === "HIDDEN_BY_WRITER" || post.status === "HIDDEN";
+    prepareSelectableRow(row, "post", post.postId, active || hidden);
 
     row.innerHTML = `
             <td>${post.postId}</td>
             <td>${escapeHtml(post.memberNickname)}</td>
-            <td>${escapeHtml(post.category)}</td>
+            <td>${escapeHtml(getCategoryLabel(post.category))}</td>
             <td>${escapeHtml(post.title)}</td>
             <td>${formatValue(post.viewCount)}</td>
-            <td>${pinned ? "고정" : "-"}</td>
-            <td>${escapeHtml(post.status)}</td>
+            <td><span class="admin-badge ${active ? "admin-post-public" : "admin-post-private"}">${active ? "공개" : "비공개"}</span></td>
             <td>${formatValue(post.createdAt)}</td>
             <td>
-                <button
+                ${active ? `<button
                     type="button"
-                    class="admin-action-button"
+                    class="admin-action-button ${pinned ? "admin-state-release" : "admin-state-activate"}"
                     onclick="changePostPin(${post.postId}, ${!pinned})"
                 >
                     ${pinned ? "고정 해제" : "상단 고정"}
-                </button>
+                </button>` : "처리 완료"}
 
-                <button
-                    type="button"
-                    class="admin-action-button admin-action-danger"
-                    onclick="deletePostByAdmin(${post.postId})"
-                >
-                    관리자 삭제
-                </button>
             </td>
         `;
 
@@ -472,47 +718,6 @@ async function changePostPin(postId, pinned) {
   } catch (error) {
     console.error("게시글 고정 상태 변경 실패:", error);
     showMessage("게시글 고정 상태 변경 중 오류가 발생했습니다.");
-  }
-}
-
-/*
- * =========================================
- * 관리자 게시글 삭제
- * POST /api/admin/posts/delete
- * =========================================
- */
-async function deletePostByAdmin(postId) {
-  const confirmed = confirm(
-    `게시글 ${postId}번을 삭제하시겠습니까?\n`
-      + "삭제된 게시글은 일반 목록에서 보이지 않습니다.",
-  );
-
-  if (!confirmed) return;
-
-  try {
-    const response = await fetch("/api/admin/posts/delete", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        postId: postId,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      handleApiError(response.status, data.message);
-      return;
-    }
-
-    showMessage(data.message || "게시글이 삭제되었습니다.");
-    await loadPosts();
-  } catch (error) {
-    console.error("관리자 게시글 삭제 실패:", error);
-    showMessage("게시글 삭제 중 오류가 발생했습니다.");
   }
 }
 
@@ -574,6 +779,62 @@ function formatValue(value) {
   return value;
 }
 
+function getRoleBadgeClass(role) {
+  return role === "ADMIN" ? "admin-role-admin" : "admin-role-user";
+}
+
+function getRoleLabel(role) {
+  return {
+    ADMIN: "관리자",
+    USER: "일반 회원",
+  }[role] || "일반 회원";
+}
+
+function getStatusBadgeClass(status) {
+  return `admin-status-${String(status || "unknown").toLowerCase()}`;
+}
+
+function getStatusLabel(status) {
+  return {
+    PENDING: "미승인",
+    APPROVED: "승인 완료",
+    REJECTED: "반려",
+    ACTIVE: "정상",
+    DELETED: "삭제",
+    HIDDEN: "숨김",
+    INACTIVE: "비활성",
+    HIDDEN_BY_WRITER: "작성자 숨김",
+    DELETED_BY_WRITER: "작성자 삭제",
+    DELETED_BY_ADMIN: "관리자 삭제",
+  }[status] || "상태 미확인";
+}
+
+function getCategoryLabel(category) {
+  return {
+    FREE: "자유",
+    RECOMMEND: "추천",
+    REVIEW: "후기",
+    NOTICE: "공지",
+    GENRE: "장르",
+    AUTHOR: "작가",
+    SERIES: "시리즈",
+    THEME: "테마",
+    TIER: "티어리스트",
+    IDEAL: "이상형월드컵",
+    WORLDCUP: "이상형월드컵",
+  }[category] || category;
+}
+
+function getCategoryBadgeClass(category) {
+  const label = getCategoryLabel(category);
+  return {
+    "장르": "category-genre",
+    "시리즈": "category-series",
+    "작가": "category-author",
+    "테마": "category-theme",
+  }[label] || "category-default";
+}
+
 /*
  * =========================================
  * HTML 삽입 방지
@@ -591,3 +852,9 @@ function escapeHtml(value) {
     .replaceAll("\"", "&quot;")
     .replaceAll("'", "&#039;");
 }
+
+window.changeMemberLock = changeMemberLock;
+window.changePostPin = changePostPin;
+window.reviewBookRequest = reviewBookRequest;
+window.reviewTierTemplate = reviewTierTemplate;
+window.reviewWorldcupTemplate = reviewWorldcupTemplate;

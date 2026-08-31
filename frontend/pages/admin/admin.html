@@ -17,12 +17,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 
     <!-- BookMate 공통 CSS -->
-    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260831-8">
 
     <!-- 관리자 페이지 전용 CSS -->
     <link
             rel="stylesheet"
-            href="/assets/css/admin.css"
+            href="/assets/css/admin.css?v=20260831-16"
     >
 </head>
 <body class="admin-page">
@@ -38,15 +38,11 @@
         <!-- =====================================
              관리자 페이지 제목
              ===================================== -->
-        <section class="admin-hero">
-            <div class="admin-hero-copy">
-          <span class="admin-label">
-            ADMIN
-          </span>
-                <h1>관리자 페이지</h1>
-                <p>회원 상태와 커뮤니티 게시글을 한 곳에서 관리할 수 있습니다.</p>
-            </div>
-        </section>
+        <header class="admin-page-heading">
+            <h1 class="page-gradient-title">
+                <span class="page-title-icon page-title-icon-admin" aria-hidden="true"></span>관리자 페이지
+            </h1>
+        </header>
         <!-- =====================================
              관리자 메시지
              admin.js의 showMessage()와 연결
@@ -61,7 +57,11 @@
                     <h2>회원 관리</h2>
                     <p>회원 정보와 계정 상태를 확인하고 잠금 또는 잠금 해제를 할 수 있습니다.</p>
                 </div>
-                <button type="button" class="button" id="member-refresh-button">회원 목록 새로고침</button>
+                <div class="choice-tabs admin-member-tabs" role="group" aria-label="회원 유형">
+                    <button type="button" class="is-active" data-member-filter="active" aria-pressed="true">정상 회원</button>
+                    <button type="button" data-member-filter="restricted" aria-pressed="false">제한 회원</button>
+                    <button type="button" data-member-filter="admin" aria-pressed="false">관리자</button>
+                </div>
             </div>
             <!-- 회원 테이블 -->
             <div class="admin-table-wrapper">
@@ -74,16 +74,22 @@
                         <th>이메일</th>
                         <th>권한</th>
                         <th>로그인 실패</th>
-                        <th>잠금 여부</th>
                         <th>가입일</th>
                         <th>관리</th>
                     </tr>
                     </thead>
                     <tbody id="member-table-body"><tr>
-                        <td colspan="9" class="admin-empty">회원 정보를 불러오는 중입니다.</td>
+                        <td colspan="8" class="admin-empty">회원 정보를 불러오는 중입니다.</td>
                     </tr>
                     </tbody>
                 </table>
+            </div>
+            <div class="admin-section-footer">
+            <nav class="list-pagination" id="member-pagination" aria-label="회원 목록 페이지">
+                <button class="button button-outline" type="button" data-pagination-prev>이전</button>
+                <div class="list-page-numbers" data-pagination-numbers aria-live="polite"></div>
+                <button class="button button-outline" type="button" data-pagination-next>다음</button>
+            </nav>
             </div>
         </section>
         <!-- =====================================
@@ -95,7 +101,11 @@
                     <h2>게시글 관리</h2>
                     <p>게시글을 상단에 고정하거나 관리자 권한으로 삭제할 수 있습니다.</p>
                 </div>
-                <button type="button" class="button" id="post-refresh-button">게시글 목록 새로고침</button>
+                <div class="choice-tabs admin-member-tabs" role="group" aria-label="게시글 공개 상태">
+                    <button type="button" class="is-active" data-post-filter="public" aria-pressed="true">공개 게시물</button>
+                    <button type="button" data-post-filter="private" aria-pressed="false">비공개 게시물</button>
+                    <button type="button" data-post-filter="pinned" aria-pressed="false">고정 게시물</button>
+                </div>
             </div>
             <!-- 게시글 테이블 -->
             <div class="admin-table-wrapper">
@@ -104,12 +114,11 @@
                     <thead>
 
                     <tr>
-                        <th>게시글번호</th>
+                        <th class="admin-post-number-heading">게시글<br>번호</th>
                         <th>작성자</th>
                         <th>카테고리</th>
                         <th>제목</th>
                         <th>조회수</th>
-                        <th>고정</th>
                         <th>상태</th>
                         <th>작성일</th>
                         <th>관리</th>
@@ -123,7 +132,7 @@
                     <tr>
 
                         <td
-                                colspan="9"
+                                colspan="8"
                                 class="admin-empty">
 
                             게시글 정보를 불러오는 중입니다.
@@ -137,11 +146,51 @@
                 </table>
 
             </div>
+            <div class="admin-section-footer">
+            <nav class="list-pagination" id="post-pagination" aria-label="게시글 목록 페이지">
+                <button class="button button-outline" type="button" data-pagination-prev>이전</button>
+                <div class="list-page-numbers" data-pagination-numbers aria-live="polite"></div>
+                <button class="button button-outline" type="button" data-pagination-next>다음</button>
+            </nav>
+            <div class="admin-delete-controls" data-delete-controls="post">
+                <button type="button" class="button button-outline admin-delete-cancel" hidden>취소</button>
+                <button type="button" class="button admin-delete-start">삭제 모드</button>
+            </div>
+            </div>
 
         </section>
 
         <section class="admin-section">
-            <div class="admin-section-header"><div><h2>티어 템플릿 검토</h2><p>회원이 신청한 책 구성을 확인하고 공개 여부를 결정합니다.</p></div><button type="button" class="button" id="tier-refresh-button">신청 목록 새로고침</button></div>
+            <div class="admin-section-header">
+                <div>
+                    <h2>책 등록 신청 검토</h2>
+                    <p>회원이 신청한 도서 정보를 확인하고 등록 여부를 결정합니다.</p>
+                </div>
+            </div>
+            <div class="admin-table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                    <tr>
+                        <th>번호</th><th>신청자</th><th>책 제목</th><th>작가</th>
+                        <th>장르</th><th>상태</th><th>신청일</th><th>관리</th>
+                    </tr>
+                    </thead>
+                    <tbody id="book-table-body">
+                    <tr><td colspan="8" class="admin-empty">책 등록 신청을 불러오는 중입니다.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="admin-section-footer">
+            <nav class="list-pagination" id="book-pagination" aria-label="책 등록 신청 페이지">
+                <button class="button button-outline" type="button" data-pagination-prev>이전</button>
+                <div class="list-page-numbers" data-pagination-numbers aria-live="polite"></div>
+                <button class="button button-outline" type="button" data-pagination-next>다음</button>
+            </nav>
+            </div>
+        </section>
+
+        <section class="admin-section">
+            <div class="admin-section-header"><div><h2>티어 템플릿 검토</h2><p>회원이 신청한 책 구성을 확인하고 공개 여부를 결정합니다.</p></div></div>
             <div class="admin-table-wrapper">
                 <table class="admin-table">
                     <thead>
@@ -163,10 +212,17 @@
                     </tbody>
                 </table>
             </div>
+            <div class="admin-section-footer">
+            <nav class="list-pagination" id="tier-pagination" aria-label="티어리스트 템플릿 신청 페이지">
+                <button class="button button-outline" type="button" data-pagination-prev>이전</button>
+                <div class="list-page-numbers" data-pagination-numbers aria-live="polite"></div>
+                <button class="button button-outline" type="button" data-pagination-next>다음</button>
+            </nav>
+            </div>
         </section>
 
         <section class="admin-section">
-            <div class="admin-section-header"><div><h2>이상형월드컵 템플릿 검토</h2><p>회원이 신청한 월드컵 구성을 확인하고 공개 여부를 결정합니다.</p></div><button type="button" class="button" id="worldcup-refresh-button">신청 목록 새로고침</button></div>
+            <div class="admin-section-header"><div><h2>이상형월드컵 템플릿 검토</h2><p>회원이 신청한 월드컵 구성을 확인하고 공개 여부를 결정합니다.</p></div></div>
             <div class="admin-table-wrapper">
                 <table class="admin-table">
                     <thead>
@@ -179,6 +235,13 @@
                     <tr><td colspan="8" class="admin-empty">월드컵 템플릿 신청을 불러오는 중입니다.</td></tr>
                     </tbody>
                 </table>
+            </div>
+            <div class="admin-section-footer">
+            <nav class="list-pagination" id="worldcup-pagination" aria-label="이상형월드컵 템플릿 신청 페이지">
+                <button class="button button-outline" type="button" data-pagination-prev>이전</button>
+                <div class="list-page-numbers" data-pagination-numbers aria-live="polite"></div>
+                <button class="button button-outline" type="button" data-pagination-next>다음</button>
+            </nav>
             </div>
         </section>
 
@@ -193,11 +256,13 @@
      ========================================= -->
 <script type="module" src="/js/components/navbar.js" defer>
 </script>
+<script src="/js/components/list-pagination.js" defer></script>
+<script src="/js/components/book-genre.js?v=20260831-1" defer></script>
 
 <!-- =========================================
      관리자 페이지 JavaScript
      ========================================= -->
-<script type="module" src="/js/pages/admin.js?v=20260831-1" defer>
+<script type="module" src="/js/pages/admin.js?v=20260831-23" defer>
 </script>
 
 </body>
