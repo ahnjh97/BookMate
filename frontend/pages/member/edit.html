@@ -1,16 +1,81 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>회원정보수정 | BookMate</title><link rel="stylesheet" href="/assets/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>회원정보 수정 | BookMate</title>
+  <link rel="stylesheet" href="/assets/css/style.css?v=20260831-4">
+  <link rel="stylesheet" href="/assets/css/member-edit.css?v=20260831-2">
   <script src="/js/components/auth-guard.js"></script>
 </head>
 <body>
   <header class="site-header" data-navbar></header>
-  <main class="page-main"><section class="page-content auth-card">
-    <h1>회원정보수정</h1><p>회원정보 수정 기능이 들어갈 화면입니다.</p>
-    <button class="button button-primary" type="button" disabled>수정하기 (준비 중)</button>
-  </section></main>
+
+  <main class="member-edit-page">
+    <div class="member-edit-container">
+      <header class="page-heading member-edit-heading">
+        <h1 class="page-gradient-title">
+          <span class="page-title-icon page-title-icon-member" aria-hidden="true"></span>회원정보 수정
+        </h1>
+      </header>
+
+      <div class="member-edit-grid">
+        <section class="member-edit-card" aria-labelledby="profile-edit-title">
+          <div class="member-edit-card-heading">
+            <h2 id="profile-edit-title">기본 정보</h2>
+            <p>아이디는 변경할 수 없습니다.</p>
+          </div>
+
+          <form id="account-edit-form" class="member-edit-form">
+            <label>아이디<input id="account-login-id" type="text" disabled></label>
+            <label>
+              닉네임
+              <span class="member-edit-input-action">
+                <input id="account-nickname" type="text" maxlength="30" required>
+                <button id="account-check-nickname" class="button button-outline" type="button">중복 확인</button>
+              </span>
+              <small id="account-nickname-hint" class="member-edit-hint"></small>
+            </label>
+            <label>
+              이메일
+              <span class="member-edit-input-action">
+                <input id="account-email" type="email" maxlength="100" required>
+                <button id="account-check-email" class="button button-outline" type="button">중복 확인</button>
+              </span>
+              <small id="account-email-hint" class="member-edit-hint"></small>
+            </label>
+            <label id="account-author-section" hidden>
+              작가 소개
+              <textarea id="account-self-intro" maxlength="1000" rows="4"></textarea>
+            </label>
+            <p id="account-message" class="member-edit-message" aria-live="polite"></p>
+            <button class="button button-primary member-edit-submit" type="submit">변경사항 저장</button>
+          </form>
+        </section>
+
+        <section class="member-edit-card" aria-labelledby="password-edit-title">
+          <div class="member-edit-card-heading">
+            <h2 id="password-edit-title">비밀번호 변경</h2>
+            <p>현재 비밀번호를 확인한 후 변경합니다.</p>
+          </div>
+
+          <form id="password-edit-form" class="member-edit-form">
+            <label>현재 비밀번호<input id="password-current" type="password" autocomplete="current-password" required></label>
+            <label>
+              새 비밀번호
+              <input id="password-new" type="password" minlength="8" maxlength="100" autocomplete="new-password" required>
+              <small class="member-edit-hint">8자 이상 입력해 주세요.</small>
+            </label>
+            <label>새 비밀번호 확인<input id="password-confirm" type="password" minlength="8" maxlength="100" autocomplete="new-password" required></label>
+            <p id="password-message" class="member-edit-message" aria-live="polite"></p>
+            <button class="button button-primary member-edit-submit" type="submit">비밀번호 변경</button>
+          </form>
+        </section>
+      </div>
+    </div>
+  </main>
+
   <script src="/js/components/navbar.js" defer></script>
+  <script type="module" src="/js/pages/member-edit.js?v=20260831-1" defer></script>
 </body>
 </html>
