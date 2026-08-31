@@ -174,7 +174,7 @@ function renderBooks(books) {
         return;
     }
 
-    books.forEach((book) => {
+    books.forEach((book, index) => {
         const detailUrl = `/pages/book/detail.html?id=${encodeURIComponent(book.bookId)}`;
         const card = document.createElement("article");
         card.className = "book-card";
@@ -195,7 +195,8 @@ function renderBooks(books) {
         const image = document.createElement("img");
         image.src = book.imageUrl || "";
         image.alt = `${book.title} 표지`;
-        image.loading = "lazy";
+        image.loading = "eager";
+        if (index < 2) image.fetchPriority = "high";
         image.decoding = "async";
         image.addEventListener("error", () => {
             cover.textContent = book.title;

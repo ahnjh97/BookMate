@@ -660,6 +660,11 @@ button {
   -webkit-mask-image: url("/assets/icons/bookcase.svg");
 }
 
+.page-title-icon-book-add {
+  mask-image: url("/assets/icons/book-add.svg?v=2");
+  -webkit-mask-image: url("/assets/icons/book-add.svg?v=2");
+}
+
 .page-title-icon-member {
   mask-image: url("/assets/icons/member.svg");
   -webkit-mask-image: url("/assets/icons/member.svg");

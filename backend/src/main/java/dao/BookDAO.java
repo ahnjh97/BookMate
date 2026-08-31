@@ -2,6 +2,7 @@ package dao;
 
 import dto.BookDTO;
 import dto.SearchSuggestionDTO;
+import util.BookImageUrlUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -80,7 +81,7 @@ public class BookDAO {
                             resultSet.getLong("result_id"),
                             resultSet.getString("result_name"),
                             resultSet.getString("result_detail"),
-                            normalizeImageUrl(resultSet.getString("image_url"))
+                            BookImageUrlUtil.thumbnail(resultSet.getString("image_url"))
                     ));
                 }
             }
@@ -105,7 +106,7 @@ public class BookDAO {
         };
         String sql = """
                 SELECT B.book_id, B.author_id, A.author_name, B.title, B.genre,
-                       B.publisher, B.published_date, B.description, B.image_url, B.status,
+                       B.publisher, B.published_date, B.description, B.image_url, B.source_url, B.status,
                        NVL(ROUND(AVG(R.score), 2), 0) AS average_rating,
                        COUNT(R.rating_id) AS rating_count
                   FROM BOOK B
@@ -116,7 +117,7 @@ public class BookDAO {
                    AND (? IS NULL OR B.genre = ?)
                    AND (? IS NULL OR B.author_id = ?)
                  GROUP BY B.book_id, B.author_id, A.author_name, B.title, B.genre,
-                          B.publisher, B.published_date, B.description, B.image_url, B.status
+                          B.publisher, B.published_date, B.description, B.image_url, B.source_url, B.status
                  ORDER BY """ + " " + orderBy + " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
         String normalizedKeyword = normalize(keyword);
@@ -187,21 +188,36 @@ public class BookDAO {
     public BookDTO selectBookById(Connection connection, long bookId) throws SQLException {
         String sql = """
                 SELECT B.book_id, B.author_id, A.author_name, B.title, B.genre,
-                       B.publisher, B.published_date, B.description, B.image_url, B.status,
+                       B.publisher, B.published_date, B.description, B.image_url, B.source_url, B.status,
                        NVL(ROUND(AVG(R.score), 2), 0) AS average_rating,
-                       COUNT(R.rating_id) AS rating_count
+                       COUNT(R.rating_id) AS rating_count,
+                       COUNT(CASE WHEN R.score = 5 THEN 1 END) AS rating_5_count,
+                       COUNT(CASE WHEN R.score = 4 THEN 1 END) AS rating_4_count,
+                       COUNT(CASE WHEN R.score = 3 THEN 1 END) AS rating_3_count,
+                       COUNT(CASE WHEN R.score = 2 THEN 1 END) AS rating_2_count,
+                       COUNT(CASE WHEN R.score = 1 THEN 1 END) AS rating_1_count
                   FROM BOOK B
                   JOIN AUTHOR A ON A.author_id = B.author_id
                   LEFT JOIN RATING R ON R.book_id = B.book_id
                  WHERE B.book_id = ? AND B.status = 'APPROVED'
                  GROUP BY B.book_id, B.author_id, A.author_name, B.title, B.genre,
-                          B.publisher, B.published_date, B.description, B.image_url, B.status
+                          B.publisher, B.published_date, B.description, B.image_url, B.source_url, B.status
                 """;
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, bookId);
             try (ResultSet resultSet = statement.executeQuery()) {
-                return resultSet.next() ? mapBook(resultSet) : null;
+                if (!resultSet.next()) return null;
+                BookDTO book = mapBook(resultSet);
+                book.setSourceUrl(resultSet.getString("source_url"));
+                book.setRatingDistribution(java.util.Map.of(
+                        5, resultSet.getInt("rating_5_count"),
+                        4, resultSet.getInt("rating_4_count"),
+                        3, resultSet.getInt("rating_3_count"),
+                        2, resultSet.getInt("rating_2_count"),
+                        1, resultSet.getInt("rating_1_count")
+                ));
+                return book;
             }
         }
     }
@@ -260,9 +276,9 @@ public class BookDAO {
         book.setPublisher(resultSet.getString("publisher"));
         book.setPublishedDate(resultSet.getDate("published_date"));
         book.setDescription(resultSet.getString("description"));
-        String imageUrl = normalizeImageUrl(resultSet.getString("image_url"));
-        book.setImageUrl(imageUrl);
-        book.setDetailImageUrl(toDetailImageUrl(imageUrl));
+        String sourceImageUrl = resultSet.getString("image_url");
+        book.setImageUrl(BookImageUrlUtil.thumbnail(sourceImageUrl));
+        book.setDetailImageUrl(BookImageUrlUtil.detail(sourceImageUrl));
         book.setStatus(resultSet.getString("status"));
         book.setAverageRating(resultSet.getDouble("average_rating"));
         book.setRatingCount(resultSet.getInt("rating_count"));
@@ -276,17 +292,4 @@ public class BookDAO {
         return value.trim();
     }
 
-    private String normalizeImageUrl(String imageUrl) {
-        if (imageUrl != null && imageUrl.startsWith("/bookmate/")) {
-            return imageUrl.substring("/bookmate".length());
-        }
-        return imageUrl;
-    }
-
-    private String toDetailImageUrl(String imageUrl) {
-        if (imageUrl == null) {
-            return null;
-        }
-        return imageUrl.replace("-240.webp", "-520.webp");
-    }
 }

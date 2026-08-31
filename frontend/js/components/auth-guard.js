@@ -2,7 +2,7 @@ document.documentElement.style.visibility = "hidden";
 
 (async function requireLogin() {
   try {
-    const response = await fetch("/api/auth/session", {
+    const response = await fetch("/api/auth", {
       cache: "no-store",
       credentials: "same-origin"
     });

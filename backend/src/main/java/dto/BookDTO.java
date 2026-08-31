@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.sql.Date;
+import java.util.Map;
 
 @Setter
 @Getter
@@ -18,9 +19,11 @@ public class BookDTO {
     private String description;
     private String imageUrl;
     private String detailImageUrl;
+    private String sourceUrl;
     private String status;
     private double averageRating;
     private int ratingCount;
+    private Map<Integer, Integer> ratingDistribution;
 
     public BookDTO() {
     }

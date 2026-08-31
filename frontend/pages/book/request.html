@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>책 등록하기 | BookMate</title>
+    <link rel="stylesheet" href="/assets/css/style.css?v=20260831-5">
+    <link rel="stylesheet" href="/assets/css/book-request.css?v=20260831-5">
+</head>
+<body>
+<header class="site-header" data-navbar></header>
+<main class="book-request-page">
+    <a class="back-navigation" href="/pages/book/list.html">← 책 목록으로</a>
+    <h1 class="page-gradient-title book-request-title"><span class="page-title-icon page-title-icon-book-add" aria-hidden="true"></span>책 등록하기</h1>
+    <section class="book-request-panel">
+        <div class="book-catalog-summary">
+            <p>책 제목·작가·ISBN으로 검색한 뒤 등록할 책을 선택해 주세요. 필수 정보가 모두 있는 책만 표시됩니다.</p>
+            <p class="book-data-source">도서 DB 제공: 알라딘 인터넷서점</p>
+        </div>
+        <form id="book-search-form" class="book-catalog-search" role="search">
+            <div>
+                <input id="book-catalog-query" type="search" maxlength="100"
+                       aria-label="등록할 도서 검색"
+                       placeholder="예: 해리 포터, 한강, 9788936434267" required>
+                <button class="button button-primary" type="submit">검색</button>
+            </div>
+        </form>
+        <p id="book-search-message" class="book-request-message" role="status" aria-live="polite"></p>
+        <div id="book-search-results" class="book-search-results"></div>
+        <nav id="book-search-pagination" class="list-pagination book-search-pagination" hidden
+             aria-label="도서 검색 결과 페이지">
+            <button class="button button-outline" type="button" data-pagination-prev>이전</button>
+            <div class="list-page-numbers" data-pagination-numbers aria-live="polite"></div>
+            <button class="button button-outline" type="button" data-pagination-next>다음</button>
+        </nav>
+        <section id="selected-book" class="selected-book" hidden aria-labelledby="selected-book-heading">
+            <h2 id="selected-book-heading">선택한 책</h2>
+            <div id="selected-book-content"></div>
+            <p id="book-request-message" class="book-request-message" role="status" aria-live="polite"></p>
+            <div class="book-request-actions">
+                <button id="clear-selected-book" class="button button-outline" type="button">다시 선택</button>
+                <button id="submit-book-request" class="button button-primary" type="button">책 등록하기</button>
+            </div>
+        </section>
+    </section>
+</main>
+<script src="/js/components/navbar.js" defer></script>
+<script src="/js/components/auth-guard.js" defer></script>
+<script src="/js/components/list-pagination.js?v=20260831-2" defer></script>
+<script src="/js/pages/book-request.js?v=20260831-4" defer></script>
+</body>
+</html>

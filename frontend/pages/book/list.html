@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>책 | BookMate</title>
     <link rel="stylesheet" href="/assets/css/style.css?v=20260830-4">
-    <link rel="stylesheet" href="/assets/css/book-list.css?v=20260830-3">
+    <link rel="stylesheet" href="/assets/css/book-list.css?v=20260831-4">
 </head>
 <body>
 <header class="site-header" data-navbar></header>
@@ -17,17 +17,20 @@
                 <button id="book-reset-button" class="page-gradient-title page-title-button" type="button"><span class="page-title-icon page-title-icon-bookshelf" aria-hidden="true"></span>책 목록</button>
             </div>
 
-            <form id="book-search-form" class="book-tools" role="search">
-                <div class="book-keyword-field">
-                    <input id="book-keyword" name="keyword" type="search"
-                           aria-label="책 검색어" aria-autocomplete="list"
-                           aria-controls="search-suggestions"
-                           aria-expanded="false"
-                           placeholder="책 제목 또는 작가명" autocomplete="off">
-                    <div id="search-suggestions" role="listbox" hidden></div>
-                </div>
-                <button class="button button-primary" type="submit">검색</button>
-            </form>
+            <div class="book-tools-row">
+                <form id="book-search-form" class="book-tools" role="search">
+                    <div class="book-keyword-field">
+                        <input id="book-keyword" name="keyword" type="search"
+                               aria-label="책 검색어" aria-autocomplete="list"
+                               aria-controls="search-suggestions"
+                               aria-expanded="false"
+                               placeholder="책 제목 또는 작가명" autocomplete="off">
+                        <div id="search-suggestions" role="listbox" hidden></div>
+                    </div>
+                    <button class="button button-primary" type="submit">검색</button>
+                </form>
+                <a class="button button-teal book-create-button" href="/pages/book/request.html">책 등록하기</a>
+            </div>
         </div>
 
         <div class="book-result-context" aria-live="polite">
@@ -76,6 +79,7 @@
 </main>
 
 <script src="/js/components/navbar.js" defer></script>
-<script src="/js/pages/book-list.js?v=20260831-1" defer></script>
+<script src="/js/components/flash-toast.js" defer></script>
+<script src="/js/pages/book-list.js?v=20260831-3" defer></script>
 </body>
 </html>

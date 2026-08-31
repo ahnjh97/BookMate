@@ -13,12 +13,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await loadMembers();
   await loadPosts();
+  await loadBookRequests();
   await loadTierTemplates();
   await loadWorldcupTemplates();
 
   const memberRefreshButton = document.getElementById("member-refresh-button");
   const postRefreshButton = document.getElementById("post-refresh-button");
   const tierRefreshButton = document.getElementById("tier-refresh-button");
+  const bookRequestRefreshButton = document.getElementById("book-request-refresh-button");
   const worldcupRefreshButton = document.getElementById("worldcup-refresh-button");
 
   if (memberRefreshButton) {
@@ -29,8 +31,43 @@ document.addEventListener("DOMContentLoaded", async () => {
     postRefreshButton.addEventListener("click", loadPosts);
   }
   if (tierRefreshButton) tierRefreshButton.addEventListener("click", loadTierTemplates);
+  if (bookRequestRefreshButton) bookRequestRefreshButton.addEventListener("click", loadBookRequests);
   if (worldcupRefreshButton) worldcupRefreshButton.addEventListener("click", loadWorldcupTemplates);
 });
+
+async function loadBookRequests() {
+  const tbody = document.getElementById("book-request-table-body");
+  if (!tbody) return;
+  try {
+    const response = await fetch("/api/admin/book-requests", { credentials: "include" });
+    const data = await response.json();
+    if (!response.ok) { handleApiError(response.status, data.message); return; }
+    const requests = data.requests || [];
+    tbody.innerHTML = requests.length ? "" : '<tr><td colspan="8" class="admin-empty">책 등록 신청이 없습니다.</td></tr>';
+    requests.forEach(request => {
+      const row = document.createElement("tr");
+      const pending = request.status === "PENDING";
+      row.innerHTML = `<td>${request.requestId}</td><td>${escapeHtml(request.requesterNickname)}</td>`
+        + `<td>${escapeHtml(request.isbn)}</td><td><a href="${escapeHtml(request.imageUrl)}" target="_blank" rel="noopener">${escapeHtml(request.title)}</a><br><small>${escapeHtml(request.authorName)}</small></td>`
+        + `<td>${escapeHtml(request.genre)}</td><td>${formatValue(request.publishedDate)}</td><td><span class="admin-badge">${escapeHtml(request.status)}</span></td>`
+        + `<td>${pending ? `<button class="admin-action-button" onclick="reviewBookRequest(${request.requestId},true)">승인</button> <button class="admin-action-button admin-action-danger" onclick="reviewBookRequest(${request.requestId},false)">반려</button>` : "처리 완료"}</td>`;
+      tbody.append(row);
+    });
+  } catch (error) { console.error(error); showMessage("책 등록 신청을 불러오지 못했습니다."); }
+}
+
+async function reviewBookRequest(requestId, approved) {
+  const reason = approved ? "" : prompt("반려 사유를 입력해 주세요.");
+  if (!approved && !reason) return;
+  if (approved && !confirm(`${requestId}번 책을 등록할까요?`)) return;
+  try {
+    const response = await fetch("/api/admin/book-requests", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ requestId, approved, reason }) });
+    const data = await response.json();
+    if (!response.ok) { handleApiError(response.status, data.message); return; }
+    showMessage(data.message);
+    await loadBookRequests();
+  } catch (error) { console.error(error); showMessage("책 등록 신청을 처리하지 못했습니다."); }
+}
 
 async function loadTierTemplates() {
   const tbody = document.getElementById("tier-table-body");
@@ -152,12 +189,12 @@ async function reviewWorldcupTemplate(templateId, approved) {
 /*
  * =========================================
  * 관리자 페이지 접근 권한 확인
- * GET /api/auth/session
+ * GET /api/auth
  * =========================================
  */
 async function checkAdminAccess() {
   try {
-    const response = await fetch("/api/auth/session", {
+    const response = await fetch("/api/auth", {
       method: "GET",
       cache: "no-store",
       credentials: "include",

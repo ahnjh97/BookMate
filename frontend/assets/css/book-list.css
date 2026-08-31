@@ -27,6 +27,14 @@
 }
 
 /* 기존 검색 기능을 공통 입력 스타일과 어울리도록 정리합니다. */
+.book-tools-row {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
 .book-tools {
     position: relative;
     z-index: 5;
@@ -35,6 +43,13 @@
     flex: none;
     gap: 10px;
     margin: 0;
+}
+
+.book-create-button {
+    flex: none;
+    min-height: 44px;
+    padding-inline: 22px;
+    white-space: nowrap;
 }
 
 .book-keyword-field {
@@ -550,6 +565,15 @@
     .book-tools {
         width: 100%;
         flex: none;
+    }
+
+    .book-tools-row {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .book-create-button {
+        align-self: flex-end;
     }
 
     .book-filter-bar {
