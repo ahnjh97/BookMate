@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initializeDeleteControls();
   initializeMemberFilters();
   initializePostFilters();
+  initializeFastTooltips();
   await loadMembers();
   await loadPosts(1);
   await loadComments();
@@ -36,6 +37,58 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadWorldcupTemplates();
 
 });
+
+function initializeFastTooltips() {
+  const tooltip = document.createElement("div");
+  tooltip.className = "admin-fast-tooltip";
+  tooltip.setAttribute("role", "tooltip");
+  document.body.appendChild(tooltip);
+
+  let activeCell = null;
+
+  const show = cell => {
+    const text = cell?.dataset.tooltip;
+    if (!text) return;
+    const content = cell.querySelector(".admin-cell-ellipsis");
+    if (!content || content.scrollWidth <= content.clientWidth) {
+      hide();
+      return;
+    }
+    activeCell = cell;
+    tooltip.textContent = text;
+    tooltip.classList.add("is-visible");
+
+    const cellRect = cell.getBoundingClientRect();
+    const tooltipRect = tooltip.getBoundingClientRect();
+    const gap = 6;
+    const left = Math.min(Math.max(gap, cellRect.left), window.innerWidth - tooltipRect.width - gap);
+    const below = cellRect.bottom + gap;
+    const top = below + tooltipRect.height <= window.innerHeight - gap
+      ? below
+      : Math.max(gap, cellRect.top - tooltipRect.height - gap);
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+  };
+
+  const hide = () => {
+    activeCell = null;
+    tooltip.classList.remove("is-visible");
+  };
+
+  document.addEventListener("pointerover", event => {
+    const cell = event.target.closest(".admin-tooltip-cell");
+    if (cell && cell !== activeCell) show(cell);
+  });
+  document.addEventListener("pointerout", event => {
+    if (activeCell && !activeCell.contains(event.relatedTarget)) hide();
+  });
+  document.addEventListener("focusin", event => show(event.target.closest(".admin-tooltip-cell")));
+  document.addEventListener("focusout", event => {
+    if (activeCell && !activeCell.contains(event.relatedTarget)) hide();
+  });
+  window.addEventListener("scroll", hide, true);
+  window.addEventListener("resize", hide);
+}
 
 function initializeManagementTabs() {
   const buttons = [...document.querySelectorAll("[data-admin-section]")];
@@ -271,7 +324,7 @@ function renderTierTemplates(templates) {
         escapeHtml(getCategoryLabel(template.category))
       }</span></td><td>${escapeHtml(template.title)}</td><td>${template.itemCount}권</td><td><span class="admin-badge ${getStatusBadgeClass(template.status)}">${
         escapeHtml(getStatusLabel(template.status))
-      }</span></td><td>${formatValue(template.requestedAt)}</td><td>${
+      }</span></td><td>${formatAdminDate(template.requestedAt)}</td><td>${
         pending
           ? `<button class="admin-action-button"
                      onclick="reviewTierTemplate(${template.templateId}, true)">승인</button>
@@ -335,7 +388,7 @@ function renderWorldcupTemplates(templates) {
       row.innerHTML = `<td>${template.templateId}</td><td>${escapeHtml(template.creatorNickname)}</td>`
         + `<td><span class="admin-category-badge ${getCategoryBadgeClass(template.category)}">${escapeHtml(getCategoryLabel(template.category))}</span></td><td>${escapeHtml(template.title)}</td>`
         + `<td>${template.itemCount}권</td><td><span class="admin-badge ${getStatusBadgeClass(template.status)}">${escapeHtml(getStatusLabel(template.status))}</span></td>`
-        + `<td>${formatValue(template.requestedAt)}</td><td>${pending
+        + `<td>${formatAdminDate(template.requestedAt)}</td><td>${pending
           ? `<button class="admin-action-button" onclick="reviewWorldcupTemplate(${template.templateId}, true)">승인</button>
              <button class="admin-action-button admin-action-danger" onclick="reviewWorldcupTemplate(${template.templateId}, false)">반려</button>`
           : "처리 완료"}</td>`;
@@ -500,7 +553,7 @@ function renderMembers(members) {
                 </span>
             </td>
             <td>${formatValue(member.failCount)}</td>
-            <td>${formatValue(member.createdAt)}</td>
+            <td>${formatAdminDate(member.createdAt)}</td>
             <td>${managementHtml}</td>
         `;
 
@@ -614,11 +667,11 @@ function renderBookRequests(requests) {
     const row = document.createElement("tr");
     const pending = request.status === "PENDING";
     const genreGroup = window.BookMateGenre.groupOf(request.genre);
-    row.innerHTML = `<td>${request.requestId}</td><td>${escapeHtml(request.requesterNickname)}</td>`
-      + `<td>${escapeHtml(request.title)}</td><td>${escapeHtml(request.authorName)}</td>`
+    row.innerHTML = `<td>${request.requestId}</td>${renderTruncatedCell(request.requesterNickname, "admin-book-requester")}`
+      + `${renderTruncatedCell(request.title, "admin-book-title")}${renderTruncatedCell(request.authorName, "admin-book-author")}`
       + `<td><span class="admin-category-badge genre-badge" data-genre="${escapeHtml(genreGroup)}">${escapeHtml(genreGroup)}</span></td>`
       + `<td><span class="admin-badge ${getStatusBadgeClass(request.status)}">${escapeHtml(getStatusLabel(request.status))}</span></td>`
-      + `<td>${formatValue(request.requestedAt)}</td><td>${pending
+      + `<td>${formatAdminDate(request.requestedAt)}</td><td>${pending
         ? `<button class="admin-action-button" onclick="reviewBookRequest(${request.requestId}, true)">승인</button>
            <button class="admin-action-button admin-action-danger" onclick="reviewBookRequest(${request.requestId}, false)">반려</button>`
         : "처리 완료"}</td>`;
@@ -692,7 +745,7 @@ function renderPosts(posts) {
             <td>${escapeHtml(post.title)}</td>
             <td>${formatValue(post.viewCount)}</td>
             <td><span class="admin-badge ${active ? "admin-post-public" : "admin-post-private"}">${active ? "공개" : "비공개"}</span></td>
-            <td>${formatValue(post.createdAt)}</td>
+            <td>${formatAdminDate(post.createdAt)}</td>
             <td>
                 ${active ? `<button
                     type="button"
@@ -788,7 +841,7 @@ function renderComments(comments) {
       <td>${escapeHtml(comment.memberNickname)}</td>
       <td class="admin-comment-content">${escapeHtml(comment.content)}</td>
       <td><span class="admin-badge ${getStatusBadgeClass(comment.status)}">${escapeHtml(getStatusLabel(comment.status))}</span></td>
-      <td>${formatValue(comment.createdAt)}</td>
+      <td>${formatAdminDate(comment.createdAt)}</td>
       <td>${active
         ? `<button type="button" class="admin-action-button admin-action-danger" data-comment-delete="${comment.commentId}">삭제</button>`
         : "처리 완료"}
@@ -880,6 +933,25 @@ function formatValue(value) {
   }
 
   return value;
+}
+
+function formatAdminDate(value) {
+  if (value === null || value === undefined || value === "") return "-";
+
+  const text = String(value);
+  const matched = text.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2}):(\d{2})/);
+  if (matched) return `${matched[1]}-${matched[2]}-${matched[3]} ${matched[4]}:${matched[5]}:${matched[6]}`;
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return escapeHtml(text);
+  const pad = number => String(number).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+
+function renderTruncatedCell(value, className) {
+  const fullText = value === null || value === undefined || value === "" ? "-" : String(value);
+  const safeText = escapeHtml(fullText);
+  return `<td class="${className} admin-tooltip-cell" data-tooltip="${safeText}" tabindex="0"><span class="admin-cell-ellipsis">${safeText}</span></td>`;
 }
 
 function getRoleBadgeClass(role) {

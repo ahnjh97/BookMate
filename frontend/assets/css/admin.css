@@ -122,7 +122,8 @@
   justify-content: flex-end;
 }
 .admin-table-wrapper {
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 .admin-table {
   width: 100%;
@@ -139,6 +140,51 @@
   color: var(--color-muted);
   background: #f8fafb;
   font-size: 0.78rem;
+}
+.admin-book-review-table {
+  table-layout: fixed;
+}
+.admin-book-review-table th:nth-child(1) { width: 52px; }
+.admin-book-review-table th:nth-child(2) { width: 14%; }
+.admin-book-review-table th:nth-child(3) { width: auto; }
+.admin-book-review-table th:nth-child(4) { width: 18%; }
+.admin-book-review-table th:nth-child(5) { width: 66px; }
+.admin-book-review-table th:nth-child(6) { width: 66px; }
+.admin-book-review-table th:nth-child(7) { width: 150px; }
+.admin-book-review-table th:nth-child(8) { width: 116px; }
+.admin-cell-ellipsis {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.admin-fast-tooltip {
+  position: fixed;
+  z-index: 1000;
+  width: max-content;
+  max-width: min(360px, 70vw);
+  padding: 7px 10px;
+  border: 1px solid rgb(15 23 42 / 12%);
+  border-radius: 7px;
+  color: #fff;
+  background: #26323d;
+  box-shadow: 0 7px 20px rgb(15 23 42 / 18%);
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.45;
+  opacity: 0;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+  transform: translateY(-2px);
+  transition: opacity 60ms ease, transform 60ms ease;
+  visibility: hidden;
+  white-space: normal;
+}
+.admin-fast-tooltip.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
 }
 .admin-post-number-heading {
   width: 48px;
