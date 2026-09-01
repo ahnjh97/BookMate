@@ -49,7 +49,7 @@ async function restoreSavedTierList() {
     if (book && zone) zone.append(book);
   });
   updatePool();
-  message.textContent = "마지막으로 저장한 티어리스트를 불러왔습니다.";
+  window.BookMateToast.show("마지막으로 저장한 티어리스트를 불러왔습니다.", "success");
 }
 function buildBoard() {
   board.replaceChildren();
@@ -67,8 +67,11 @@ function buildBoard() {
   wireZone(pool);
 }
 function resetBooks() {
+  board.querySelectorAll(".tier-dropzone").forEach(zone => zone.replaceChildren());
   pool.replaceChildren();
   template.items.forEach(item => pool.append(bookNode(item)));
+  placeholder = null;
+  dragged = null;
   updatePool();
 }
 function bookNode(item) {
@@ -155,7 +158,19 @@ document.getElementById("reset-button").addEventListener("click", () => {
   if (confirm("모든 책을 처음 위치로 되돌릴까요?")) resetBooks();
 });
 const dialog = document.getElementById("save-dialog");
-document.getElementById("save-open-button").addEventListener("click", () => dialog.showModal());
+function hasRankedBooks() {
+  return board.querySelector(".tier-dropzone .tier-book:not(.drop-preview)") !== null;
+}
+function showEmptyTierWarning() {
+  window.BookMateToast.show("한 권 이상의 책을 티어에 배치해 주세요.", "warning");
+}
+document.getElementById("save-open-button").addEventListener("click", () => {
+  if (!hasRankedBooks()) {
+    showEmptyTierWarning();
+    return;
+  }
+  dialog.showModal();
+});
 document.getElementById("save-cancel").addEventListener("click", () => dialog.close());
 document.getElementById("save-form").addEventListener("submit", async event => {
   event.preventDefault();
@@ -165,8 +180,8 @@ document.getElementById("save-form").addEventListener("submit", async event => {
       placements.push({ bookId: Number(el.dataset.bookId), grade })
     )
   );
-  if (pool.querySelectorAll(".tier-book:not(.drop-preview)").length) {
-    message.textContent = "모든 책을 티어에 배치한 뒤 저장해 주세요.";
+  if (!placements.length) {
+    showEmptyTierWarning();
     dialog.close();
     return;
   }
@@ -190,7 +205,11 @@ document.getElementById("save-form").addEventListener("submit", async event => {
     }
     if (!response.ok) throw new Error(data.message);
     dialog.close();
-    message.textContent = data.message;
+    sessionStorage.setItem("bookmate:flash-toast", JSON.stringify({
+      message: data.message,
+      state: "success",
+    }));
+    location.href = `/pages/tier/result.html?id=${encodeURIComponent(data.tierListId)}`;
   } catch (error) {
     message.textContent = error.message || "저장하지 못했습니다.";
     dialog.close();

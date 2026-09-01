@@ -425,7 +425,11 @@ button {
 }
 .auth-form input:focus { border-color: var(--color-primary); outline: 2px solid rgb(15 163 193 / 18%); }
 .auth-form small { color: var(--color-muted); }
-.auth-form > .button { margin-top: 8px; }
+.auth-form > .button {
+  min-width: 112px;
+  margin-top: 8px;
+  justify-self: end;
+}
 .field-with-button { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
 .form-message { min-height: 24px; margin: 5px 0 0 !important; font-size: .9rem; }
 .form-message.error { color: #b42318; }
@@ -600,6 +604,13 @@ button {
 .flash-toast[data-visible="true"] {
   opacity: 1;
   transform: translate(-50%, 0);
+}
+
+.flash-toast[data-state="warning"] {
+  border-color: #f2a900;
+  color: #8a4300;
+  background: rgb(255 244 204 / 98%);
+  box-shadow: 0 12px 32px rgb(180 83 9 / 22%);
 }
 
 /* 페이지 상단에서 공통으로 사용하는 BookMate 그라데이션 제목 */
