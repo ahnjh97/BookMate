@@ -1,183 +1,211 @@
+<div align="center">
+
 # BookMate
 
-정적 HTML/CSS/JavaScript, Jakarta Servlet, JDBC, 로컬 Oracle로 구성된 CRUD 미니프로젝트입니다. 개발 환경에서는 내장 Tomcat 백엔드를 `8080`에서 실행하고, `DevProxyServer`가 프론트엔드를 `5501`에서 제공하면서 `/api/*` 요청을 백엔드로 전달합니다.
+**책을 발견하고 평가하며, 다른 독자와 취향을 공유하는 도서 커뮤니티**
 
-## 디렉토리 구조
+[기능](#주요-기능) &nbsp;&nbsp;|&nbsp;&nbsp; [아키텍처](#아키텍처) &nbsp;&nbsp;|&nbsp;&nbsp; [실행](#로컬-실행)
 
-```Shell
-bookmate/
-├── .env                           # 환경변수: DB 등 민감정보 통합 관리 (gitignore 대상)
-├── .env.example                   # 팀 공유용 템플릿
-├── .gitattributes                 # Windows/Mac 줄바꿈 통일: * text=auto eol=lf
-├── .gitignore
-├── README.md                      # 프로젝트 개요, 필수 환경(JDK버전 등) 명시
-├── docker-compose.yml             # .env 참조
-│
-├── backend/                       # Java + JDBC, 4계층 구조(controller-service-dao-dto)
-│   └── ...
-├── frontend/                      # HTML + CSS + 바닐라 JavaScript
-│   └── ...
-│
-├── db/                           # Oracle DB 컨테이너 정의
-│   ├── schema.sql                # 테이블 생성(DDL) — 순서대로 한 파일에 다 넣어도 무방
-│   └── seed.sql                  # 관리자 계정 등 초기 데이터
-│
-├── scripts/                       # 개발 및 로컬 실행 자동화 스크립트
-│   ├── start.sh / start.bat       # BookMate 백엔드 실행 (내장 Tomcat) - Main.java를 Maven exec 플러그인으로 직접 구동
-│   ├── db-init.sh / db-init.bat   # DB 완전 초기화 (schema.sql, seed.sql 재실행)
-│   ├── proxy.sh / proxy.bat       # DevProxyServer 컴파일 및 실행
-│   ├── DevProxyServer.java        # 로컬 개발용 리버스 프록시
-│   └── docker/                    # Oracle DBMS 로컬 세팅을 Docker 컨테이너로 대체하는 경우 사용
-│       ├── start.sh / start.bat   # DB 컨테이너 실행
-│       └── reset.sh / reset.bat   # DB 컨테이너·볼륨 초기화
-│
-└── docs/
-    ├── README.md                   # 산출물 인덱스(노션/Figma 링크 모음)
-    ├── requirements.md             # 요구사항정의서 + IA/유저플로우
-    ├── screen_spec.md              # 화면정의서(Figma 링크+설명)
-    ├── erd.mmd                     # ERD(텍스트로 관리하는 다이어그램)
-    ├── table_spec.md               # 테이블정의서 + DB 네이밍규칙
-    ├── interface_spec.md           # 인터페이스정의서
-    └── coding_convention.md        # 코딩컨벤션
+</div>
+
+<br>
+
+## 프로젝트 소개
+
+BookMate는 도서 검색과 평점 기록을 중심으로 개인 책장, 티어리스트, 이상형 월드컵, 커뮤니티를 하나의 독서 경험으로 연결한 웹 서비스입니다.
+
+기본적인 CRUD에서 출발해 **세션 기반 인증과 권한 분리**, **관리자 승인 흐름**, **외부 도서 API 연동**, **사용자 활동 데이터를 활용한 취향 분석**까지 구현 범위를 확장했습니다.
+
+<!-- TODO: 실제 서비스 화면 캡처 후 아래 주석을 교체하세요.
+![BookMate 주요 화면](docs/images/bookmate-overview.png)
+-->
+
+## 주요 기능
+
+| 영역 | 구현 내용 |
+| :--- | :--- |
+| **도서 탐색** | 키워드·장르·정렬·페이지네이션, 검색어 자동 완성, 상세 정보와 독자 평점 조회 |
+| **평점과 책장** | 평점 및 후기 등록·수정·삭제, 점수별 필터, 사용자별 독서 활동 모아보기 |
+| **취향 콘텐츠** | S~D 등급 티어리스트, 8강·16강 이상형 월드컵, 결과 저장·통계·공유 |
+| **커뮤니티** | 게시글·댓글 CRUD, 좋아요, 검색, 티어리스트·이상형 월드컵 결과 첨부, 신고 |
+| **회원과 권한** | 회원가입, 로그인·로그아웃, 프로필·비밀번호 변경, 세션 인증, 관리자 접근 제어 |
+| **운영 관리** | 회원 이용 제한, 게시글 상단 고정·삭제, 댓글 관리, 도서·콘텐츠 템플릿 승인 및 반려 |
+
+## 기술 스택
+
+| 구분 | 기술 | 활용 |
+| :--- | :--- | :--- |
+| **Frontend** | `HTML5` `CSS3` `Vanilla JavaScript` | 화면 구성, 비동기 API 통신, ES Modules 기반 컴포넌트 분리 |
+| **Backend** | `Java 21` `Jakarta Servlet 6` | JSON 기반 HTTP API, 세션·권한 처리 |
+| **Database** | `Oracle Database` `JDBC` | 관계형 모델링, 제약조건, 인덱스, 페이지네이션 |
+| **Runtime** | `Embedded Tomcat 10` | 별도 WAS 설정 없이 애플리케이션 실행 |
+| **Data Access** | `HikariCP` `PreparedStatement` | 커넥션 재사용과 매개변수 바인딩 |
+| **Data Format** | `Gson` | Java 객체와 JSON 요청·응답 변환 |
+| **External API** | `Aladin OpenAPI` | ISBN 기반 도서 검색과 메타데이터 수집 |
+| **Build** | `Maven` | 의존성 및 빌드 관리 |
+
+## 아키텍처
+
+요청 처리, 비즈니스 규칙, 데이터 접근을 Controller–Service–DAO 계층으로 분리했습니다.
+
+```mermaid
+flowchart TB
+    B[Browser]
+    F[AdminAuthFilter]
+    C[Controller]
+    S[Service]
+    D[DAO]
+    O[(Oracle DB)]
+    A[Aladin OpenAPI]
+
+    B -->|일반 HTTP / JSON| C
+    B -->|관리자 API| F
+    F -->|인증 / 인가 통과| C
+    C <-->|DTO| S
+    S --> D
+    D -->|JDBC| O
+    S -.->|HTTP / JSON| A
 ```
 
-## 실행 구조
+- `Controller` — 요청 검증, 세션 확인, HTTP 응답 처리
+- `Service` — 권한 검증, CRUD 규칙, 통계와 취향 계산
+- `DAO` — SQL 실행과 데이터 매핑
+- `DTO` — 계층 간 데이터 전달
+- `Filter` — `/api/admin/*` 요청에 대한 공통 인증·인가
+
+프론트엔드는 페이지별 모듈과 공통 API 클라이언트·UI 컴포넌트를 분리해 관리합니다.
+
+## 구현 포인트
+
+### 데이터 무결성
+
+- 기본키·외래키와 `UNIQUE`, `CHECK` 제약조건으로 잘못된 상태를 DB 단계에서도 차단
+- 도서 상태, 게시글 상태, 회원 역할 등 도메인 값을 제한
+- 조회 조건에 맞춘 복합 인덱스와 Oracle `OFFSET ... FETCH NEXT` 페이지네이션 적용
+- `PreparedStatement`로 사용자 입력값을 SQL과 분리
+
+### 인증과 운영
+
+- `HttpSession` 기반 로그인 상태 유지 및 관리자 API 필터링
+- 비밀번호를 `PBKDF2WithHmacSHA256`과 개별 Salt, 120,000회 반복으로 해시
+- 회원 잠금과 콘텐츠 승인·반려 등 운영자 워크플로 구현
+- 입력값과 도메인 규칙을 검증하고 상황에 맞는 HTTP 상태 코드 반환
+
+### 개발 환경
+
+- 내장 Tomcat으로 Java 애플리케이션에서 서버를 직접 구동
+- 로컬 프록시가 정적 프론트엔드와 `/api` 요청을 하나의 주소로 연결
+- CSV 시드와 초기화 도구로 개발 데이터를 재현 가능하게 구성
+
+## 데이터 모델
+
+21개 테이블을 회원, 도서, 취향 활동, 커뮤니티, 운영 영역으로 나누어 설계했습니다.
+
+| 영역 | 테이블 |
+| :--- | :--- |
+| **회원** | <code>MEMBER</code><br><code>AUTHOR</code><br><code>AUTHOR_ACCOUNT</code> |
+| **도서** | <code>BOOK</code><br><code>BOOK_REQUEST</code><br><code>RATING</code> |
+| **티어리스트** | <code>TIER_TEMPLATE</code><br><code>TIER_TEMPLATE_ITEM</code><br><code>TIER_LIST</code><br><code>TIER_ITEM</code> |
+| **이상형 월드컵** | <code>IDEAL_TEMPLATE</code><br><code>IDEAL_TEMPLATE_ITEM</code><br><code>IDEAL_RUN</code><br><code>IDEAL_MATCH</code> |
+| **커뮤니티** | <code>POST</code><br><code>POST_COMMENT</code><br><code>POST_LIKE</code><br><code>AUTHOR_REVIEW</code><br><code>REPORT</code> |
+| **운영** | <code>ADMIN_LOG</code><br><code>AUTHOR_ACCOUNT_REQUEST</code> |
+
+각 템플릿과 결과 항목은 별도 테이블로 분리하고, 회원이나 상위 콘텐츠 삭제 시 연관 데이터가 함께 정리되도록 참조 규칙을 설정했습니다.
+
+## 프로젝트 구조
 
 ```text
-브라우저 http://localhost:5501/
-        ↓
-DevProxyServer
-        ├─ /pages, /assets, /js  → frontend 정적 파일
-        └─ /api/*                → http://localhost:8080/api/*
-                                      ↓
-                                Jakarta Servlet
-                                      ↓
-                                Service → DAO → JDBC → 로컬 Oracle
+book-inven/
+├─ backend/
+│  ├─ src/main/java/
+│  │  ├─ controller/   # HTTP 엔드포인트
+│  │  ├─ service/      # 비즈니스 로직
+│  │  ├─ dao/          # JDBC 데이터 접근
+│  │  ├─ dto/          # 요청·응답 데이터
+│  │  ├─ filter/       # 관리자 권한 필터
+│  │  └─ util/         # DB, 세션, 암호화, 응답 유틸리티
+│  └─ pom.xml
+├─ frontend/
+│  ├─ pages/           # 기능별 HTML 화면
+│  ├─ js/              # 페이지·API·공통 컴포넌트 모듈
+│  └─ assets/          # 스타일과 아이콘
+├─ db/                 # Oracle 스키마와 CSV 시드
+└─ scripts/            # 실행·초기화 자동화
 ```
 
-로컬 개발의 기본 접속 주소 `http://localhost:5501`
-내장 Tomcat은 백엔드와 직접 확인용 정적 파일을 `8080`에서 제공하지만, 일반적인 화면 개발과 테스트는 프록시를 통해 진행
+## 로컬 실행
 
-## 필수 환경
+### 준비 사항
 
 - JDK 21
-- Maven 3.9 이상
-- 로컬 Oracle Database
-- IntelliJ IDEA Community 또는 Ultimate(선택)
+- Oracle Database
+- Aladin TTB API Key
 
-## DB 설정
+### 1. 환경 변수 설정
 
-1. `.env.example`을 복사해 프로젝트 루트에 `.env`를 만듭니다.
-2. 로컬 Oracle 계정에 맞게 값을 수정합니다.
+프로젝트 루트의 `.env.example`을 `.env`로 복사한 뒤 값을 입력합니다.
 
 ```env
 DB_URL=jdbc:oracle:thin:@localhost:1521:xe
 DB_USER=bookmate
-DB_PASSWORD=book
+DB_PASSWORD=your_password
+ALADIN_TTB_KEY=your_api_key
 ```
 
-서비스명 접속을 사용하는 경우 URL 예시는 `jdbc:oracle:thin:@localhost:1521/XEPDB1`입니다.
+### 2. 데이터베이스 초기화
 
-### DB 초기화
+프로젝트 루트에서 초기화 스크립트를 실행하고, 안내에 따라 `I`를 입력합니다.
 
-DB 초기화는 기존 BookMate 테이블과 데이터를 삭제한 뒤 `db/schema.sql`, `db/seed.sql`을 다시 실행합니다. 필요한 데이터가 있으면 먼저 백업하세요.
-IntelliJ에서는 `util.DBInit`을 실행합니다. 프로젝트 루트와 `backend` 작업 디렉터리를 모두 지원합니다.
-터미널에서는 다음 스크립트를 사용할 수 있습니다.
-
-```bat
+```powershell
 scripts\db-init.bat
 ```
 
-```bash
-bash scripts/db-init.sh
-```
+이 스크립트는 Maven Wrapper로 `DBInit.java`를 실행합니다. 기존 BookMate 테이블과 데이터가 삭제된 뒤 다시 생성되므로 필요한 데이터는 먼저 백업해야 합니다.
 
-초기화가 완료되면 다음 개발 데이터가 준비됩니다.
+> 기존 BookMate 테이블과 데이터가 삭제된 뒤 스키마와 개발용 데이터가 다시 생성됩니다.
 
-- 승인 도서 1,000권
-- 테스트 회원 `user1`~`user100` 100명
-- 테스트 회원 공통 비밀번호: `qwerasdf`
+### 3. 서버 실행
 
-### 책 표지 이미지
-
-- 목록·통계용: `frontend/assets/images/books/{bookId}-240.webp`
-- 상세·월드컵 선택용: `frontend/assets/images/books/{bookId}-520.webp`
-- 티어·월드컵 템플릿 콜라주: `frontend/assets/images/templates/`
-- 전체 표지와 콜라주 재생성: `python scripts/build-book-images.py`
-- 표지를 내려받거나 이미지로 검증하지 못한 책이 하나라도 있으면 생성 작업이 실패합니다.
-- 승인된 티어리스트 템플릿 8개와 회원별 참여 결과
-- 이상형 월드컵 템플릿 8개와 회원별 최신 참여 결과
-- 회원별 약 100개의 평점
-
-초기화 데이터는 모두 `db` 폴더의 CSV에서 관리합니다. 도서·회원·평점과 후기뿐 아니라 티어리스트 및 이상형 월드컵의 템플릿, 항목, 참여 결과도 각각의 CSV로 분리되어 있습니다. `schema.sql`에는 테이블·시퀀스·인덱스 정의만 둡니다.
-도서 CSV를 다시 생성하려면 PowerShell에서 다음 명령을 실행합니다.
+프로젝트 루트에서 서버 실행 스크립트를 실행합니다.
 
 ```powershell
-./scripts/generate-book-seed.ps1
-```
-
-
-## 애플리케이션 실행
-
-### IntelliJ IDEA Community
-
-1. `backend/pom.xml`을 Maven 프로젝트로 불러옵니다.
-2. 로컬 Oracle이 실행 중인지 확인합니다.
-3. `backend/src/main/java/Main.java`를 실행합니다.
-4. 프로젝트 루트에서 `scripts\proxy`를 실행합니다.
-5. 브라우저에서 `http://localhost:5501/`에 접속합니다.
-
-`Main`은 실행 위치를 기준으로 프로젝트 루트를 자동 탐색하므로 별도의 Tomcat 실행 구성이나 `/bookmate` 컨텍스트 설정이 필요 없습니다.
-
-### 터미널
-
-첫 번째 터미널에서 백엔드를 실행합니다.
-
-```bat
 scripts\start.bat
 ```
 
-```bash
-bash scripts/start.sh
+내장 Tomcat이 시작되면 `http://localhost:8080`으로 접속합니다. 서버를 종료하려면 실행 중인 창에서 `Ctrl+C`를 누릅니다.
+
+## 프록시 구현
+
+서비스 실행에 필수적인 구성은 아니지만, 프론트엔드와 백엔드를 서로 다른 포트로 분리했을 때의 요청 흐름을 이해하기 위해 프록시 서버를 직접 구현했습니다. `5501` 포트로 들어온 `/api/*` 요청을 `8080`의 백엔드로 전달해 별도 CORS 설정 없이 같은 출처처럼 통신합니다.
+
+```powershell
+scripts\proxy.bat
 ```
 
-두 번째 터미널에서 프론트 개발 프록시를 실행합니다.
+프록시를 실행한 경우 `http://localhost:5501`로 접속합니다.
 
-```bat
-scripts\proxy
-```
+## 취향 일치율
 
-백엔드는 Maven 명령으로 직접 실행할 수도 있습니다.
+두 사용자의 공통 활동을 세 가지 축으로 비교합니다.
 
-```bash
-mvn -f backend/pom.xml compile exec:java
-```
+| 비교 기준 | 가중치 | 계산 대상 |
+| :--- | ---: | :--- |
+| **도서 평점** | **50%** | 두 사용자가 공통으로 평가한 도서의 점수 |
+| **티어리스트** | **25%** | 같은 템플릿에서 배치한 도서의 S~D 등급 |
+| **이상형 월드컵** | **25%** | 같은 템플릿에서 선택한 도서의 승패 기록 |
 
-백엔드와 프록시는 각각 실행 중인 터미널에서 `Ctrl+C`로 종료합니다.
+참여 기록이 없는 영역은 계산에서 제외하고 남은 가중치를 다시 배분합니다. 데이터가 일부만 있어도 비교할 수 있으며, 공통 활동 수에 따라 신뢰도를 `LOW`, `MEDIUM`, `HIGH`로 함께 제공합니다.
 
-## 주요 URL
+## 팀
 
-- 메인: `http://localhost:5501/`
-- 책 목록: `http://localhost:5501/pages/book/list.html`
-- 로그인: `http://localhost:5501/pages/auth/login.html`
-- 회원가입: `http://localhost:5501/pages/auth/signup.html`
-- 책 API: `GET http://localhost:5501/api/books`
-- 인증 상태: `GET http://localhost:5501/api/auth`
-- 백엔드 직접 확인: `http://localhost:8080/`
+3명이 함께 개발한 팀 프로젝트입니다.
 
-## 프론트 개발 프록시
+- [ahnjh97](https://github.com/ahnjh97)
+- [jungryulip](https://github.com/jungryulip)
+- [mean71](https://github.com/mean71)
 
-백엔드를 `8080` 포트에서 먼저 실행한 다음, 프로젝트 루트에서 아래 명령을 실행합니다.
+<br>
 
-```bat
-scripts\proxy
-```
-
-`proxy.bat`이 `scripts` 폴더 이동, `DevProxyServer.java` 컴파일, 실행을 모두 처리합니다. 브라우저에서는 `http://localhost:5501`에 접속합니다.
-
-- 프론트엔드 정적 파일: `frontend` 폴더에서 제공
-- `/api/*` 요청: `http://localhost:8080`으로 전달
-- 프록시 종료: 실행 중인 터미널에서 `Ctrl+C`
-- 백엔드 주소 변경: `BACKEND_URL` 환경변수 사용
-
-HTML/CSS/JavaScript 수정은 브라우저 새로고침으로 반영됩니다. 백엔드 Java 코드를 수정하면 백엔드를 다시 시작하고, `DevProxyServer.java`를 수정하면 `scripts\proxy`를 다시 실행합니다.
+<div align="center">
+도서 CRUD를 중심으로 인증, 권한, 외부 API, 통계와 사용자 간 상호작용까지 확장한 프로젝트입니다.
+</div>
