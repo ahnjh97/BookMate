@@ -49,7 +49,7 @@ BookMate는 도서 검색과 평점 기록을 중심으로 개인 책장, 티어
 요청 처리, 비즈니스 규칙, 데이터 접근을 Controller–Service–DAO 계층으로 분리했습니다.
 
 ```mermaid
-%%{init: {"theme": "base", "themeVariables": {"background": "#ffffff", "primaryColor": "#e8f8fc", "primaryTextColor": "#164653", "primaryBorderColor": "#42b3ca", "lineColor": "#5aaabd", "secondaryColor": "#f2fbfe", "tertiaryColor": "#ffffff", "edgeLabelBackground": "#f7fcfe", "fontFamily": "Arial, sans-serif"}}}%%
+%%{init: {"theme": "base", "themeVariables": {"background": "#ffffff", "primaryColor": "#e8f8fc", "primaryTextColor": "#164653", "primaryBorderColor": "#42b3ca", "lineColor": "#5aaabd", "secondaryColor": "#f2fbfe", "tertiaryColor": "#ffffff", "edgeLabelBackground": "#f7fcfe"}}}%%
 flowchart TB
     B[Browser]
     F[AdminAuthFilter]
