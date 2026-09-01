@@ -66,7 +66,7 @@ backend/
     │   │   ├── dev/               # 개발용 임시 컨트롤러
     │   │   ├── home/              # 메인 화면
     │   │   ├── ideal/             # 이상형 월드컵
-    │   │   ├── member/            # 회원가입·정보수정·마이페이지
+    │   │   ├── member/            # 회원가입·정보수정·내 책장
 	│	│	│	└── SignupController.java      # POST /api/members (또는 팀원 경로 유지: /api/auth/signup)
     │   │   ├── post/              # 게시판
     │   │   ├── rating/            # 평점
