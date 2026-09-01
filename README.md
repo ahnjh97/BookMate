@@ -49,6 +49,7 @@ BookMate는 도서 검색과 평점 기록을 중심으로 개인 책장, 티어
 요청 처리, 비즈니스 규칙, 데이터 접근을 Controller–Service–DAO 계층으로 분리했습니다.
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"background": "#ffffff", "primaryColor": "#e8f8fc", "primaryTextColor": "#164653", "primaryBorderColor": "#42b3ca", "lineColor": "#5aaabd", "secondaryColor": "#f2fbfe", "tertiaryColor": "#ffffff", "edgeLabelBackground": "#f7fcfe", "fontFamily": "Arial, sans-serif"}}}%%
 flowchart TB
     B[Browser]
     F[AdminAuthFilter]
@@ -65,6 +66,12 @@ flowchart TB
     S --> D
     D -->|JDBC| O
     S -.->|HTTP / JSON| A
+
+    classDef application fill:#e8f8fc,stroke:#42b3ca,color:#164653,stroke-width:1.5px
+    classDef resource fill:#f3fbfe,stroke:#72bfd0,color:#245766,stroke-width:1.5px
+    class B,F,C,S,D application
+    class O,A resource
+    linkStyle default stroke:#5aaabd,stroke-width:1.5px
 ```
 
 - `Controller` — 요청 검증, 세션 확인, HTTP 응답 처리
