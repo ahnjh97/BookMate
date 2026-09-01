@@ -14,8 +14,10 @@ public class ReportDTO {
     /* 신고 데이터를 담는 저장소 */
     private long reportId;
     private long reporterId;
+    private String reporterNickname;
     private String targetType;
     private long targetId;
+    private String targetContent;
     private String reasonType;
     private String reasonDetail;
     private String status;

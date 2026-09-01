@@ -50,6 +50,7 @@
             <button type="button" data-admin-section="books" aria-pressed="false">책 등록</button>
             <button type="button" data-admin-section="tiers" aria-pressed="false">티어리스트 템플릿</button>
             <button type="button" data-admin-section="worldcups" aria-pressed="false">이상형월드컵 템플릿</button>
+            <button type="button" data-admin-section="reports" aria-pressed="false">신고 처리</button>
         </nav>
         <!-- =====================================
              관리자 메시지
@@ -286,7 +287,77 @@
                 </nav>
             </div>
         </section>
+        <section class="admin-section" data-admin-panel="reports" hidden>
+            <div class="admin-section-header">
+                <div>
+                    <h2>신고 처리</h2>
+                    <p>접수된 신고 내용을 확인하고 처리합니다.</p>
+                </div>
+            </div>
 
+            <div class="admin-report-toolbar">
+                <div class="admin-report-tabs">
+                    <button
+                            type="button"
+                            data-report-type="POST"
+                            class="is-active"
+                            aria-pressed="true"
+                    >
+                        게시글
+                    </button>
+
+                    <button
+                            type="button"
+                            data-report-type="COMMENT"
+                            aria-pressed="false"
+                    >
+                        댓글
+                    </button>
+
+                    <button
+                            type="button"
+                            data-report-type="MEMBER"
+                            aria-pressed="false"
+                    >
+                        사용자
+                    </button>
+                </div>
+
+                <form class="admin-report-search">
+                    <input
+                            type="search"
+                            placeholder="신고 대상 또는 신고자 검색"
+                            autocomplete="off"
+                    >
+                    <button type="submit">검색</button>
+                </form>
+            </div>
+
+            <div class="admin-table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                    <tr>
+                        <th>신고번호</th>
+                        <th>구분</th>
+                        <th>신고 대상</th>
+                        <th>신고 사유</th>
+                        <th>신고자</th>
+                        <th>신고일</th>
+                        <th>상태</th>
+                        <th>관리</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="report-table-body">
+                    <tr>
+                        <td colspan="8" class="admin-empty">
+                            신고 내역을 불러오는 중입니다.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
     </div>
 
