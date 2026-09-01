@@ -54,9 +54,9 @@ public class Main {
         scanner.setScanManifest(false);
 
         tomcat.start();
+        System.out.println();
         System.out.println("BookMate 실행: http://localhost:" + port + "/");
-        // 서버 기동 시 전체 검증로직실행 및 로깅 - Checkable 인터페이스 구현체를 AllChecks에 등록
-        check.AllChecks.main(null);
+        System.out.println();
         // 메인 스레드 대기 - 없으면 프로세스 즉시 종료되며 서버도 같이 꺼짐
         tomcat.getServer().await();
     }

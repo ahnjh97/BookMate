@@ -12,7 +12,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- exec-maven-plugin가 기본으로 실행할 클래스 이름 (기본값 Main(서버)) -->
-        <!-- DB 초기화 스크립트(scripts/drop-volume.bat)에서
+        <!-- DB 초기화 스크립트(scripts/db-init.bat)에서
          -Dexec.mainClass=util.DBInit 로 이 값을 덮어써서 DBInit을 대신 실행
          <mainClass>Main</mainClass>이 고정값이라 커맨드라인 오버라이드가 무시되었음 -->
         <exec.mainClass>Main</exec.mainClass>
