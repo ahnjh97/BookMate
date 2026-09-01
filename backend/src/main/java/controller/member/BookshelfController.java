@@ -11,6 +11,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import dto.bookshelf.BookshelfDTO;
+import dto.bookshelf.BookshelfTierDTO;
 import service.BookshelfService;
 
 @WebServlet("/api/members/bookshelf")
@@ -25,20 +27,14 @@ public class BookshelfController extends HttpServlet {
 
         try {
             long memberId = Long.parseLong(request.getParameter("memberId"));
-            Map<String, Object> bookshelf = service.findBookshelf(memberId);
+            BookshelfDTO bookshelf = service.findBookshelf(memberId);
             if (bookshelf == null) {
                 sendError(response, HttpServletResponse.SC_NOT_FOUND, "존재하지 않는 회원입니다.");
                 return;
             }
             Set<Long> accessibleTierListIds = new LinkedHashSet<>();
-            Object rawTierLists = bookshelf.get("tierLists");
-            if (rawTierLists instanceof List<?> tierLists) {
-                for (Object item : tierLists) {
-                    if (item instanceof Map<?, ?> tierList
-                            && tierList.get("tierListId") instanceof Number tierListId) {
-                        accessibleTierListIds.add(tierListId.longValue());
-                    }
-                }
+            for (BookshelfTierDTO tierList : bookshelf.getTierLists()) {
+                accessibleTierListIds.add(tierList.getTierListId());
             }
             request.getSession(true).setAttribute(
                     "bookshelfTierListAccess", accessibleTierListIds);
