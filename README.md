@@ -4,6 +4,8 @@
 
 **책을 발견하고 평가하며, 다른 독자와 취향을 공유하는 도서 커뮤니티**
 
+▶️ [**BookMate 시연 영상 보기**](https://youtu.be/CWcD3AWFWKk)
+
 [기능](#주요-기능) &nbsp;&nbsp;|&nbsp;&nbsp; [아키텍처](#아키텍처) &nbsp;&nbsp;|&nbsp;&nbsp; [실행](#로컬-실행)
 
 </div>
